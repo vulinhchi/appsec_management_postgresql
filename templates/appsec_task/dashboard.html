@@ -1,0 +1,604 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h4 class="mt-4">Monthly Task Timeline</h4>
+
+<div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+  <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(-1)">‹ Prev</button>
+  <h5 id="calendar-month-title" class="mb-0"></h5>
+  <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(1)">Next ›</button>
+</div>
+
+<h2>Pentest Task Calendar</h2>
+<div class="calendar-grid border" id="calendar-pentest" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ccc;"></div>
+
+<div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+  <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(-1)">‹ Prev</button>
+  <h5 id="calendar-month-title" class="mb-0"></h5>
+  <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(1)">Next ›</button>
+</div>
+<h2>Verify Task Calendar</h2>
+<div class="calendar-grid border" id="calendar-verify" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ccc;"></div>
+
+
+<div class="container-fluid">
+  
+  <h3 class="mb-4">📊 AppSec Dashboard</h3>
+
+  <!-- 1. Bar Chart -->
+  <div class="row">
+    
+    <div class="col-md-5">
+      <h5 class="mb-3">Tasks in month</h5>
+      <table class="table table-bordered table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Month</th>
+            <th>Pentest Task</th>
+            <th>Verify Task</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in task_stats %}
+          <tr>
+            <td>{{ row.month }}</td>
+            <td>{{ row.pentest }}</td>
+            <td>{{ row.verify }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-md-7">
+      <canvas id="taskChart"></canvas>
+    </div>
+  </div>
+</div>
+
+
+  <!-- 2. Vulnerabilities -->
+<div class="row">
+    <div class="col-md-5">
+      <h5 class="mb-3">📊 Vulnerabilities in month Chart</h5>
+      <table class="table table-bordered table-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th>Month</th>
+            <th>Critical+High+Medium Vuln</th>
+            <th>Critical+High+Medium Closed Vuln</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for label, all_count, closed_count in vuln_stats_combined %}
+            <tr>
+              <td>{{ label }}</td>
+              <td>{{ all_count }}</td>
+              <td>{{ closed_count }}</td>
+            </tr>
+            {% endfor %}
+
+
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-7">
+      <canvas id="vulnChart2"></canvas>
+    </div>
+    
+</div>
+<div class="mt-5">
+  <h5>📊 Thống kê lỗ hổng theo tháng theo Risk Level</h5>
+  <canvas id="vulnChart"></canvas>
+</div>
+
+
+  <!-- 3. API lỗi -->
+<div class="container-fluid">
+  
+  <!-- 1. Bar Chart -->
+  <div class="row">
+    
+    <div class="col-md-5">
+      <h5 class="mb-3">📊 Affected URLs in month</h5>
+      <table class="table table-bordered table-sm">
+        <thead class="thead-dark">
+          <tr>
+             <th>Month</th>
+              <th>All Affected URLs</th>
+              <th>Closed Affected URLs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for label, all_count, closed_count in affected_stats_combined %}
+            <tr>
+              <td>{{ label }}</td>
+              <td>{{ all_count }}</td>
+              <td>{{ closed_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-md-7">
+      <canvas id="affectedUrlChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- exception -->
+<div class="container-fluid">
+  
+  <!-- 1. Bar Chart -->
+  <div class="row">
+    
+    <div class="col-md-5">
+      <h5 class="mb-3">📊 Exception in month</h5>
+      <table class="table table-bordered table-sm">
+        <thead class="thead-dark">
+          <tr>
+             <th>Month</th>
+              <th>All Exceptions</th>
+              <th>Closed Exceptions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for label, total, closed in exception_stats_combined %}
+            <tr>
+              <td>{{ label }}</td>
+              <td>{{ total }}</td>
+              <td>{{ closed }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-md-7">
+      <canvas id="exceptionChart"></canvas>
+    </div>
+  </div>
+</div>
+
+
+<!-- JSON Script (an toàn cho JavaScript) -->
+{{ pentest_labels|json_script:"pentest_labels" }}
+{{ pentest_data|json_script:"pentest_data" }}
+{{ verify_data|json_script:"verify_data" }}
+{{ calendar_events|json_script:"calendar_events" }}
+{{ vuln_labels|json_script:"vuln-labels" }}
+{{ vuln_total|json_script:"vuln-total" }}
+{{ vuln_closed|json_script:"vuln-closed" }}
+
+<!-- JS libraries -->
+<script src="{% static 'js/chart.js' %}"></script>
+<!-- <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
+ -->
+ <style>
+  .calendar-grid {
+    border: 1px solid #dee2e6;
+  }
+  .calendar-grid > div {
+    box-sizing: border-box;
+  }
+</style>
+<script>
+  const pentestTasks = {{ pentest_tasks_json|safe }};
+  const verifyTasks = {{ verify_tasks_json|safe }};
+  let calMonth = new Date().getMonth();
+  let calYear = new Date().getFullYear();
+
+  function renderCalendar(gridId, tasks, month, year) {
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = "";
+
+    const firstDay = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startDayOfWeek = (firstDay.getDay() + 6) % 7;
+    const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+    for (let i = 0; i < totalCells; i++) {
+      const dayNum = i - startDayOfWeek + 1;
+      const cell = document.createElement("div");
+      cell.className = "bg-white p-1 small border";
+      cell.style.minHeight = "90px";
+      cell.style.position = "relative";
+
+      if (dayNum >= 1 && dayNum <= daysInMonth) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+        const taskDate = new Date(year, month, dayNum);
+        const dayLabel = document.createElement("div");
+        dayLabel.innerHTML = `<strong>${dayNum}</strong>`;
+        cell.appendChild(dayLabel);
+
+        
+        const tasksForDay = tasks.filter(task => {
+          const start = new Date(task.start);
+          const end = task.end ? new Date(task.end) : new Date(year, 11, 31);
+          return taskDate >= start && taskDate <= end;
+        });
+
+
+        tasksForDay.forEach(task => {
+          const tag = document.createElement("div");
+          tag.className = "mt-1 px-1 py-1 d-block rounded";
+          tag.style.fontSize = "0.75rem";
+          tag.style.fontWeight = "600";
+          tag.style.lineHeight = "1.2";
+          tag.title = `${task.name} - (${task.pic})`;
+          tag.style.backgroundColor =
+            task.type === "pentest" ? "#f8d7da" :
+            task.type === "retest" ? "#f0e68c" :
+            "#d1ecf1";
+          tag.style.color = "#333";
+          tag.innerText = `${task.type} ${task.name} - (${task.pic})`;
+          tag.style.whiteSpace = "nowrap";
+          tag.style.overflow = "hidden";
+          tag.style.textOverflow = "ellipsis";
+          cell.appendChild(tag);
+        });
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  // Initial render
+  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear);
+  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear);
+  // Điều khiển chuyển tháng
+function renderBothCalendars() {
+  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear);
+  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear);
+
+  const monthTitle = new Date(calYear, calMonth, 1).toLocaleString("default", {
+    month: "long",
+    year: "numeric"
+  });
+  document.getElementById("calendar-month-title").innerText = monthTitle;
+}
+
+function changeCalendarMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) {
+    calMonth = 11;
+    calYear -= 1;
+  } else if (calMonth > 11) {
+    calMonth = 0;
+    calYear += 1;
+  }
+  renderBothCalendars();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  renderBothCalendars();
+});
+
+
+</script>
+
+
+<script>
+  // Parse dữ liệu từ script JSON an toàn
+  const pentestLabels = JSON.parse(document.getElementById('pentest_labels').textContent);
+  const pentestData = JSON.parse(document.getElementById('pentest_data').textContent);
+  const verifyData = JSON.parse(document.getElementById('verify_data').textContent);
+  const calendarEvents = JSON.parse(document.getElementById('calendar_events').textContent);
+
+  // Chart
+  const taskChart = new Chart(document.getElementById("taskChart"), {
+    type: 'bar',
+    data: {
+      labels: pentestLabels,
+      datasets: [
+        {
+          label: 'Pentest Task',
+          data: pentestData,
+          backgroundColor: '#007bff',
+        },
+        {
+          label: 'Verify Task',
+          data: verifyData,
+          backgroundColor: '#28a745',
+        }
+      ]
+    },
+    
+    options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Count'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          title: {
+            display: true,
+            text: 'Tasks in month'
+          }
+        }
+      }
+  });
+
+  // Calendar
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+      initialView: 'dayGridMonth',
+      events: calendarEvents,
+      height: 600,
+    });
+    calendar.render();
+  });
+</script>
+
+<canvas id="vulnChart" height="120"></canvas>
+
+<script>
+  const vulnChart = new Chart(document.getElementById("vulnChart"), {
+    type: 'bar',
+    data: {
+      labels: {{ vuln_stats.labels|safe }},
+      datasets: [
+        {
+          label: 'Số lượng App bị ảnh hưởng',
+          data: {{ vuln_stats.affected_apps|safe }},
+          backgroundColor: '#007bff',  // xanh nước biển
+        },
+        {
+          label: 'Critical - Open',
+          data: {{ vuln_stats.critical_open|safe }},
+          backgroundColor: '#8B0000', // đỏ đậm
+          stack: 'Critical',
+        },
+        {
+          label: 'Critical - Closed',
+          data: {{ vuln_stats.critical_close|safe }},
+          backgroundColor: '#28a745', // xanh lá
+          stack: 'Critical',
+        },
+        {
+          label: 'High - Open',
+          data: {{ vuln_stats.high_open|safe }},
+          backgroundColor: '#FF0000', // đỏ tươi
+          stack: 'High',
+        },
+        {
+          label: 'High - Closed',
+          data: {{ vuln_stats.high_close|safe }},
+          backgroundColor: '#28a745', // xanh lá
+          stack: 'High',
+        },
+        {
+          label: 'Medium - Open',
+          data: {{ vuln_stats.medium_open|safe }},
+          backgroundColor: '#FFA500', // cam
+          stack: 'Medium',
+        },
+        {
+          label: 'Medium - Closed',
+          data: {{ vuln_stats.medium_close|safe }},
+          backgroundColor: '#28a745', // xanh lá
+          stack: 'Medium',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Số lượng'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top'
+        },
+        title: {
+          display: true,
+          text: 'Thống kê lỗi bảo mật theo tháng'
+        }
+      }
+    }
+  });
+</script>
+
+<canvas id="vulnChart2" width="600" height="300"></canvas>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const labels = {{ vuln_labels_json|safe }};
+    const total = {{ vuln_total_json|safe }};
+    const closed = {{ vuln_closed_json|safe }};
+
+    console.log("labels:", labels);
+    console.log("total:", total);
+    console.log("closed:", closed);
+
+    const ctx = document.getElementById("vulnChart2").getContext("2d");
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Critical+High+Medium Vulnerabilities',
+            data: total,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+          },
+          {
+            label: 'Critical+High+Medium Vulnerabilities Closed',
+            data: closed,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Count'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          title: {
+            display: true,
+            text: 'Vulnerabilities in month Chart'
+          }
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Lấy dữ liệu từ context
+    const affectedLabels = JSON.parse('{{ affected_labels_json|safe }}');
+    const affectedTotal = JSON.parse('{{ affected_total_json|safe }}');
+    const affectedClosed = JSON.parse('{{ affected_closed_json|safe }}');
+
+    console.log("Affected Labels:", affectedLabels);
+    console.log("Affected Total:", affectedTotal);
+    console.log("Affected Closed:", affectedClosed);
+
+    // Vẽ biểu đồ
+    const ctx = document.getElementById("affectedUrlChart").getContext("2d");
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: affectedLabels,
+        datasets: [
+          {
+            label: 'Total Affected URL',
+            data: affectedTotal,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',  // Màu sắc
+          },
+          {
+            label: 'Closed Affected URL',
+            data: affectedClosed,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',  // Màu sắc
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Count'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          title: {
+            display: true,
+            text: 'Affected API in month Chart'
+          }
+        }
+      }
+    });
+  });
+</script>
+<script>
+  const ctxException = document.getElementById('exceptionChart').getContext('2d');
+  const exceptionChart = new Chart(ctxException, {
+    type: 'bar',
+    data: {
+      labels: {{ exception_labels_json|safe }},
+      datasets: [
+        {
+          label: 'Tổng Exception',
+          data: {{ exception_total_json|safe }},
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Đã đóng',
+          data: {{ exception_closed_json|safe }},
+          backgroundColor: 'rgba(75, 192, 192, 0.5)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Tháng'
+          }
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Số lượng Exception'
+          }
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'Thống kê Exception theo tháng'
+        }
+      }
+    }
+  });
+</script>
+
+
+
+{% endblock %}

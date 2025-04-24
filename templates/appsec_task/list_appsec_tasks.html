@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}List AppSec Task{% endblock %}
+{% block content %}
+<h2>AppSec Task List</h2>
+
+<a href="{% url 'appsec_task:create_appsec_task' %}" class="btn btn-success">Create New Task</a>
+<a href="{% url 'appsec_task:export_appsec_tasks' %}" class="btn btn-primary">Export All Data</a>
+
+<!-- Checkbox để bật/tắt cột -->
+    <div class="mb-3">
+
+        <label><input type="checkbox" class="column-toggle" data-column="0" checked> ID</label>
+        <label><input type="checkbox" class="column-toggle" data-column="1" checked> Task Name</label>
+        <label><input type="checkbox" class="column-toggle" data-column="2" checked> Status</label>
+        <label><input type="checkbox" class="column-toggle" data-column="3" checked> PIC ISM</label>
+        <label><input type="checkbox" class="column-toggle" data-column="4" checked> Start Date</label>
+        <label><input type="checkbox" class="column-toggle" data-column="5" checked> End Date</label>
+
+        <label><input type="checkbox" class="column-toggle" data-column="6" checked> Production URL</label>
+        <label><input type="checkbox" class="column-toggle" data-column="7" checked> Owner</label>
+        
+        
+        <label><input type="checkbox" class="column-toggle" data-column="8" checked> Mail Loop</label>
+        <label><input type="checkbox" class="column-toggle" data-column="9" checked> Chat group </label>
+        <label><input type="checkbox" class="column-toggle" data-column="10" checked> Ticket link</label>
+        <label><input type="checkbox" class="column-toggle" data-column="11" checked> Sharepoint link</label>
+
+        <label><input type="checkbox" class="column-toggle" data-column="12" checked> Internet/Internal?</label>
+        <label><input type="checkbox" class="column-toggle" data-column="13" checked> New App/Old App?</label>
+        
+        <label><input type="checkbox" class="column-toggle" data-column="14" checked> Checklist Type</label>
+        <label><input type="checkbox" class="column-toggle" data-column="15" checked> Share Cost? </label>
+        
+        
+    </div>
+
+
+<form method="POST" enctype="multipart/form-data" action="{% url 'appsec_task:import_appsec_tasks' %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <input type="file" name="task_file" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-success">Import Pentest Tasks</button>
+        </div>
+    </div>
+</form>  
+<div class="content">
+    <div class="container-fluid">
+        
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Advanced Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Task Name</label>
+                        <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Start Date (From)</label>
+                        <input type="date" class="form-control filter-date" data-column="4" id="start-date-from">
+                    </div>
+                    <div class="col-md-3">
+                        <label>End Date (To)</label>
+                        <input type="date" class="form-control filter-date" data-column="5" id="end-date-to">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Status</label>
+                        <select class="form-control filter-input" data-column="2">
+                            <option value="">All</option>
+                            <option value="Not Start">Not Start</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Interrupt">Interrupt</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancel">Cancel</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label>Internet/Internal? </label>
+                        <select class="form-control filter-input" data-column="12">
+                            <option value="">All</option>
+                            <option value="Internet">Internet</option>
+                            <option value="Internal">Internal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label>New App/Old App? </label>
+                        <select class="form-control filter-input" data-column="13">
+                            <option value="">All</option>
+                            <option value="New App">New App</option>
+                            <option value="Old App">Old App</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label>Share Cost</label>
+                        <select class="form-control filter-input" data-column="15">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-4">
+                        <button id="clearFilters" class="btn btn-danger">Clear Filters</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="table-container">
+
+                
+                <table class="table table-bordered" id="taskTable" border="1">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">ID</th>
+                            <th>
+                                <span onclick="sortTable(1)">Task Name</span>
+                                <br>
+                                <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
+                            </th>
+                            <!-- <th onclick="sortTable(1)">Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th> -->
+                            <th>
+                                <span onclick="sortTable(2)">Status </span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="2">
+                                    <option value="">All</option>
+                                    <option value="Not Start">Not Start</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Interrupt">Interrupt</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancel">Cancel</option>
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(3)">PIC ISM</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="3">
+                            </th>
+                            <th>
+
+                                <span onclick="sortTable(4)">Start Date </span> 
+                                </th>
+                            <th>
+                                <span onclick="sortTable(5)">End Date </span>
+                            </th>
+
+                            <th>
+                                <span onclick="sortTable(6)">Production URL </span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="6">
+                            </th>
+                            <th>
+                                <span onclick="sortTable(7)">Owner </span> <br>
+                                <input type="text" class="form-control filter-input" data-column="7">
+                            </th>
+                            
+                            <th>Mail loop <br> <input type="text" class="form-control filter-input" data-column="8"></th>
+                            <th>Chat group <br> <input type="text" class="form-control filter-input" data-column="9"></th>
+                            <th>Ticket link <br> <input type="text" class="form-control filter-input" data-column="10"> </th>
+                            
+                            <th>Sharepoint link <br> <input type="text" class="form-control filter-input" data-column="11"></th>
+                            <th>
+                                <span onclick="sortTable(12)">Internet/Internal? </span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="12">
+                                    <option value="">All</option>
+                                    <option value="Internet">Internet</option>
+                                    <option value="Internal">Internal</option>
+                                    
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(13)">New App/Old App? </span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="13">
+                                    <option value="">All</option>
+                                    <option value="New App">New App</option>
+                                    <option value="Old App">Old App</option>
+                                    
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(14)">Checklist Type</span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="14">
+                                    <option value="">All</option>
+                                    <option value="Full Checklist">Full Checklist</option>
+                                    <option value="New Function Checklist">New Function Checklist</option>
+                                    <option value="No Checklist">No Checklist</option>
+                                    
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(15)">Share Cost? </span>
+                                <br>
+                                <select class="form-control filter-input" data-column="15">
+                                    <option value="">All</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                    
+                                </select>
+                            </th>
+                            
+                            <th>Pentest</th>
+                            <th>Verify</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                        {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.id }}</td>
+                            <td>{{ task.name }}</td>
+                            <td>
+                                
+                                {% if task.status == "Not Start" %}
+                                    <span class="badge bg-info">{{ task.status }}</span>
+                                {% elif task.status == "In Progress" %}
+                                    <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                                {% elif task.status == "Interrupt" %}
+                                    <span class="badge bg-danger text-dark">{{ task.status }}</span>
+                                {% elif task.status == "Done" %}
+                                    <span class="badge bg-success">{{ task.status }}</span>
+                                {% elif task.status == "Cancel" %}
+                                    <span class="badge bg-danger text-dark">{{ task.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.PIC_ISM }}</td>
+                            <td>{{ task.start_date }}</td>
+                            <td>{{ task.end_date }}</td>
+
+                            <td>{{ task.environment_prod }}</td>
+                            <td>{{ task.owner }}</td>
+                            <td>{{ task.mail_loop }}</td>
+                            <td>{{ task.chat_group }}</td>
+                            <td>{{ task.link_ticket }}</td>
+                            <td>{{ task.link_sharepoint }}</td>
+                            <td>{{ task.is_internet }}</td>
+                            <td>{{ task.is_newapp }}</td>
+                            <td>{{ task.checklist_type }}</td>
+                            <td>{{ task.sharecost }}</td>
+                            <td>
+                                
+                                {% with pentest_task=task.pentest_tasks.first %}
+                                    {% if pentest_task %}
+                                        <a href="{% url 'pentest_task:view_pentest_task' pentest_task.id %}" class="btn btn-primary">
+                                            View Pentest
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'pentest_task:create_pentest_task' task.id %}" class="btn btn-success">
+                                            Create Pentest
+                                        </a>
+                                    {% endif %}
+                                {% endwith %}
+                                
+                            </td>
+                            <td>
+                                {% with verify_task=task.verify_tasks.first %}
+                                    {% if verify_task %}
+                                
+                                        <a href="{% url 'verify_task:view_verify_task' verify_task.id %}" class="btn btn-primary">View Verify</a>
+                                    {% else %}
+                                        <a href="{% url 'verify_task:create_verify_task' task.id %}" class="btn btn-success">Create Verify</a>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            
+                            <td>
+                                <a href="{% url 'appsec_task:view_appsec_task' task.id %}" class="btn btn-info">View</a>
+                                <a href="{% url 'appsec_task:edit_appsec_task' task.id %}" class="btn btn-warning">Edit</a>
+                                <form action="{% url 'appsec_task:delete_appsec_task' task.id %}" method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this task?');">Delete</button>
+                                                </form>
+                                
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">No tasks found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+       </div>
+    </div>
+</div>
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
+<script src="{% static 'js/custome.js' %}"></script>
+{% endblock %}

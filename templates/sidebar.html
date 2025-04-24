@@ -1,0 +1,144 @@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Logo hoặc tiêu đề -->
+    <a href="#" class="brand-link">
+        <i class="fas fa-shield-alt"></i>
+        <span class="brand-text font-weight-light">Admin Panel</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="{% url 'appsec_task:dashboard' %}" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="{% url 'appsec_task:list_appsec_tasks' %}" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Appsec Tasks</p>
+                    </a>
+                </li>
+
+                <!-- Pentest Task (Có submenu) -->
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bug"></i>
+                        <p>
+                            Pentest Tasks
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'pentest_task:list_pentest_tasks' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List Pentest Tasks</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'pentest_task:list_retest_tasks' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List Retest Tasks</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Verify Task -->
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bug"></i>
+                        <p>
+                            Verify Tasks
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                       
+                        <li class="nav-item">
+                            <a href="{% url 'verify_task:list_verify_tasks' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List Verify Tasks</p>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bug"></i>
+                        <p>
+                            Vulnerability Template
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                       
+                        <li class="nav-item">
+                            <a href="{% url 'pentest_task:list_vuln_templates' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List Vulnerability Templates </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'pentest_task:vuln_template_create' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Add Vulnerability Templates </p>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </li>
+                <!-- Sharecost(Có submenu) -->
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bug"></i>
+                        <p>
+                            Other Information
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'appsec_task:list_sharecost' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List All Sharecost</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'appsec_task:all_exceptions' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List All Exceptions</p>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </li>
+
+            
+                <!-- Ticket -->
+                <li class="nav-item">
+                    <a href="{% url 'pentest_task:list_pentest_tasks' %}" class="nav-link">
+                        <i class="nav-icon fas fa-ticket-alt"></i>
+                        <p>Ticket</p>
+                    </a>
+                </li>
+
+                <!-- logout -->
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link text-danger">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                        <p>Logout</p>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</aside>

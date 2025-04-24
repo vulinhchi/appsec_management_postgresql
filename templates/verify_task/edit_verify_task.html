@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Verify Task{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Edit Verify Task: {{appsec_task.name}}</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+        
+    <form method="post" enctype="multipart/form-data" id="VulnerabiityForm">
+        {% csrf_token %}
+        <div class="container">
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Error!</strong> Please correct the following errors:
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        
+        
+        <!-- Tabs -->
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="taskTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#task_description" data-toggle="tab">Task Description</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#plan" data-toggle="tab">Plan</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#additional_info" data-toggle="tab">Additional Information</a>
+                    </li>
+                </ul>
+            </div>
+        
+                <div class="tab-content mt-3" id="vulnTabsContent">
+                    <!-- Tab 1: Task Description -->
+                    <div class="tab-pane fade show active" id="task_description" role="tabpanel">
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Task Name</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.name}}
+                                </div>
+                              </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Description</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.description}}
+                                </div>
+                              </div>
+                        </div>
+                  
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Status</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                    {{ form.status}}
+
+                                </div>
+                              </div>
+                        </div>
+          
+                    </div>
+
+                    <!-- Tab 2: Plan -->
+                    <div class="tab-pane fade" id="plan">
+
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>PIC ISM</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.PIC_ISM}}
+                                </div>
+                              </div>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b> Start Date</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.start_date }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>End Date</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.end_date}}
+                                </div>
+                              </div>
+                        </div>
+                    </div>    
+
+                    <!-- Tab 3: Additional Information -->
+                    <div class="tab-pane fade" id="additional_info">
+                      <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Owner</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.owner}}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Environment Prod</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.environment_prod}}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Mail Loop </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.mail_loop }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Chat Group </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.chat_group }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Link Ticket </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.link_ticket }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Link Sharepoint </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.link_sharepoint }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Internet/Internal? </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.is_internet }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>New App/Old App?</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.is_newapp }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Checklist Type</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ appsec_task.checklist_type }}
+                                </div>
+                              </div>
+                        </div>
+                        
+                    </div>
+                    <button type="submit" class="btn btn-primary">Edit Task</button>
+                    <a href="{% url 'verify_task:list_verify_tasks' %}" class="btn btn-secondary">Back to Verify Task List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}

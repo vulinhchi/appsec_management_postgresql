@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View Sharecost{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">View ShareCost: {{appsec_task.name}}</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+	<form method="post">
+	    {% csrf_token %}
+	    <div class="container">
+	            {% if form.errors %}
+	                <div class="alert alert-danger">
+	                    <strong>Error!</strong> Please correct the following errors:
+	                    <ul>
+	                        {% for field in form %}
+	                            {% for error in field.errors %}
+	                                <li>{{ field.label }}: {{ error }}</li>
+	                            {% endfor %}
+	                        {% endfor %}
+	                    </ul>
+	                </div>
+	            {% endif %}
+	    </div>
+
+		<div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="taskTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#task_description" data-toggle="tab">ShareCost Info</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#additional_info" data-toggle="tab">Additional Information</a>
+                </li>
+                
+            </ul>
+        </div>
+        <div class="tab-content mt-3">
+            <!-- Tab 1: Task Description -->
+            <div class="tab-pane fade show active" id="task_description" role="tabpanel">
+	    		
+	    		<div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>PIC cost</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.pic}}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Project Code</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.project_code}}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Owner/BUL</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.owner}}
+                        </div>
+                      </div>
+                </div>
+              </div>
+            <!-- Tab 3: Additional Information -->
+            <div class="tab-pane fade" id="additional_info">
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b> Cost (MM)</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.cost_mm}}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Cost dolla</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.cost_dolla}}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b> Month Pay</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.month_pay}}
+                        </div>
+                      </div>
+                </div>
+                 <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Pay?</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.pay_status}}
+                        </div>
+                      </div>
+                </div>
+                 <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Note</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.note}}
+                        </div>
+                      </div>
+                </div>
+            </div>
+
+			    <a href="{% url 'appsec_task:list_appsec_tasks' %}" class="btn btn-secondary">Back</a>
+          <a href="{% url 'appsec_task:list_sharecost' %}" class="btn btn-primary">List Sharecost</a>
+			</div>
+		</div>
+	</form>
+</div>
+
+
+{% endblock %}

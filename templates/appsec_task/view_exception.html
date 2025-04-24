@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View Exception {% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">View Exception of {{pentest_task.name}}</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <form method="post" id="appSecTaskForm">
+        {% csrf_token %}
+        <div class="container">
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Error!</strong> Please correct the following errors:
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="taskTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#task_description" data-toggle="tab">Exception Description</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#plan" data-toggle="tab">Risk Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#additional_info" data-toggle="tab">Remediation and Exception Reason</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content mt-3" id="vulnTabsContent">
+            <!-- Tab 1: Task Description -->
+            <div class="tab-pane fade show active" id="task_description" role="tabpanel">
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Vulnerability</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.vulnerability }}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Overview</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.overview}}
+                        </div>
+                      </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b> Status
+                            </b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          <span class="badge {% if form.status == 'Open' %}badge-danger
+                                     {% elif form.status == 'Closed' %}badge-success
+                                     {% else %}badge-secondary{% endif %}">
+                                {{ form.status }}
+                            </span>
+                           
+
+                    </div>
+                      </div>
+                </div>
+
+            </div>
+
+            <!-- Tab 2: Plan -->
+            <div class="tab-pane fade" id="plan">
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Exploitability Level</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          <span class="badge {% if form.exploitability_level == 'Critical' %}critical
+                                 {% elif form.exploitability_level == 'High' %}high
+                                 {% elif form.exploitability_level == 'Medium' %}medium
+                                 {% elif form.exploitability_level == 'Low' %}low
+                                 {% elif form.exploitability_level == 'Recommend' %}recommend
+                                 {% else %}badge-secondary{% endif %}">
+                              {{ form.exploitability_level }}
+                          </span>
+                          
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Exploitability description </b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.exploitability}}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Impact Level</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          <span class="badge {% if form.impact_level == 'Critical' %}critical
+                                 {% elif form.impact_level == 'High' %}high
+                                 {% elif form.impact_level == 'Medium' %}medium
+                                 {% elif form.impact_level == 'Low' %}low
+                                 {% elif form.impact_level == 'Recommend' %}recommend
+                                 {% else %}badge-secondary{% endif %}">
+                              {{ form.impact_level }}
+                          </span>
+                          
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Impact description</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.impact}}
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Risk Level</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          <span class="badge {% if form.risk_level == 'Critical' %}critical
+                                 {% elif form.risk_level == 'High' %}high
+                                 {% elif form.risk_level == 'Medium' %}medium
+                                 {% elif form.risk_level == 'Low' %}low
+                                 {% elif form.risk_level == 'Recommend' %}recommend
+                                 {% else %}badge-secondary{% endif %}">
+                              {{ form.risk_level }}
+                          </span>
+                          
+                        </div>
+                      </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Risk description </b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.risk}}
+                        </div>
+                      </div>
+                </div>
+               
+            </div>
+
+            <!-- Tab 3: Additional Information -->
+            <div class="tab-pane fade" id="additional_info">
+              <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Remediation</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.remediation}}
+                        </div>
+                      </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Reason of Exception</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.reason_of_exception}}
+                        </div>
+                      </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Exception Date </b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ form.exception_date }}
+                        </div>
+                      </div>
+                </div>
+                
+                
+            </div>
+            <a href="{% url 'appsec_task:exception_list' appsec_task.id %}" class="btn btn-secondary">Back to Exception List </a>
+        </div>
+      
+    </form>
+    
+</div>
+
+
+{% endblock %}

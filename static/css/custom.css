@@ -1,0 +1,251 @@
+/*giao diện search vuln_template*/
+#vuln_suggestions {
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    z-index: 999;
+}
+
+/*giao diện phần logout*/
+/* Ví dụ CSS cho phần navbar */
+.navbar-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.btn-sm {
+  font-size: 14px;
+}
+
+.nav-treeview .nav-item {
+    padding-left: 20px; /* Thụt lề hơn */
+    font-size: 0.9rem; /* Nhỏ hơn mục chính */
+}
+.nav-treeview .nav-item a {
+    color: #adb5bd !important; /* Màu xám nhạt */
+}
+
+.nav-treeview .nav-item a:hover {
+    color: #ffffff !important; /* Màu trắng khi hover */
+}
+.nav-item > a {
+    /*font-weight: bold; /* Chữ đậm hơn */*/
+    color: #ffffff !important; /* Màu sáng hơn */
+}
+.nav-treeview .nav-item a {
+    border-left: 3px solid transparent;
+    padding-left: 25px; /* Thụt sâu hơn chút */
+}
+
+.nav-treeview .nav-item a:hover {
+    border-left: 3px solid #007bff; /* Hiện border xanh khi hover */
+}
+/*CSS cho phần list pentest tasks, hiển thị thanh cuộn*/
+.table-container {
+            width: 100%;
+            overflow-x: auto; /* Bật thanh cuộn ngang khi bảng quá rộng */
+        }
+        thead,th {
+            background-color: #ffb366; /* Màu cam đậm hơn */
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            white-space: nowrap; /* Ngăn nội dung tự động xuống dòng */
+            cursor: pointer; /* Hiệu ứng khi di chuột */
+        }
+        /* Cố định 3 cột đầu */
+        /*th:nth-child(-n+2),
+        td:nth-child(-n+2) {
+            position: sticky;      /* Giữ cột cố định */
+            /*left: 0;              /* Căn từ bên trái */
+            /*background: #f4f4f4;  /* Đặt màu nền cho cột cố định */
+            /*z-index: 2;           /* Giữ cột trên các phần tử cuộn */
+        /*}*/
+
+        /*th:nth-child(3), td:nth-child(3) {
+            z-index: 3; /* Cột cuối trong nhóm cố định đặt cao hơn */
+        /*}
+
+        /* Hiệu ứng khi click */
+        .selected-row {
+            background-color: #ffcc99 !important; /* Màu nền xanh nhẹ */
+            color: #1d3557; /* Màu chữ xanh đậm */
+            font-weight: bold;
+        }
+         /* Hiệu ứng hover */
+        tbody tr:hover {
+            background-color: #ffcc99; /* Màu xanh nhẹ */
+            transition: background-color 0.3s ease; /* Hiệu ứng mượt */
+        }
+
+/*hiển thị cho phần message lỗi*/
+.alert-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    width: 400px;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 10px;
+}
+/* Đảm bảo label trong .form-group có màu chữ rõ ràng, k bị ghi đè bở css  {{ form.media }}*/
+.form-group label {
+    color: #333 !important;  /* Màu chữ đậm */
+}
+.container .tab-pane .fade .form-group{
+    color: #333 !important;  /* Màu chữ đậm */
+}
+/* Đặt lại font chữ mặc định cho Evidence */
+.martor-preview {
+    font-family: Arial, sans-serif !important;
+    font-size: 14px !important;
+    color: #333 !important;
+}
+/*chỉnh size hình ảnh trong evidence:*/
+/* Đảm bảo hình ảnh trong evidence luôn có kích thước cố định */
+.card-body img {
+    width: 1000px;       /* Kích thước cố định cho chiều rộng hình ảnh */
+    height: auto;       /* Giữ tỷ lệ của hình ảnh */
+    display: block;     /* Đảm bảo hình ảnh được hiển thị như block element */
+    margin-left: auto;  /* Căn trái và phải tự động để căn giữa */
+    margin-right: auto; /* Căn trái và phải tự động để căn giữa */
+}
+/*HÌnh ảnh cho phần POC của Affected URL*/
+td img {
+    max-width: 250px;
+    height: auto;
+    display: block;
+    margin: 2px auto;     /* giảm khoảng cách trên/dưới và vẫn căn giữa */
+    padding: 0;           /* loại bỏ padding nếu có */
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+/*CSS cho phần sort list_appsec_task*/
+.sortable {
+    cursor: pointer;
+    position: relative;
+    background-color: #f8f9fa;
+}
+
+.sortable.active {
+    background-color: #e0e0e0;
+}
+
+.sort-arrow {
+    font-size: 0.8em;
+    margin-left: 5px;
+    display: inline-block;
+}
+
+/*ghi đè màu cho phần risk-rating*/
+/* Risk Rating */
+#risk-rating.critical_text {
+  background-color: #8B0000 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-rating.high_text {
+  background-color: #FF0000 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-rating.medium_text {
+  background-color: #FFA500 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-rating.low_text {
+  background-color: #008000 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-rating.recommend_text {
+  background-color: #32CD32 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+
+/* Risk Score */
+#risk-score.critical_text {
+  background-color: #8B0000 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-score.high_text {
+  background-color: #FF0000 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-score.medium_text {
+  background-color: #FFA500 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-score.low_text {
+  background-color: #008000 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+#risk-score.recommend_text {
+  background-color: #32CD32 !important;
+  color: #fff !important;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+
+
+/*màu Background của level lỗ hổng*/
+.critical { background-color: #8B0000; color: white; } /* Đỏ đậm */
+.high { background-color: #FF0000; color: white; } /* Đỏ */
+.medium { background-color: #FFA500; color: white; } /* Cam */
+.low { background-color: #008000; color: white; } /* Xanh lá đậm */
+.recommend { background-color: #32CD32; color: white; } /* Xanh lá nhạt */
+
+/* Màu sắc cho từng cấp độ */
+.critical_text { color: #8B0000 !important; font-weight: bold; font-size: 20px; font-family: sans-serif;line-height: 1.15; } /* Đỏ đậm */
+.high_text { color: #FF0000 !important; font-weight: bold;  font-size: 20px; font-family: sans-serif;line-height: 1.15;} /* Đỏ */
+.medium_text { color: #FFA500 !important; font-weight: bold; font-size: 20px; font-family: sans-serif;line-height: 1.15; } /* Cam */
+.low_text { color: #008000 !important; font-weight: bold;  font-size: 20px; font-family: sans-serif;line-height: 1.15;} /* Xanh lá đậm */
+.recommend_text { color: #32CD32 !important; font-weight:bold;  font-size: 20px; font-family: sans-serif;line-height: 1.15; } /* Xanh lá nhạt */

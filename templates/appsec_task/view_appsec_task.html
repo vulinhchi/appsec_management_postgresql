@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View AppSec Task{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">View AppSec Task:  {{form.name}}</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<a href="{% url 'appsec_task:exception_create' form.id %}" class="btn btn-primary">Create Exception</a>
+<a href="{% url 'appsec_task:exception_list' form.id %}" class="btn btn-primary">List Exception</a>
+{% with sharecost_task=form.share_cost_details.first %}
+      {% if sharecost_task %}
+          <a href="{% url 'appsec_task:view_sharecost' form.id sharecost_task.id %}" class="btn btn-sm btn-primary">
+              <i class="fas fa-eye"></i> View Share Cost
+          </a>
+      {% else %}
+          <a href="{% url 'appsec_task:add_sharecost' form.id %}" class="btn btn-sm btn-success">
+              <i class="fas fa-dollar-sign"></i> Add Share Cost
+          </a>
+      {% endif %}
+  {% endwith %}
+  
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="taskTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#task_description" data-toggle="tab">Task Description</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#plan" data-toggle="tab">Plan</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#additional_info" data-toggle="tab">Additional Information</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body">
+            <form  method="post">
+                
+                <div class="tab-content">
+                    <!-- Tab 1: Task Description -->
+                    <div class="tab-pane fade show active" id="task_description">
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Task Name</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.name | linebreaksbr}}
+                                </div>
+                              </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Description</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                    {{ form.description | default:'' | linebreaksbr }}
+                                </div>
+                              </div>
+                        </div>
+                       <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Status</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                {% if form.status == "Not Start" %}
+                                    <span class="badge bg-info">{{ form.status }}</span>
+                                {% elif form.status == "In Progress" %}
+                                    <span class="badge bg-warning text-dark">{{ form.status }}</span>
+                                {% elif form.status == "Reported" %}
+                                    <span class="badge bg-primary">{{ form.status }}</span>
+                                {% elif form.status == "Retest" %}
+                                    <span class="badge bg-danger">{{ form.status }}</span>
+                                {% elif form.status == "Interrupt" %}
+                                    <span class="badge bg-danger text-dark">{{ form.status }}</span>
+                                {% elif form.status == "Completed" %}
+                                    <span class="badge bg-success">{{ form.status }}</span>
+                                {% elif form.status == "Cancel" %}
+                                    <span class="badge bg-danger text-dark">{{ form.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ form.status }}</span>
+                                {% endif %}
+                            </div>
+                              </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Plan -->
+                    <div class="tab-pane fade" id="plan">
+                    
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>PIC ISM</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.PIC_ISM | linebreaks}}
+                                </div>
+                              </div>
+                        </div>
+                  
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b> Start Date</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.start_date }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>End Date</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.end_date | linebreaksbr}}
+                                </div>
+                              </div>
+                        </div>
+                    
+                    </div>
+
+                    <!-- Tab 3: Additional Information -->
+                    <div class="tab-pane fade" id="additional_info">
+                      <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Owner</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.owner | linebreaks}}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Environment Prod</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.environment_prod | linebreaks}}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Mail Loop </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.mail_loop }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Chat Group </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.chat_group }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Link Ticket </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.link_ticket }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Link Sharepoint </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.link_sharepoint }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Internet/Internal? </b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.is_internet }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>New App/Old App?</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.is_newapp }}
+                                </div>
+                              </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Checklist Type</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.checklist_type }}
+                                </div>
+                              </div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </form>
+            <a href="{% url 'appsec_task:list_appsec_tasks' %}" class="btn btn-secondary">Back</a>
+            
+        </div>
+
+            
+    </div>
+</div>
+
+
+{% endblock %}

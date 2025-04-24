@@ -1,0 +1,24 @@
+Django==3.2
+djongo==1.3.6
+pytz
+pymongo==3.12.3
+pandas
+openpyxl
+markdown2
+
+# Markdown Editor (Martor)
+martor==1.6.22
+beautifulsoup4
+
+# Export Report (Word)
+python-docx
+docxtpl
+pillow  # Hỗ trợ hình ảnh trong report
+
+# CKEditor (Nếu muốn dùng thay thế Martor)
+django-ckeditor
+
+# Security & Debugging
+django-environ  # Quản lý biến môi trường
+whitenoise  # Serve static files
+gunicorn  # Dùng cho deployment

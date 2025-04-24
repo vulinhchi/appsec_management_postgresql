@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}List All Sharecost{% endblock %}
+{% block content %}
+
+
+<a href="{% url 'appsec_task:export_sharecost_excel' %}" class="btn btn-primary">Export Sharecost Excel</a>
+<div class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">List All Sharecost</h3>
+            </div>
+            
+            
+
+                
+            <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Advanced Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Task Name</label>
+                        <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label>Share Cost?</label>
+                        <select class="form-control filter-input" data-column="2">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label>PIC Pentest</label>
+                        <select class="form-control filter-input" data-column="3">
+                            <option value="">All</option>
+                            <option value="ISM">ISM</option>
+                            <option value="SAS">SAS</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Month Pay</label>
+                        <input type="text"class="form-control filter-input"  data-column="8">
+                    </div>
+                   
+                    <div class="col-md-3">
+                        <label>Pay Status</label>
+                        <select class="form-control filter-input" data-column="9">
+                            <option value="">All</option>
+                            <option value="Done">Done</option>
+                            <option value="Information Sent">Information Sent</option>
+                            <option value="Not yet">Not yet</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-4">
+                        <button id="clearFilters" class="btn btn-danger">Clear Filters</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+
+            
+            <table class="table table-bordered" id="taskTable" border="1">
+
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">ID</th>
+                        <th>
+                            <span onclick="sortTable(1)">Task Name </span>
+                             <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
+                        </th>
+                        
+                        <th>
+                            <span onclick="sortTable(2)">Sharecost?</span>
+                            <br>
+                            <select class="form-control filter-input" data-column="8">
+                                <option value="">All</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                
+                            </select>
+                            
+                        </th>
+                        <!-- <th onclick="sortTable(0)">AppSec Name</th> -->
+                        <th>
+                            <span onclick="sortTable(3)">PIC  </span>
+                            <br>
+                            <select class="form-control filter-input" data-column="3">
+                                <option value="">All</option>
+                                <option value="ISM">ISM</option>
+                                <option value="SAS">SAS</option>
+                                <option value="Other">Other</option>
+                                
+                            </select>
+
+                        </th>
+                        <th>
+                            <span onclick="sortTable(4)">Project Code </span>
+                            <br> <input type="text" class="form-control filter-input" data-column="4"> <br> 
+                            
+                        </th>
+                        <th>
+                            <span onclick="sortTable(5)">Owner </span>
+                            <br> <input type="text" class="form-control filter-input" data-column="5"></th>
+                        <th>
+                            <span onclick="sortTable(6)">Cost (MM) </span>
+                        </th>
+                        <th>
+                            <span onclick="sortTable(7)">Cost Dolla </span>
+                        </th>
+                        <th>
+                            <span onclick="sortTable(8)">Month Pay</span>
+                            <br> <input type="text" class="form-control filter-input" data-column="8">
+                        </th>
+
+                        <th>
+                            <span onclick="sortTable(9)">Pay Status</span>
+                            <br>
+                            <select class="form-control filter-input" data-column="9">
+                                <option value="">All</option>
+                                <option value="Done">Done</option>
+                                <option value="Information Sent">Information Sent</option>
+                                <option value="Not yet">Not yet</option>
+                                
+                            </select>
+                        </th>
+                        <th>
+                            <span onclick="sortTable(10)">Note </span> 
+                            <br> <input type="text" class="form-control filter-input" data-column="10">
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.id }}</td>
+                        <td>{{ task.appsec_task.name }}</td>
+                        <td>{{ task.appsec_task.sharecost }}</td>
+                        <td>{{ task.pic }}</td>
+                        
+                        <td>{{ task.project_code }}</td>
+                        <td>{{ task.owner }}</td>
+                        <td>{{ task.cost_mm }}</td>
+                        <td>{{ task.cost_dolla }}</td>
+                        <td>{{ task.month_pay }}</td>
+                        <td>{{ task.pay_status }}</td>
+                        <td>{{ task.note }}</td>
+                        
+                        <td>
+                            <a href="{% url 'appsec_task:view_sharecost' task.appsec_task.id task.id %}" class="btn btn-info">View</a>
+                            <a href="{% url 'appsec_task:edit_sharecost' task.appsec_task.id task.id %}" class="btn btn-warning">Edit</a>
+                            <form action="{% url 'appsec_task:delete_sharecost' task.appsec_task.id task.id %}" method="POST" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this Sharecost?');">Delete</button>
+                                            </form>
+                            <a href="{% url 'appsec_task:view_appsec_task' task.appsec_task.id %}" class="btn btn-info">View AppSec Task</a>
+                            
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">No tasks found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+       </div>
+    </div>
+</div>
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
+<script src="{% static 'js/custome.js' %}"></script>
+
+{% endblock %}

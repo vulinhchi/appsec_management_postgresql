@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}List Exception{% endblock %}
+{% block content %}
+<h2>Exception list of {{appsec_task.name}}</h2>
+
+<a href="{% url 'appsec_task:exception_create' appsec_task.id%}" class="btn btn-success">Create New Exception</a>
+<a href="{% url 'appsec_task:view_appsec_task' appsec_task.id%}" class="btn btn-secondary">Back to Appsec task </a>
+
+<!-- code để export ra file excel đã có template -->
+<a href="{% url 'appsec_task:export_appsec_tasks' %}" class="btn btn-primary">Export Exception Form</a>
+
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="card">
+            
+            <!-- <div class="card mb-3"> -->
+            
+            
+        </div>
+            <div class="table-container">
+
+                
+                <table class="table table-bordered" id="taskTable" border="1">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">ID</th>
+                            <th>
+                                <span onclick="sortTable(1)">Vulnerability</span>
+                                <br>
+                                <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
+                            </th>
+                            <th>
+                                <span onclick="sortTable(2)">Overview</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="2">
+                            </th>
+                            <th>
+                                <span onclick="sortTable(3)">Status </span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="3">
+                                    <option value="">All</option>
+                                    <option value="Open">Open</option>
+                                    <option value="Closed">Close</option>
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(4)">Exploitability Level</span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="4">
+                                    <option value="">All</option>
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Recommend">Recommend</option>
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(5)">Impact Level</span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="5">
+                                    <option value="">All</option>
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Recommend">Recommend</option>
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(6)">Risk Level</span>
+                                <br> 
+                                <select class="form-control filter-input" data-column="6">
+                                    <option value="">All</option>
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Recommend">Recommend</option>
+                                </select>
+                            </th>
+                            <th>
+                                <span onclick="sortTable(7)">Exception Date</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="7">
+                            </th>
+                            <th>
+                                <span onclick="sortTable(8)">Exception Create</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="8">
+                            </th>
+
+                            
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                        {% for task in exceptions %}
+                        <tr>
+                            <td>{{ task.id }}</td>
+                            <td>{{ task.vulnerability }}</td>
+                            <td>{{ task.overview }}</td>
+                            <td>
+                                <span class="badge {% if task.status == 'Open' %}badge-danger
+                                     {% elif task.status == 'Closed' %}badge-success
+                                     {% else %}badge-secondary{% endif %}">
+                                {{ task.status }}
+                                </span>
+                                
+                               <!--  {% if task.status == "Open" %}
+                                    <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                                {% elif task.status == "Closed" %}
+                                    <span class="badge bg-success">{{ task.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ task.status }}</span>
+                                {% endif %} -->
+                            </td>
+                            
+                            <td>
+                                <span class="badge {% if task.exploitability_level == 'Critical' %}critical
+                                     {% elif task.exploitability_level == 'High' %}high
+                                     {% elif task.exploitability_level == 'Medium' %}medium
+                                     {% elif task.exploitability_level == 'Low' %}low
+                                     {% elif task.exploitability_level == 'Recommend' %}recommend
+                                     {% else %}badge-secondary{% endif %}">
+                                  {{ task.exploitability_level }}
+                              </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if task.impact_level == 'Critical' %}critical
+                                     {% elif task.impact_level == 'High' %}high
+                                     {% elif task.impact_level == 'Medium' %}medium
+                                     {% elif task.impact_level == 'Low' %}low
+                                     {% elif task.impact_level == 'Recommend' %}recommend
+                                     {% else %}badge-secondary{% endif %}">
+                                  {{ task.impact_level }}
+                              </span>
+                            
+                            </td>
+                            <td>
+                                <span class="badge {% if task.risk_level == 'Critical' %}critical
+                                     {% elif task.risk_level == 'High' %}high
+                                     {% elif task.risk_level == 'Medium' %}medium
+                                     {% elif task.risk_level == 'Low' %}low
+                                     {% elif task.risk_level == 'Recommend' %}recommend
+                                     {% else %}badge-secondary{% endif %}">
+                                  {{ task.risk_level }}
+                              </span>
+                            </td>
+                            
+                            <td>{{ task.exception_date }}</td>
+                            <td>{{ task.exception_create }}</td>
+
+                            
+                            <td>
+                                <a href="{% url 'appsec_task:exception_detail' appsec_task.id task.id %}" class="btn btn-info">View</a>
+                                <a href="{% url 'appsec_task:exception_edit' appsec_task.id task.id %}" class="btn btn-warning">Edit</a>
+                                <form action="{% url 'appsec_task:exception_delete' appsec_task.id task.id %}" method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this exception?');">Delete</button>
+                                                </form>
+                                
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">No tasks found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+       </div>
+    </div>
+</div>
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
+<script src="{% static 'js/custome.js' %}"></script>
+{% endblock %}
