@@ -11,4 +11,4 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Chạy server
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "task_manager.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8001", "task_manager.wsgi:application"]

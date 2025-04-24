@@ -1,33 +1,50 @@
 services:
   web:
     build: .
-    container_name: django_web
+    container_name: django_web_postgres
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py runserver 0.0.0.0:8001"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
       - ./media:/app/media
     ports:
-      - "8000:8000"
+      - "8001:8001"
     depends_on:
-      - mongo
+      - db
+
     environment:
-      - DJANGO_SETTINGS_MODULE=task_manager.settings
-      - MONGO_URI=mongodb://mongo:27017/taskdb
+      - POSTGRES_DB=taskdb
+      - POSTGRES_USER=taskuser
+      - POSTGRES_PASSWORD=taskpassword
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
       - DATA_UPLOAD_MAX_MEMORY_SIZE=5242880
 
-  mongo:
-    image: mongo:latest
-    # container_name: mongo_db2
+    # environment:
+    #   - DJANGO_SETTINGS_MODULE=task_manager.settings
+    #   - POSTGRES_DB=taskdb
+    #   - POSTGRES_USER=taskuser
+    #   - POSTGRES_PASSWORD=taskpassword
+    #   - POSTGRES_HOST=db
+    #   - POSTGRES_PORT=5432
+    #   - DATA_UPLOAD_MAX_MEMORY_SIZE=5242880
+
+  db:
+    image: postgres:latest
+    container_name: django_db_postgres
     restart: always
+    environment:
+      - POSTGRES_DB=taskdb
+      - POSTGRES_USER=taskuser
+      - POSTGRES_PASSWORD=taskpassword
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mongo_data:
   static_volume:
+  postgres_data:
