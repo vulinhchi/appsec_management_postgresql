@@ -36,6 +36,12 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
+                            <a href="{% url 'pentest_task:my_task_view' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>My Pentest Tasks</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{% url 'pentest_task:list_pentest_tasks' %}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>List Pentest Tasks</p>
@@ -60,7 +66,12 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                       
+                        <li class="nav-item">
+                            <a href="{% url 'verify_task:my_task_view' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>My Verify Tasks</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="{% url 'verify_task:list_verify_tasks' %}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>

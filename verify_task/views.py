@@ -74,3 +74,10 @@ def delete_verify_task(request, verify_task_id):
     if request.method == "POST":
         verify_task.delete()
     return redirect('verify_task:list_verify_tasks') 
+
+
+@login_required
+def my_task_view(request):
+    my_tasks = VerifyTask.objects.filter(PIC_ISM=request.user)
+    return render(request, 'verify_task/my_tasks.html', {'tasks': my_tasks})
+    
