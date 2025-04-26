@@ -19,6 +19,34 @@
       {% else %}
         <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Login</a> <!-- Nút login nếu chưa đăng nhập -->
       {% endif %}
+
+
     </div>
   </div>
 </nav>
+<!-- Notification Dropdown -->
+<li class="nav-item dropdown">
+  <a class="nav-link" data-bs-toggle="dropdown" href="#">
+    <i class="fas fa-bell"></i>
+    {% if notif_count > 0 %}
+      <span class="badge bg-danger navbar-badge">{{ notif_count }}</span>
+    {% endif %}
+  </a>
+  <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+    <span class="dropdown-header">{{ notif_count }} Thông báo mới</span>
+    <div class="dropdown-divider"></div>
+
+    {% for noti in notif_unread %}
+      <a href="#" class="dropdown-item">
+        <i class="fas fa-tasks me-2"></i> {{ noti.message|truncatechars:40 }}
+        <span class="float-end text-muted text-sm">{{ noti.created_at|timesince }} trước</span>
+      </a>
+      <div class="dropdown-divider"></div>
+    {% empty %}
+      <span class="dropdown-item text-center text-muted">Không có thông báo mới</span>
+    {% endfor %}
+
+    <a href="{% url 'pentest_task:notification_list' %}" class="dropdown-item dropdown-footer">Xem tất cả</a>
+  </div>
+</li>
+
