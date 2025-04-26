@@ -1,5 +1,6 @@
 from django import forms
 from .models import VerifyTask
+from django.contrib.auth.models import User
 
 class VerifyTaskForm(forms.ModelForm):
     class Meta:
@@ -22,4 +23,11 @@ class VerifyTaskForm(forms.ModelForm):
         if start_date and end_date and start_date > end_date:
             self.add_error("end_date", "End date must be greater than or equal to start date.")
         return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user_choices = [(user.username, user.username) for user in User.objects.all()]
+        user_choices.insert(0, ('', '--- Choose PIC_ISM ---'))
+
+        self.fields['PIC_ISM'].widget = forms.Select(choices=user_choices)
 
