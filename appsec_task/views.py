@@ -19,6 +19,7 @@ import openpyxl
 import calendar
 import json
 from django.contrib.auth.decorators import login_required
+from task_manager.decorators import require_groups
 
 
 
@@ -51,6 +52,7 @@ def safe_date(val):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def create_appsec_task(request):
     if request.method == "POST":
         form = AppSecTaskForm(request.POST)
@@ -64,6 +66,7 @@ def create_appsec_task(request):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def edit_appsec_task(request, task_id):
     task = get_object_or_404(AppSecTask, id=task_id)
     if request.method == "POST":
@@ -77,6 +80,7 @@ def edit_appsec_task(request, task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def delete_appsec_task(request, task_id):
     task = get_object_or_404(AppSecTask, id=task_id)
     if request.method == "POST":
@@ -85,12 +89,14 @@ def delete_appsec_task(request, task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def view_appsec_task(request, task_id):
     task = get_object_or_404(AppSecTask, id=task_id)
     return render(request, "appsec_task/view_appsec_task.html", {"form": task})
 
 
 @login_required
+@require_groups(['Pentester', 'Leader','Manager'])
 def list_appsec_tasks(request):
     # tasks = AppSecTask.objects.all()
     tasks = AppSecTask.objects.prefetch_related("pentest_tasks", "verify_tasks").all()
@@ -100,6 +106,7 @@ def list_appsec_tasks(request):
    
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def import_appsec_tasks(request):
     if request.method == "POST" and request.FILES.get("task_file"):
         file = request.FILES["task_file"]
@@ -200,6 +207,7 @@ def import_appsec_tasks(request):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def export_appsec_tasks(request):
     # sẽ là export everify, all task, sharecost, vuln, exception
     # Lấy tất cả verify_task + pentest_task
@@ -385,6 +393,7 @@ def sync_status(appsec_task_id):
 
 
 @login_required
+@require_groups(['Leader', 'Manager'])
 def add_sharecost(request, appsec_task_id):
     appsec_task = get_object_or_404(AppSecTask, id=appsec_task_id)
     if request.method == 'POST':
@@ -401,6 +410,7 @@ def add_sharecost(request, appsec_task_id):
 
 
 @login_required
+@require_groups(['Leader', 'Manager'])
 def edit_sharecost(request, appsec_task_id, sharecost_id):
     appsec_task = get_object_or_404(AppSecTask, id=appsec_task_id)
     sharecost = get_object_or_404(ShareCostDetails, id=sharecost_id, appsec_task=appsec_task)
@@ -425,6 +435,7 @@ def edit_sharecost(request, appsec_task_id, sharecost_id):
 
 
 @login_required
+@require_groups(['Leader', 'Manager'])
 def view_sharecost(request, appsec_task_id, sharecost_id):
     sharecost = get_object_or_404(ShareCostDetails, id=sharecost_id)
     if sharecost.appsec_task.id != appsec_task_id:
@@ -435,6 +446,7 @@ def view_sharecost(request, appsec_task_id, sharecost_id):
 
 
 @login_required
+@require_groups(['Leader', 'Manager'])
 def delete_sharecost(request, appsec_task_id, sharecost_id):
     task = get_object_or_404(ShareCostDetails, id=sharecost_id)
     if task.appsec_task.id != appsec_task_id:
@@ -446,12 +458,14 @@ def delete_sharecost(request, appsec_task_id, sharecost_id):
 
 
 @login_required
+@require_groups(['Leader', 'Manager'])
 def list_sharecost(request):
     tasks = ShareCostDetails.objects.all()
     return render(request, 'appsec_task/list_sharecost.html', {'tasks': tasks})
 
 
 @login_required
+@require_groups(['Leader', 'Manager'])
 def export_sharecost_excel(request):
     # Lấy các filter hiện tại từ query params
     queryset = ShareCostDetails.objects.all()
@@ -489,12 +503,14 @@ def export_sharecost_excel(request):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def all_exceptions(request):
     exceptions = SecurityException.objects.all()
     return render(request, 'appsec_task/all_exceptions.html', {'exceptions': exceptions})
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def exception_list(request, appsec_task_id):
     task = get_object_or_404(AppSecTask, id=appsec_task_id)
     exceptions = SecurityException.objects.filter(appsec_task=task)
@@ -502,6 +518,7 @@ def exception_list(request, appsec_task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def exception_create(request, appsec_task_id):
     task = get_object_or_404(AppSecTask, id=appsec_task_id)
     if request.method == 'POST':
@@ -518,6 +535,7 @@ def exception_create(request, appsec_task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def exception_edit(request, appsec_task_id, pk):
     task = get_object_or_404(AppSecTask, id=appsec_task_id)
     exception = get_object_or_404(SecurityException, pk=pk, appsec_task=task)
@@ -536,6 +554,7 @@ def exception_edit(request, appsec_task_id, pk):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def exception_delete(request, appsec_task_id, pk):
     task = get_object_or_404(AppSecTask, id=appsec_task_id)
     exception = get_object_or_404(SecurityException, pk=pk, appsec_task=task)
@@ -547,6 +566,7 @@ def exception_delete(request, appsec_task_id, pk):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def exception_detail(request, appsec_task_id, pk):
     task = get_object_or_404(AppSecTask, id=appsec_task_id)
     exception = get_object_or_404(SecurityException, pk=pk, appsec_task=task)
@@ -714,6 +734,7 @@ def task_timeline():
 
 
 @login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def dashboard(request):
     current_year = datetime.now().year
 

@@ -6,6 +6,7 @@ from .models import AppSecTask, VerifyTask
 from appsec_task.views import sync_status 
 from django.contrib.auth.decorators import login_required
 from pentest_task.models import Notification
+from task_manager.decorators import require_groups
 
 status_colors = {
         "Not Started": "bg-info",
@@ -14,6 +15,8 @@ status_colors = {
         "Cancel": "bg-danger text-dark",
     }
 
+@login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
 def list_verify_tasks(request):
     # tasks = VerifyTask.objects.all()
     tasks = VerifyTask.objects.select_related("appsec_task").all()
@@ -21,6 +24,7 @@ def list_verify_tasks(request):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def create_verify_task(request, appsec_task_id):
     appsec_task = get_object_or_404(AppSecTask, id=appsec_task_id)
 
@@ -47,6 +51,7 @@ def create_verify_task(request, appsec_task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def edit_verify_task(request, verify_task_id):
     task = get_object_or_404(VerifyTask, id=verify_task_id)
     old_assignee = task.PIC_ISM
@@ -74,6 +79,7 @@ def edit_verify_task(request, verify_task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def view_verify_task(request, verify_task_id):
     task = get_object_or_404(VerifyTask, id=verify_task_id)
     appsec_task = task.appsec_task
@@ -81,8 +87,8 @@ def view_verify_task(request, verify_task_id):
     return render(request, "verify_task/view_verify_task.html", {"form": task, "appsec_task": appsec_task})
 
 
-# 🔴 Delete Verify Task
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def delete_verify_task(request, verify_task_id):
     verify_task = get_object_or_404(VerifyTask, id=verify_task_id)
 
@@ -92,6 +98,7 @@ def delete_verify_task(request, verify_task_id):
 
 
 @login_required
+@require_groups(['Pentester', 'Leader'])
 def my_task_view(request):
     my_tasks = VerifyTask.objects.filter(PIC_ISM=request.user)
     return render(request, 'verify_task/my_tasks.html', {'tasks': my_tasks})
