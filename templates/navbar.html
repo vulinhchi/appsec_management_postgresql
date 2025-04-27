@@ -27,7 +27,15 @@
     
   </div>
 </nav>
+ 
+<style type="text/css">
+    #notificationDropdown {
+    max-height: 300px;  /* Chiều cao tối đa */
+    overflow-y: auto;   /* Cho phép cuộn dọc */
+    overflow-x: hidden; /* Không cho phép cuộn ngang */
+}
 
+</style>
 
 <script>
     document.getElementById('notificationBell').addEventListener('click', function (e) {
