@@ -1,3 +1,11 @@
+/*hiển thị notification thanh cuộn*/
+#notificationDropdown {
+    max-height: 300px;  /* Chiều cao tối đa */
+    overflow-y: auto;   /* Thêm thanh cuộn dọc khi nội dung vượt quá chiều cao */
+    padding: 0 10px;
+    overflow-x: hidden; /* Ẩn thanh cuộn ngang nếu có */
+}
+
 /*giao diện search vuln_template*/
 #vuln_suggestions {
     max-height: 200px;

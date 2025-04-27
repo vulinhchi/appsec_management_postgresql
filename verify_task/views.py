@@ -7,6 +7,7 @@ from appsec_task.views import sync_status
 from django.contrib.auth.decorators import login_required
 from pentest_task.models import Notification
 from task_manager.decorators import require_groups
+from django.contrib.auth.models import User
 
 status_colors = {
         "Not Started": "bg-info",
@@ -36,12 +37,19 @@ def create_verify_task(request, appsec_task_id):
             verify_task.name = appsec_task.name
             sync_status(appsec_task.id)
             verify_task.save()
-            # Gửi noti nếu có người được assign
             if verify_task.PIC_ISM:
-                Notification.objects.create(
-                    user=verify_task.PIC_ISM,
-                    message=f"You are assigned to Verify task:: {verify_task.name}",
-                )
+                try:
+                    user_assignee = User.objects.get(username=new_assignee)
+                    Notification.objects.create(
+                        user=user_assignee,
+                        title="New Verify Task Assigned",
+                        description=f"You are assigned to Verify task: {verify_task.name}",
+                        url=f"/verify/view/{task.id}", 
+                       
+                    )
+                except User.DoesNotExist:
+                    pass  
+
             return redirect("verify_task:list_verify_tasks")
     else:
         form = VerifyTaskForm(initial={"name": appsec_task.name, "description": appsec_task.description})  # Gán trước vào form
@@ -65,12 +73,19 @@ def edit_verify_task(request, verify_task_id):
             verify_task.save()
 
             new_assignee = verify_task.PIC_ISM
-
             if new_assignee != old_assignee and new_assignee:
-                Notification.objects.create(
-                    user=new_assignee,
-                    message=f"You are assigned to Verify task: {verify_task.name}",
-                )
+                try:
+                    user_assignee = User.objects.get(username=new_assignee)
+                    Notification.objects.create(
+                        user=user_assignee,
+                        title="New Verify Task Assigned",
+                        description=f"You are assigned to Verify task: {verify_task.name}",
+                        url=f"/verify/view/{task.id}", 
+                       
+                    )
+                except User.DoesNotExist:
+                    pass
+
             return redirect("verify_task:list_verify_tasks")
     else:
         form = VerifyTaskForm(instance=task, initial={"name": appsec_task.name, "description": appsec_task.description})  # Gán trước vào form

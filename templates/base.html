@@ -45,14 +45,6 @@
   {% endblock %}
 </head>
 
-<!-- jQuery phải load trước -->
-<!-- <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
-  <script>
-    $('.martor-preview pre').each(function(i, block){
-        hljs.highlightBlock(block);
-    });
-  </script> -->
-
 <body class="hold-transition sidebar-mini layout-fixed">
 
 
@@ -168,6 +160,11 @@
 <script type="text/javascript" src="/static/martor/plugins/js/emojis.min.js"></script>
 <script type="text/javascript" src="/static/martor/js/martor.bootstrap.min.js"></script>
 
+
+<!-- Bootstrap 4 JS cho notification -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 {% endblock %}
 </body>

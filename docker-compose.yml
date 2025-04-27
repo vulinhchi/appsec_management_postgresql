@@ -16,6 +16,7 @@ services:
       - db
 
     environment:
+      - TZ=Asia/Bangkok  # Đặt múi giờ cho container
       - POSTGRES_DB=taskdb
       - POSTGRES_USER=taskuser
       - POSTGRES_PASSWORD=taskpassword
