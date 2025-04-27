@@ -18,7 +18,7 @@ class VerifyTaskForm(forms.ModelForm):
         end_date = cleaned_data.get("end_date")
         name = cleaned_data.get("name")
         if not name:
-            self.add_error("name", "This field is required.")
+            self.add_error("name", "This 'name' field is required.")
 
         if start_date and end_date and start_date > end_date:
             self.add_error("end_date", "End date must be greater than or equal to start date.")
