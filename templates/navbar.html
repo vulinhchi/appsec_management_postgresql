@@ -15,11 +15,13 @@
         <a class="nav-link" href="#" id="notificationBell" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 
             <i class="far fa-bell"></i>
-            {% if notis_count > 0 %}
-                <span class="badge badge-danger navbar-badge">{{ notis_count }}</span>
-            {% endif %}
-            
+            <!-- {% if notis_count > 0 %} -->
+                <!-- <span id="notification_count" class="badge badge-danger navbar-badge">{{ notis_count }}</span> -->
+            <!-- {% endif %} -->
+            <span id="notification_count" class="badge badge-danger navbar-badge" style="display: none;"></span>
+
         </a>
+
 
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="notificationDropdown">
             <span class="dropdown-item">Loading...</span>
@@ -29,62 +31,298 @@
 </nav>
  
 <style type="text/css">
-    #notificationDropdown {
+#notificationDropdown {
     max-height: 300px;  /* Chiều cao tối đa */
     overflow-y: auto;   /* Cho phép cuộn dọc */
     overflow-x: hidden; /* Không cho phép cuộn ngang */
+
 }
+#notification_count {
+    font-size: 12px;               /* Kích thước chữ */
+    padding: 2px 6px;              /* Đệm nhỏ hơn để badge gọn gàng hơn */
+    border-radius: 50%;            /* Làm cho badge thành hình tròn */
+    position: absolute;            /* Vị trí tuyệt đối so với phần tử cha */
+    top: 15px;                      /* Đưa lên một chút để sát chuông */
+    right: 15px;                    /* Đưa sang bên phải sát chuông */
+    background-color: red;         /* Màu nền cho badge */
+    color: white;                  /* Màu chữ của badge */
+    font-weight: bold;             /* Làm chữ đậm để nổi bật */
+}
+
 
 </style>
 
 <script>
-    document.getElementById('notificationBell').addEventListener('click', function (e) {
+// có gọi mark_notification_as_read nhưng k gán is_read=true được
+document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    fetch("/pentest/get_notifications/", {
+    // Fetch thông tin thông báo ngay khi trang load
+    function fetchNotifications() {
+        fetch("/pentest/get_notifications/", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const { notifications, unread_notis_count } = data;
 
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        const { notifications, notis_count } = data;
-        const dropdownMenu = document.getElementById('notificationDropdown');
-        // Cập nhật số lượng thông báo chưa đọc
-        if (notis_count > 0) {
-            console.log("CÓ NOTI count > 0")
-            // Clear loading text
-            dropdownMenu.innerHTML = '';
-
-            console.log(notifications)
-
-            notifications.forEach(notif => {
-                const notifItem = document.createElement('a');
-                notifItem.href = notif.url ? notif.url : '#';
-                notifItem.classList.add('dropdown-item');
-                notifItem.innerHTML = `
-                    <i class="fas fa-envelope mr-2"></i> ${notif.title}
-                    <span class="float-right text-muted text-sm">${notif.created_at_vn}</span>
-                    <p class="dropdown-item-description">${notif.description}</p>
-                `;
-                dropdownMenu.appendChild(notifItem);
-            });
-        } else {
-            console.log("KHONG NOTI count = 0")
-            dropdownMenu.innerHTML = '<span class="dropdown-item">No notifications yet</span>';
-            document.querySelector('.navbar-badge').style.display = 'none';
+            // Cập nhật số lượng thông báo chưa đọc
+            const notificationCountElement = document.getElementById('notification_count');
             
+            // Nếu có thông báo mới
+            if (unread_notis_count > 0) {
+                notificationCountElement.textContent = unread_notis_count;  // Hiển thị số lượng thông báo
+                notificationCountElement.style.display = 'inline-block'; // Hiển thị badge
+            } else {
+                notificationCountElement.style.display = 'none';  // Ẩn nếu không có thông báo mới
+            }
+
+            // Cập nhật danh sách thông báo trong dropdown
+            const dropdownMenu = document.getElementById('notificationDropdown');
+            dropdownMenu.innerHTML = ''; // Clear "Loading..." text
+
+            if (notifications.length > 0) {
+                notifications.forEach(notif => {
+                    const notifItem = document.createElement('a');
+                    // Nếu đã đọc thì làm cho mờ hơn
+                    if (notif.is_read) {
+                        notifItem.classList.add('text-muted');  // 👈 thêm class mờ
+                    }
+                    notifItem.href = notif.url ? notif.url : '#';
+                    notifItem.classList.add('dropdown-item');
+                    notifItem.innerHTML = `
+                        <i class="fas fa-envelope mr-2"></i> ${notif.title}
+                        <span class="float-right text-muted text-sm">${notif.created_at_vn}</span>
+                        <p class="dropdown-item-description">${notif.description}</p>
+                    `;
+                   
+                    // Gắn sự kiện click để đánh dấu thông báo là đã đọc
+                    notifItem.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        
+                        fetch(`/pentest/mark_notification_as_read/${notif.id}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (notif.url) {
+                                window.location.href = notif.url;  // 👈 chuyển trang sau khi đánh dấu đã đọc
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error marking notification as read:', error);
+                            if (notif.url) {
+                                window.location.href = notif.url; 
+                            }
+                        });
+                    });
+                    
+
+                    dropdownMenu.appendChild(notifItem);
+                });
+            } else {
+                dropdownMenu.innerHTML = '<span class="dropdown-item">No notifications yet</span>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching notifications:', error);
+        });
+    }
+
+    // Lắng nghe sự kiện click vào chuông
+    const notificationBell = document.getElementById('notificationBell');
+    const dropdownMenu = document.getElementById('notificationDropdown');
+
+    // Toggle dropdown khi click vào chuông
+    notificationBell.addEventListener('click', function(event) {
+        event.preventDefault();  // Ngăn việc reload trang
+
+        // Mỗi lần click vào chuông sẽ làm mới thông báo
+        fetchNotifications();
+
+        // Kiểm tra xem dropdown có đang mở không
+        if (dropdownMenu.classList.contains('show')) {
+            dropdownMenu.classList.remove('show'); // Tắt dropdown nếu đã mở
+        } else {
+            dropdownMenu.classList.add('show'); // Mở dropdown nếu chưa mở
         }
-        
-    })
-    .catch(error => {
-        console.error('Error fetching notifications:', error);
     });
 
+    // Khi click ra ngoài chuông, ẩn dropdown
+    document.addEventListener('click', function(event) {
+        const isClickInsideBell = notificationBell.contains(event.target);
+        const isClickInsideDropdown = dropdownMenu.contains(event.target);
 
+        // Nếu click vào ngoài chuông và dropdown, ẩn dropdown
+        if (!isClickInsideBell && !isClickInsideDropdown) {
+            dropdownMenu.classList.remove('show');
+        }
+    });
+
+    // Lấy thông báo ngay từ đầu khi trang load
+    fetchNotifications();
 });
+
+// OK hiển thị unread_notis, click nhiều lần, 
+// document.addEventListener('DOMContentLoaded', function() {
+//     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+//     // Fetch thông tin thông báo ngay khi trang load
+//     function fetchNotifications() {
+//         fetch("/pentest/get_notifications/", {
+//             method: 'GET',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'X-CSRFToken': csrfToken
+//             }
+//         })
+//         .then(response => response.json())
+//         .then(data => {
+//             const { notifications, unread_notis_count } = data;
+
+//             // Cập nhật số lượng thông báo chưa đọc
+//             const notificationCountElement = document.getElementById('notification_count');
+            
+//             // Nếu có thông báo mới
+//             if (unread_notis_count > 0) {
+//                 notificationCountElement.textContent = unread_notis_count;  // Hiển thị số lượng thông báo
+//                 notificationCountElement.style.display = 'inline-block'; // Hiển thị badge
+//             } else {
+//                 notificationCountElement.style.display = 'none';  // Ẩn nếu không có thông báo mới
+//             }
+
+//             // Cập nhật danh sách thông báo trong dropdown
+//             const dropdownMenu = document.getElementById('notificationDropdown');
+//             dropdownMenu.innerHTML = ''; // Clear "Loading..." text
+
+//             if (notifications.length > 0) {
+//                 notifications.forEach(notif => {
+//                     const notifItem = document.createElement('a');
+//                     notifItem.href = notif.url ? notif.url : '#';
+//                     notifItem.classList.add('dropdown-item');
+//                     notifItem.innerHTML = `
+//                         <i class="fas fa-envelope mr-2"></i> ${notif.title}
+//                         <span class="float-right text-muted text-sm">${notif.created_at_vn}</span>
+//                         <p class="dropdown-item-description">${notif.description}</p>
+//                     `;
+//                     dropdownMenu.appendChild(notifItem);
+//                 });
+//             } else {
+//                 dropdownMenu.innerHTML = '<span class="dropdown-item">No notifications yet</span>';
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error fetching notifications:', error);
+//         });
+//     }
+
+//     // Lắng nghe sự kiện click vào chuông
+//     const notificationBell = document.getElementById('notificationBell');
+//     const dropdownMenu = document.getElementById('notificationDropdown');
+
+//     // Toggle dropdown khi click vào chuông
+//     notificationBell.addEventListener('click', function(event) {
+//         event.preventDefault();  // Ngăn việc reload trang
+
+//         // Mỗi lần click vào chuông sẽ làm mới thông báo
+//         fetchNotifications();
+
+//         // Kiểm tra xem dropdown có đang mở không
+//         if (dropdownMenu.classList.contains('show')) {
+//             dropdownMenu.classList.remove('show'); // Tắt dropdown nếu đã mở
+//         } else {
+//             dropdownMenu.classList.add('show'); // Mở dropdown nếu chưa mở
+//         }
+//     });
+
+//     // Khi click ra ngoài chuông, ẩn dropdown
+//     document.addEventListener('click', function(event) {
+//         const isClickInsideBell = notificationBell.contains(event.target);
+//         const isClickInsideDropdown = dropdownMenu.contains(event.target);
+
+//         // Nếu click vào ngoài chuông và dropdown, ẩn dropdown
+//         if (!isClickInsideBell && !isClickInsideDropdown) {
+//             dropdownMenu.classList.remove('show');
+//         }
+//     });
+
+//     // Lấy thông báo ngay từ đầu khi trang load
+//     fetchNotifications();
+// });
+
+// tạm oK
+//     document.getElementById('notificationBell').addEventListener('click', function (e) {
+//     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+//     fetch("/pentest/get_notifications/", {
+
+//         method: 'GET',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'X-CSRFToken': csrfToken
+//         }
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         const { notifications, notis_count } = data;
+//         const dropdownMenu = document.getElementById('notificationDropdown');
+//         const notificationCountElement = document.getElementById('notification_count');
+
+//         // Nếu có thông báo mới
+//         if (notis_count > 0) {
+//             notificationCountElement.textContent = notis_count;  // Hiển thị số lượng thông báo
+//             notificationCountElement.style.display = 'inline-block'; // Hiển thị badge
+//         } else {
+//             notificationCountElement.style.display = 'none';  // Ẩn nếu không có thông báo mới
+//         }
+
+
+//         // Cập nhật số lượng thông báo chưa đọc
+//         if (notis_count > 0) {
+//             console.log("CÓ NOTI count > 0")
+//             // Clear loading text
+//             dropdownMenu.innerHTML = '';
+            
+//             // if (notificationCountElement) {
+//             //     notificationCountElement.textContent = notis_count;
+//             //     notificationCountElement.style.display = 'inline-block'; // Hiển thị số lượng thông báo
+//             // } else {
+//             //     console.error("Notification count element not found.");
+//             // }
+            
+
+//             notifications.forEach(notif => {
+//                 const notifItem = document.createElement('a');
+//                 notifItem.href = notif.url ? notif.url : '#';
+//                 notifItem.classList.add('dropdown-item');
+//                 notifItem.innerHTML = `
+//                     <i class="fas fa-envelope mr-2"></i> ${notif.title}
+//                     <span class="float-right text-muted text-sm">${notif.created_at_vn}</span>
+//                     <p class="dropdown-item-description">${notif.description}</p>
+//                 `;
+//                 dropdownMenu.appendChild(notifItem);
+//             });
+//         } else {
+//             console.log("KHONG NOTI count = 0")
+//             dropdownMenu.innerHTML = '<span class="dropdown-item">No notifications yet</span>';
+//             document.querySelector('.navbar-badge').style.display = 'none';
+            
+//         }
+        
+//     })
+//     .catch(error => {
+//         console.error('Error fetching notifications:', error);
+//     });
+
+
+// });
 </script>
 

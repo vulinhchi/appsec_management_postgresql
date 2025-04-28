@@ -1,0 +1,90 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <!-- <a class="navbar-brand" href="/">Your Site</a> -->
+    
+    <!-- Đặt phần hiển thị tên người dùng và logout ở góc phải -->
+    <div class="ml-auto">
+      {% if user.is_authenticated %}
+        <span class="navbar-text mr-3">Hello, {{ user.username }}!</span> <!-- Hiển thị tên người dùng -->
+        <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">Logout</a> <!-- Nút logout -->
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Login</a> <!-- Nút login nếu chưa đăng nhập -->
+      {% endif %}
+    </div>
+        {% csrf_token %}
+        <a class="nav-link" href="#" id="notificationBell" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+            <i class="far fa-bell"></i>
+            {% if notis_count > 0 %}
+                <span class="badge badge-danger navbar-badge">{{ notis_count }}</span>
+            {% endif %}
+            
+        </a>
+
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="notificationDropdown">
+            <span class="dropdown-item">Loading...</span>
+        </div>
+    
+  </div>
+</nav>
+ 
+<style type="text/css">
+    #notificationDropdown {
+    max-height: 300px;  /* Chiều cao tối đa */
+    overflow-y: auto;   /* Cho phép cuộn dọc */
+    overflow-x: hidden; /* Không cho phép cuộn ngang */
+}
+
+</style>
+
+<script>
+    document.getElementById('notificationBell').addEventListener('click', function (e) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch("/pentest/get_notifications/", {
+
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const { notifications, notis_count } = data;
+        const dropdownMenu = document.getElementById('notificationDropdown');
+        // Cập nhật số lượng thông báo chưa đọc
+        if (notis_count > 0) {
+            console.log("CÓ NOTI count > 0")
+            // Clear loading text
+            dropdownMenu.innerHTML = '';
+
+            console.log(notifications)
+
+            notifications.forEach(notif => {
+                const notifItem = document.createElement('a');
+                notifItem.href = notif.url ? notif.url : '#';
+                notifItem.classList.add('dropdown-item');
+                notifItem.innerHTML = `
+                    <i class="fas fa-envelope mr-2"></i> ${notif.title}
+                    <span class="float-right text-muted text-sm">${notif.created_at_vn}</span>
+                    <p class="dropdown-item-description">${notif.description}</p>
+                `;
+                dropdownMenu.appendChild(notifItem);
+            });
+        } else {
+            console.log("KHONG NOTI count = 0")
+            dropdownMenu.innerHTML = '<span class="dropdown-item">No notifications yet</span>';
+            document.querySelector('.navbar-badge').style.display = 'none';
+            
+        }
+        
+    })
+    .catch(error => {
+        console.error('Error fetching notifications:', error);
+    });
+
+
+});
+</script>
+
