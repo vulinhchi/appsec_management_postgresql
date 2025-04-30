@@ -132,7 +132,30 @@
                     </ul>
                 </li>
 
-            
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bug"></i>
+                        <p>
+                            Config template
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'pentest_task:list_templates' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List Report pentest templates</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'pentest_task:upload_template' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Add new report template</p>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </li>
                 <!-- Ticket -->
                 <li class="nav-item">
                     <a href="{% url 'pentest_task:list_pentest_tasks' %}" class="nav-link">
