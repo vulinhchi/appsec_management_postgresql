@@ -574,8 +574,8 @@ def exception_detail(request, appsec_task_id, pk):
 
 
 #dashboard hiển thị:
-def get_vuln_stats():
-    current_year = 2025
+def get_vuln_stats(selected_year):
+    current_year = selected_year
     vuln_stats = {
         'labels': [],
         'affected_apps': [],
@@ -591,34 +591,31 @@ def get_vuln_stats():
 
     for month in range(1, 13):
         vuln_stats['labels'].append(f'{month}')
-
-        # Tạo ngày đầu và cuối tháng
         start_date = date(current_year, month, 1)
         last_day = calendar.monthrange(current_year, month)[1]
         end_date = date(current_year, month, last_day)
 
         base_filter = {
             'notify_date__gte': start_date,
-            'notify_date__lte': end_date
+            'notify_date__lte': end_date,
+            'notify_date__isnull': False
         }
 
-        # ✅ Đếm unique pentest_task_id
         tasks = Vulnerability.objects.filter(**base_filter).only('pentest_task_id')
         unique_task_ids = set(str(v.pentest_task_id) for v in tasks if v.pentest_task_id)
         vuln_stats['affected_apps'].append(len(unique_task_ids))
 
-        # Đếm theo risk + status
         def count_vulns(risk, status):
             return Vulnerability.objects.filter(
                 **base_filter,
-                risk_rating=risk,
-                status=status
+                risk_rating__iexact=risk,
+                status__iexact=status
             ).count()
-        # Tổng hợp ALL + CLOSED
+
         total_all = (
             count_vulns('Critical', 'Closed') +
             count_vulns('High', 'Closed') +
-            count_vulns('Medium', 'Closed')+
+            count_vulns('Medium', 'Closed') +
             count_vulns('Critical', 'Open') +
             count_vulns('High', 'Open') +
             count_vulns('Medium', 'Open')
@@ -641,7 +638,8 @@ def get_vuln_stats():
     return vuln_stats
 
 
-def get_affected_url_stats():
+
+def get_affected_url_stats(selected_year):
     affected_urls = AffectedURL.objects.select_related('vulnerability').all()
 
     monthly_totals = defaultdict(int)
@@ -651,10 +649,13 @@ def get_affected_url_stats():
         vuln = au.vulnerability
         if not vuln or not vuln.notify_date:
             continue
+        if vuln.notify_date.year != selected_year:
+            continue
+
         month = vuln.notify_date.month
         monthly_totals[month] += 1
 
-        if vuln.status.lower() == 'closed':
+        if vuln.status and vuln.status.lower() == 'closed':
             monthly_closed[month] += 1
 
     affected_labels = list(range(1, 13))
@@ -671,9 +672,12 @@ def get_affected_url_stats():
         "affected_closed": affected_closed,
     }
 
-def get_exception_stats():
-  
-    exceptions = SecurityException.objects.filter(exception_create__isnull=False)
+
+def get_exception_stats(selected_year):
+    exceptions = SecurityException.objects.filter(
+        exception_create__isnull=False,
+        exception_create__year=selected_year
+    )
 
     monthly_total = defaultdict(int)
     monthly_closed = defaultdict(int)
@@ -699,9 +703,7 @@ def get_exception_stats():
     }
 
     
-def task_timeline():
-    current_year = date.today().year
-
+def task_timeline(current_year):
     pentest_all = PentestTask.objects.filter(start_date__year=current_year)
     retest_all = PentestTask.objects.filter(start_retest__year=current_year)
     verify_all = VerifyTask.objects.filter(start_date__year=current_year)
@@ -736,7 +738,16 @@ def task_timeline():
 @login_required
 @require_groups(['Pentester', 'Leader', 'Manager'])
 def dashboard(request):
-    current_year = datetime.now().year
+    # current_year = datetime.now().year
+    year_param = request.GET.get("year")  # Lấy giá trị từ URL: ?year=2024
+    try:
+        current_year = int(year_param)
+    except (TypeError, ValueError):
+        current_year = datetime.now().year
+
+    # Tạo danh sách năm từ 2020 đến hiện tại (có thể tùy chỉnh theo dữ liệu bạn có)
+    years = list(range(2023, datetime.now().year + 1))
+
 
     pentest_counts = defaultdict(int)
     verify_counts = defaultdict(int)
@@ -765,10 +776,8 @@ def dashboard(request):
         for month in months
     ]
     # lấy các info về Critical, High, Medium với status là Open và Closed
-    vuln_stats = get_vuln_stats()
-    affected_url_stats = get_affected_url_stats()
+    vuln_stats = get_vuln_stats(current_year)
     
-
     # lấy info tổng lỗi Critical+High+Meidum với status là Open và Closed
     # combined_vuln_stats = list(zip(vuln_stats['labels'], vuln_stats['total_all'], vuln_stats['total_closed']))
     combined_vuln_stats = list(zip(
@@ -776,23 +785,25 @@ def dashboard(request):
         vuln_stats['total_all'],
         vuln_stats['total_closed']
     ))
+
+    affected_url_stats = get_affected_url_stats(current_year)
     affected_stats_combined = list(zip(
         affected_url_stats["affected_labels"],
         affected_url_stats["affected_total"],
         affected_url_stats["affected_closed"]
     ))
-    affected_url_stats = get_affected_url_stats()
-
-    exception_stats = get_exception_stats()
-
+    
+    exception_stats = get_exception_stats(current_year)
     exception_stats_combined = list(zip(
         exception_stats["exception_labels"],
         exception_stats["exception_total"],
         exception_stats["exception_closed"]
     ))
-    timeline_stats = task_timeline()
+    timeline_stats = task_timeline(current_year)
     
     context = {
+        "years": years,
+        "selected_year": current_year,
         "task_stats": task_stats,
         "pentest_labels": months,
         "pentest_data": [item["pentest"] for item in task_stats],
@@ -816,7 +827,7 @@ def dashboard(request):
 
         "exception_stats_combined": exception_stats_combined,
 
-        # Dành cho chart (nếu bạn dùng sau)
+        # Dành cho chart 
         "exception_labels_json": exception_stats["exception_labels_json"],
         "exception_total_json": exception_stats["exception_total_json"],
         "exception_closed_json": exception_stats["exception_closed_json"],

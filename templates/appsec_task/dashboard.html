@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block content %}
+
+
 <h4 class="mt-4">Monthly Task Timeline</h4>
 
 <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
@@ -21,6 +23,14 @@
 <h2>Verify Task Calendar</h2>
 <div class="calendar-grid border" id="calendar-verify" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ccc;"></div>
 
+<form method="get" class="form-inline mb-3">
+  <label for="year-select">Select Year:</label>
+  <select name="year" id="year-select" class="form-control mx-2" onchange="this.form.submit()">
+    {% for year in years %}
+      <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+    {% endfor %}
+  </select>
+</form>
 
 <div class="container-fluid">
   
@@ -89,7 +99,7 @@
     
 </div>
 <div class="mt-5">
-  <h5>📊 Thống kê lỗ hổng theo tháng theo Risk Level</h5>
+  <h5>📊 Vulnerability by Risk level in month</h5>
   <canvas id="vulnChart"></canvas>
 </div>
 
@@ -419,7 +429,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         title: {
           display: true,
-          text: 'Thống kê lỗi bảo mật theo tháng'
+          text: 'Vulnerabilitiest in month chart'
         }
       }
     }
@@ -480,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           title: {
             display: true,
-            text: 'Vulnerabilities in month Chart'
+            text: 'Vulnerabilities in month chart'
           }
         }
       }
@@ -542,7 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           title: {
             display: true,
-            text: 'Affected API in month Chart'
+            text: 'Affected API in month chart'
           }
         }
       }
@@ -592,7 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
       plugins: {
         title: {
           display: true,
-          text: 'Thống kê Exception theo tháng'
+          text: 'Exception in month chart'
         }
       }
     }
