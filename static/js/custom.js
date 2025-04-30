@@ -112,20 +112,23 @@ $(document).ready(function() {
         var endDateInput = $("#end-date-to").val();
         var startDate = parseDate(startDateInput);
         var endDate = parseDate(endDateInput);
-        
-        
-        $("#taskTable tbody tr").each(function() {
+
+
+        // ===== Filter AppSecTask + PentestTask + VerifyTask =====
+        $("#taskTable tbody tr").each(function () {
             var row = $(this);
             var isValid = true;
+            var taskStartDateText = row.find("td").filter(function(i) {
+                return $("#taskTable thead th").eq(i).text().trim().startsWith("Start Date");
+            }).text().trim();
 
-            // 🔹 Kiểm tra cột Date (cột 8 & 9 trong bảng)
-            var taskStartDateText = row.find("td").eq(8).text().trim();
-            var taskEndDateText = row.find("td").eq(9).text().trim();
+            var taskEndDateText = row.find("td").filter(function(i) {
+                return $("#taskTable thead th").eq(i).text().trim().startsWith("End Date");
+            }).text().trim();
+
             var taskStartDate = parseDate(taskStartDateText);
             var taskEndDate = parseDate(taskEndDateText);
-            // 🔹 Debug log
-            console.log("Task:", taskStartDate, "-", taskEndDate);
-
+            
             if (startDate && taskStartDate && taskStartDate < startDate) {
                 isValid = false;
             }
@@ -133,12 +136,10 @@ $(document).ready(function() {
                 isValid = false;
             }
 
-            // 🔹 Kiểm tra các input filter khác (Text Search)
-            $(".filter-input").each(function() {
+            $(".filter-input").each(function () {
                 var columnIndex = $(this).data("column");
                 var filterValue = $(this).val().toLowerCase().trim();
                 var cellText = row.find(`td:nth-child(${columnIndex + 1})`).text().toLowerCase().trim();
-
                 if (filterValue && !cellText.includes(filterValue)) {
                     isValid = false;
                 }
@@ -146,7 +147,10 @@ $(document).ready(function() {
 
             row.toggle(isValid);
         });
+
+        
     }
+
 
     // ✅ Chạy filter khi nhập input hoặc chọn ngày
     $(".filter-input, .filter-date").on("input change", filterTable);
