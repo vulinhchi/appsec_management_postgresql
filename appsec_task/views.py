@@ -22,12 +22,6 @@ from django.contrib.auth.decorators import login_required
 from task_manager.decorators import require_groups
 
 
-
-# from bson.decimal128 import Decimal128
-# from django.db.models.functions import ExtractMonth, ExtractYear
-# from django.db.models import Count
-
-
 def safe_str(value):
     return "" if pd.isna(value) or value is None else str(value).strip()
 
@@ -103,7 +97,7 @@ def list_appsec_tasks(request):
     for task in tasks:
         sync_status(task.id)
     return render(request, 'appsec_task/list_appsec_tasks.html', {'tasks': tasks})
-   
+  
 
 @login_required
 @require_groups(['Pentester', 'Leader'])
@@ -115,95 +109,237 @@ def import_appsec_tasks(request):
             xls = pd.ExcelFile(file)
 
             # Sheet 1: VERIFY TASK
-            verify_df = pd.read_excel(xls, sheet_name="Verify Request 2025 (All)")
+            verify_df = pd.read_excel(xls, sheet_name="Verify Request")
             for _, row in verify_df.iterrows():
-                appsec_name = safe_str(row.get("name"))
-                if not appsec_name:
-                    print("⚠️ Bỏ qua dòng vì không có appsec_name:", row.to_dict())
-                    continue
+                try:
+                    appsec_name = safe_str(row.get("Task"))
+                    if not appsec_name:
+                        print("⚠️ Bỏ qua dòng vì không có appsec_name:", row.to_dict())
+                        continue
 
-                # Nếu AppSecTask đã tồn tại thì bỏ qua tạo VerifyTask
-                if AppSecTask.objects.filter(name=appsec_name).exists():
-                    print(f"⚠️ AppSecTask '{appsec_name}' đã tồn tại, bỏ qua tạo VerifyTask và PentestTask.")
-                    continue
+                    appsec_task, created = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
+                        'description': safe_str(row.get("Description")),
+                        'owner': safe_str(row.get("Owner/Requester")),
+                        'environment_prod': safe_str(row.get("Domain PROD")),
+                        'link_sharepoint': safe_str(row.get("Sharepoint Link")),
+                        'link_ticket': safe_str(row.get("Ticket")),
+                        'mail_loop': safe_str(row.get("Mail loop")),
+                        'chat_group': safe_str(row.get("Chat group")),
+                        'is_internet': safe_str(row.get("Public Internet/Internal?")),
+                        'is_newapp': safe_str(row.get("NewApp/OldApp?")),
+                        'checklist_type': safe_str(row.get("Checklist Type")),
+                        'sharecost': safe_str(row.get("Share Cost?")),
+                    })
 
-                verify_names.add(appsec_name)  
-                appsec_task, _ = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
-                    'name':safe_str(row.get("name")),
-                    'description':safe_str(row.get("description")),
-                    'owner': safe_str(row.get("owner")),
-                    'environment_prod': safe_str(row.get("environment_prod")),
-                    'link_sharepoint': safe_str(row.get("link_sharepoint")),
-                    'link_ticket': safe_str(row.get("link_ticket")),
-                    'mail_loop': safe_str(row.get("mail_loop")),
-                    'chat_group': safe_str(row.get("chat_group")),
-                    'is_internet': safe_str(row.get("is_internet")),
-                    'is_newapp': safe_str(row.get("is_newapp")),
-                    'checklist_type': safe_str(row.get("checklist_type")),
-                    'sharecost': safe_str(row.get("sharecost")),
-                })
-              
-                VerifyTask.objects.create(
-                    appsec_task=appsec_task, # gắn appsec_task object
-                    name=appsec_name,
-                    description=safe_str(row.get("description")),
-                    
-                    PIC_ISM=safe_str(row.get("PIC_ISM")),
-                    status=safe_str(row.get("status")),
-                    start_date=safe_date(row.get("start_date")),
-                    end_date=safe_date(row.get("end_date")),
-                )
+                    if not created:
+                        # Cập nhật AppSecTask nếu đã tồn tại
+                        appsec_task.description = safe_str(row.get("Description"))
+                        appsec_task.owner = safe_str(row.get("Owner/Requester"))
+                        appsec_task.environment_prod = safe_str(row.get("Domain PROD"))
+                        appsec_task.link_sharepoint = safe_str(row.get("Sharepoint Link"))
+                        appsec_task.link_ticket = safe_str(row.get("Ticket"))
+                        appsec_task.mail_loop = safe_str(row.get("Mail loop"))
+                        appsec_task.chat_group = safe_str(row.get("Chat group"))
+                        appsec_task.is_internet = safe_str(row.get("Public Internet/Internal?"))
+                        appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
+                        appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
+                        appsec_task.sharecost = safe_str(row.get("Share Cost?"))
+                        appsec_task.save()
+                        print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
+
+                    verify_names.add(appsec_name)
+
+                    verify_task = VerifyTask.objects.filter(appsec_task=appsec_task).first()
+                    if verify_task:
+                        verify_task.name = appsec_name
+                        verify_task.description = safe_str(row.get("Description"))
+                        verify_task.PIC_ISM = safe_str(row.get("PIC ISM"))
+                        verify_task.status = safe_str(row.get("Status"))
+                        verify_task.start_date = safe_date(row.get("Start date"))
+                        verify_task.end_date = safe_date(row.get("Finish date"))
+                        verify_task.save()
+                        print(f"🔁 Đã cập nhật VerifyTask cho '{appsec_name}'")
+                        messages.warning(request, f"❌ Cập nhật VerifyTask: {appsec_name}, row: {row.to_dict()}")
+                    else:
+                        VerifyTask.objects.create(
+                            appsec_task=appsec_task,
+                            name=appsec_name,
+                            description=safe_str(row.get("Description")),
+                            PIC_ISM=safe_str(row.get("PIC ISM")),
+                            status=safe_str(row.get("Status")),
+                            start_date=safe_date(row.get("Start date")),
+                            end_date=safe_date(row.get("Finish date")),
+                        )
+                        print(f"✅ Tạo VerifyTask cho '{appsec_name}'")
+
+                except Exception as e:
+                    messages.error(request, f"❌ Lỗi tạo/cập nhật VerifyTask: {e}, row: {row.to_dict()}")
+                    traceback.print_exc()
 
             # Sheet 2: PENTEST TASK
-            pentest_df = pd.read_excel(xls, sheet_name="Pentest Request 2025")
+            pentest_df = pd.read_excel(xls, sheet_name="Pentest Request")
             for _, row in pentest_df.iterrows():
-                appsec_name = safe_str(row.get("name"))
-                if not appsec_name or appsec_name not in verify_names:
-                    continue  # ✅ bỏ qua nếu tên không có trong verify sheet
-
                 try:
-                    # Bỏ qua nếu AppSecTask đã tồn tại (đã bị skip ở bước trên)
+                    appsec_name = safe_str(row.get("Task"))
+                    if not appsec_name:
+                        continue
+
+                    appsec_task = AppSecTask.objects.filter(name=appsec_name).first()
+                    if not appsec_task:
+                        print(f"⚠️ AppSecTask '{appsec_name}' không tồn tại, bỏ qua PentestTask.")
+                        continue
+
+                    pentest_task = PentestTask.objects.filter(appsec_task=appsec_task).first()
+                    if pentest_task:
+                        pentest_task.name = appsec_name
+                        pentest_task.description = safe_str(row.get("Description"))
+                        pentest_task.environment_test = safe_str(row.get("Domain Test"))
+                        pentest_task.status = safe_str(row.get("Status"))
+                        pentest_task.ref = safe_str(row.get("REF"))
+                        pentest_task.number_of_apis = safe_int(row.get("Number of API/Scope"))
+                        pentest_task.effort_working_days = safe_int(row.get("Pentest + Retest Effort (md)/person"))
+                        pentest_task.PIC_ISM = safe_str(row.get("PIC ISM"))
+                        pentest_task.start_date = safe_date(row.get("Start pentest date"))
+                        pentest_task.end_date = safe_date(row.get("Finish pentest date"))
+                        pentest_task.start_retest = safe_date(row.get("Start retest date"))
+                        pentest_task.end_retest = safe_date(row.get("Finish retest date"))
+                        pentest_task.component = safe_str(row.get("Component"))
+                        pentest_task.save()
+                        print(f"🔁 Đã cập nhật PentestTask cho '{appsec_name}'")
+                        messages.warning(request, f"❌ Cập nhật PentestTask: {appsec_name}, row: {row.to_dict()}")
+                    else:
+                        PentestTask.objects.create(
+                            appsec_task=appsec_task,
+                            name=appsec_name,
+                            description=safe_str(row.get("Description")),
+                            environment_test=safe_str(row.get("Domain Test")),
+                            status=safe_str(row.get("Status")),
+                            ref=safe_str(row.get("REF")),
+                            number_of_apis=safe_int(row.get("Number of API/Scope")),
+                            effort_working_days=safe_int(row.get("Pentest + Retest Effort (md)/person")),
+                            PIC_ISM=safe_str(row.get("PIC ISM")),
+                            start_date=safe_date(row.get("Start pentest date")),
+                            end_date=safe_date(row.get("Finish pentest date")),
+                            start_retest=safe_date(row.get("Start retest date")),
+                            end_retest=safe_date(row.get("Finish retest date")),
+                            component=safe_str(row.get("Component")),
+                        )
+                        print(f"✅ Tạo PentestTask cho '{appsec_name}'")
+                except Exception as e:
+                    messages.error(request, f"❌ Lỗi tạo/cập nhật PentestTask: {e}, row: {row.to_dict()}")
+                    traceback.print_exc()
+
+            messages.success(request, "✅ Tasks imported and updated successfully!")
+
+        except Exception as e:
+            messages.error(request, f"❌ Lỗi đọc file hoặc xử lý tổng quát: {e}")
+            traceback.print_exc()
+
+        return redirect("appsec_task:list_appsec_tasks")
+
+
+def import_appsec_tasks1(request):
+    if request.method == "POST" and request.FILES.get("task_file"):
+        file = request.FILES["task_file"]
+        verify_names = set()
+        try:
+            xls = pd.ExcelFile(file)
+
+            # Sheet 1: VERIFY TASK
+            verify_df = pd.read_excel(xls, sheet_name="Verify Request")
+            for _, row in verify_df.iterrows():
+                try:
+                    appsec_name = safe_str(row.get("Task"))
+                    if not appsec_name:
+                        print("⚠️ Bỏ qua dòng vì không có appsec_name:", row.to_dict())
+                        continue
+
+                    # Lấy hoặc tạo AppSecTask
+                    appsec_task, created = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
+                        'description': safe_str(row.get("Description")),
+                        'owner': safe_str(row.get("Owner/Requester")),
+                        'environment_prod': safe_str(row.get("Domain PROD")),
+                        'link_sharepoint': safe_str(row.get("Sharepoint Link")),
+                        'link_ticket': safe_str(row.get("Ticket")),
+                        'mail_loop': safe_str(row.get("Mail loop")),
+                        'chat_group': safe_str(row.get("Chat group")),
+                        'is_internet': safe_str(row.get("Public Internet/Internal?")),
+                        'is_newapp': safe_str(row.get("NewApp/OldApp?")),
+                        'checklist_type': safe_str(row.get("Checklist Type")),
+                        'sharecost': safe_str(row.get("Share Cost?")),
+                    })
+
+                    if created:
+                        print(f"✅ AppSecTask '{appsec_name}' được tạo mới.")
+                    else:
+                        print(f"ℹ️ AppSecTask '{appsec_name}' đã tồn tại.")
+
+                    verify_names.add(appsec_name)
+
+                    if not VerifyTask.objects.filter(appsec_task=appsec_task).exists():
+                        VerifyTask.objects.create(
+                            appsec_task=appsec_task,
+                            name=appsec_name,
+                            description=safe_str(row.get("Description")),
+                            PIC_ISM=safe_str(row.get("PIC ISM")),
+                            status=safe_str(row.get("Status")),
+                            start_date=safe_date(row.get("Start date")),
+                            end_date=safe_date(row.get("Finish date")),
+                        )
+                        print(f"✅ Tạo VerifyTask cho '{appsec_name}'")
+                    else:
+                        print(f"ℹ️ VerifyTask cho '{appsec_name}' đã tồn tại.")
+
+                except Exception as e:
+                    messages.error(request, f"❌ Lỗi tạo VerifyTask: {e}, row: {row.to_dict()}")
+                    traceback.print_exc()
+
+            # Sheet 2: PENTEST TASK
+            pentest_df = pd.read_excel(xls, sheet_name="Pentest Request")
+            for _, row in pentest_df.iterrows():
+                try:
+                    appsec_name = safe_str(row.get("Task"))
+                    if not appsec_name:
+                        continue
+
                     if not AppSecTask.objects.filter(name=appsec_name).exists():
-                        print(f"⚠️ AppSecTask '{appsec_name}' không được tạo từ verify sheet, bỏ qua PentestTask.")
+                        print(f"⚠️ AppSecTask '{appsec_name}' không tồn tại, bỏ qua PentestTask.")
                         continue
 
                     appsec_task = AppSecTask.objects.get(name=appsec_name)
-                except AppSecTask.DoesNotExist:
-                    print(f"❌ Không tìm thấy AppSecTask tên: {appsec_name}")
-                    continue
 
-                if not appsec_name:
-                    continue
+                    if not PentestTask.objects.filter(appsec_task=appsec_task).exists():
+                        PentestTask.objects.create(
+                            appsec_task=appsec_task,
+                            name=appsec_name,
+                            description=safe_str(row.get("Description")),
+                            environment_test=safe_str(row.get("Domain Test")),
+                            status=safe_str(row.get("Status")),
+                            ref=safe_str(row.get("REF")),
+                            number_of_apis=safe_int(row.get("Number of API/Scope")),
+                            effort_working_days=safe_int(row.get("Pentest + Retest Effort (md)/person")),
+                            PIC_ISM=safe_str(row.get("PIC ISM")),
+                            start_date=safe_date(row.get("Start pentest date")),
+                            end_date=safe_date(row.get("Finish pentest date")),
+                            start_retest=safe_date(row.get("Start retest date")),
+                            end_retest=safe_date(row.get("Finish retest date")),
+                            component=safe_str(row.get("Component")),
+                        )
+                        print(f"✅ Tạo PentestTask cho '{appsec_name}'")
+                    else:
+                        print(f"ℹ️ PentestTask cho '{appsec_name}' đã tồn tại.")
+                except Exception as e:
+                    messages.error(request, f"❌ Lỗi tạo PentestTask: {e}, row: {row.to_dict()}")
+                    traceback.print_exc()
 
-               
-                PentestTask.objects.create(
-                    appsec_task=appsec_task, # gắn appsec_task object
-                    name=appsec_name,
-                    description=safe_str(row.get("description")),
-                    
-                    environment_test=safe_str(row.get("environment_test")),
-                    status=safe_str(row.get("status")),
-                    ref=safe_str(row.get("ref")),
+            messages.success(request, "✅ Tasks imported successfully from both sheets!")
 
-                    number_of_apis=safe_int(row.get("number_of_apis")),
-                    effort_working_days=safe_int(row.get("effort_working_days")),
-                    #scope chưa có info, nên để trống
-                    PIC_ISM=safe_str(row.get("PIC_ISM")),
-                    start_date=safe_date(row.get("start_date")),
-                    end_date=safe_date(row.get("end_date")),
-                    start_retest=safe_date(row.get("start_retest")),
-                    end_retest=safe_date(row.get("end_retest")),
-                    component=safe_str(row.get("component")),
-                    
-                    
-                )
-
-            messages.success(request, "Tasks imported successfully from both sheets!")
         except Exception as e:
-            messages.error(request, f"❌ Lỗi tạo VerifyTask: {e}, row: {row.to_dict()}")
+            messages.error(request, f"❌ Lỗi đọc file hoặc xử lý tổng quát: {e}")
             traceback.print_exc()
-            # messages.error(request, f"Error importing file: {e}")
+
         return redirect("appsec_task:list_appsec_tasks")
+
 
 
 @login_required
@@ -220,22 +356,23 @@ def export_appsec_tasks(request):
     verify_data = []
     for task in verify_tasks:
         verify_data.append({
-            "name": task.appsec_task.name if task.appsec_task else "",
-            "description": task.description,
-            "owner": task.appsec_task.owner if task.appsec_task else "",
-            "environment_prod": task.appsec_task.environment_prod if task.appsec_task else "",
-            "PIC_ISM": task.PIC_ISM,
-            "status": task.status,
-            "start_date": task.start_date,
-            "end_date": task.end_date,
+            "Task": task.appsec_task.name if task.appsec_task else "",
+            "Description": task.description,
+            "Owner/Requester": task.appsec_task.owner if task.appsec_task else "",
+            "Domain PROD": task.appsec_task.environment_prod if task.appsec_task else "",
+            "PIC ISM": task.PIC_ISM,
+            "Status": task.status,
+            "Start date": task.start_date,
+            "Finish date": task.end_date,
 
-            "link_sharepoint": task.appsec_task.link_sharepoint if task.appsec_task else "",
-            "link_ticket": task.appsec_task.link_ticket if task.appsec_task else "",
-            "mail_loop": task.appsec_task.mail_loop if task.appsec_task else "",
-            "chat_group": task.appsec_task.chat_group if task.appsec_task else "",
-            "is_internet": task.appsec_task.is_internet if task.appsec_task else "",
-            "is_newapp": task.appsec_task.is_newapp if task.appsec_task else "",
-            "checklist_type": task.appsec_task.checklist_type if task.appsec_task else "",
+            "Sharepoint Link": task.appsec_task.link_sharepoint if task.appsec_task else "",
+            "Ticket": task.appsec_task.link_ticket if task.appsec_task else "",
+            "Mail loop": task.appsec_task.mail_loop if task.appsec_task else "",
+            "Chat group": task.appsec_task.chat_group if task.appsec_task else "",
+            "Public Internet/Internal?": task.appsec_task.is_internet if task.appsec_task else "",
+            "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
+            "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
+            "Share Cost?": task.appsec_task.sharecost,
             
         })
     verify_df = pd.DataFrame(verify_data)
@@ -244,50 +381,50 @@ def export_appsec_tasks(request):
     pentest_data = []
     for task in pentest_tasks:
         pentest_data.append({
-            "name": task.appsec_task.name if task.appsec_task else "",
-            "description": task.description,
-            "owner": task.appsec_task.owner if task.appsec_task else "",
-            "environment_prod": task.appsec_task.environment_prod if task.appsec_task else "",
-            "environment_test": task.environment_test,
+            "Task": task.appsec_task.name if task.appsec_task else "",
+            "Description": task.description,
+            "Owner/Requester": task.appsec_task.owner if task.appsec_task else "",
+            "Domain PROD": task.appsec_task.environment_prod if task.appsec_task else "",
+            "Domain Test": task.environment_test,
             
-            "PIC_ISM": task.PIC_ISM,
-            "status": task.status,
-            "start_date": task.start_date,
-            "end_date": task.end_date,
-            "start_retest": task.start_retest,
-            "end_retest": task.end_retest,
-            "ref": task.ref,
-            "number_of_apis": task.number_of_apis,
-            "effort_working_days": task.effort_working_days,
+            "PIC ISM": task.PIC_ISM,
+            "Status": task.status,
+            "Start pentest date": task.start_date,
+            "Finish pentest date": task.end_date,
+            "Start retest date": task.start_retest,
+            "Finish retest date": task.end_retest,
+            "REF": task.ref,
+            "Number of API/Scope": task.number_of_apis,
+            "Pentest + Retest Effort (md)/person": task.effort_working_days,
             
-            "link_sharepoint": task.appsec_task.link_sharepoint if task.appsec_task else "",
-            "link_ticket": task.appsec_task.link_ticket if task.appsec_task else "",
-            "mail_loop": task.appsec_task.mail_loop if task.appsec_task else "",
-            "chat_group": task.appsec_task.chat_group if task.appsec_task else "",
-            "is_internet": task.appsec_task.is_internet if task.appsec_task else "",
-            "is_newapp": task.appsec_task.is_newapp if task.appsec_task else "",
-            "checklist_type": task.appsec_task.checklist_type if task.appsec_task else "",
-            "component": task.component,
-            "sharecost": task.appsec_task.sharecost,
+            "Sharepoint Link": task.appsec_task.link_sharepoint if task.appsec_task else "",
+            "Ticket": task.appsec_task.link_ticket if task.appsec_task else "",
+            "Mail loop": task.appsec_task.mail_loop if task.appsec_task else "",
+            "Chat group": task.appsec_task.chat_group if task.appsec_task else "",
+            "Public Internet/Internal?": task.appsec_task.is_internet if task.appsec_task else "",
+            "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
+            "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
+            "Component": task.component,
+            "Share Cost?": task.appsec_task.sharecost,
+            
         })
     pentest_df = pd.DataFrame(pentest_data)
-
     # Sheet 3: Vulnerability
     vuln_data = []
     for vuln in vulnerabilities:
         vuln_data.append({
-            "task_name": vuln.pentest_task.name if vuln.pentest_task else "",
-            "environment_test": vuln.pentest_task.environment_test if vuln.pentest_task else "",
-            "name_vuln": vuln.name_vuln,
-            "ref": vuln.ref,
-            "risk_rating": vuln.risk_rating,
-            "notify_date":vuln.notify_date,
-            "status": vuln.status,
+            "Task": vuln.pentest_task.name if vuln.pentest_task else "",
+            "Domain Test": vuln.pentest_task.environment_test if vuln.pentest_task else "",
+            "Issue Description": vuln.name_vuln,
+            "REF": vuln.ref,
+            "Risk": vuln.risk_rating,
+            "Notify":vuln.notify_date,
+            "Status": vuln.status,
             "PIC": vuln.pentest_task.PIC_ISM,
-            "component": vuln.pentest_task.component,
-            "is_internet": vuln.pentest_task.appsec_task.is_internet if vuln.pentest_task.appsec_task else "",
-            "is_newapp": vuln.pentest_task.appsec_task.is_newapp if vuln.pentest_task.appsec_task else "",
-            "checklist_type": vuln.pentest_task.appsec_task.checklist_type if vuln.pentest_task.appsec_task else "",
+            "Component": vuln.pentest_task.component,
+            "Public Internet/Internal?": vuln.pentest_task.appsec_task.is_internet if vuln.pentest_task.appsec_task else "",
+            "NewApp/OldApp?": vuln.pentest_task.appsec_task.is_newapp if vuln.pentest_task.appsec_task else "",
+            "Checklist Type": vuln.pentest_task.appsec_task.checklist_type if vuln.pentest_task.appsec_task else "",
             
         })
     vuln_df = pd.DataFrame(vuln_data)
@@ -314,15 +451,15 @@ def export_appsec_tasks(request):
     # Tạo file Excel với 2 sheet
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        verify_df.to_excel(writer, sheet_name="Verify Request 2025 (All)", index=False)
-        pentest_df.to_excel(writer, sheet_name="Pentest Request 2025", index=False)
+        verify_df.to_excel(writer, sheet_name="Verify Request", index=False)
+        pentest_df.to_excel(writer, sheet_name="Pentest Request", index=False)
         vuln_df.to_excel(writer, sheet_name="Vulnerability", index=False) 
         exception_df.to_excel(writer, sheet_name="Exception", index=False) 
 
 
     output.seek(0)
     response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=ISM AppSec FollowUp 2025.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=ISM AppSec FollowUp.xlsx'
     return response
 
 
@@ -378,14 +515,30 @@ def sync_status(appsec_task_id):
         appsec_task.start_date = verify_task.start_date
         appsec_task.end_date = verify_task.end_date
         
-    # Đồng bộ PIC_ISM, loại bỏ trùng lặp
+    # # Đồng bộ PIC_ISM, loại bỏ trùng lặp
+    # pic_set = set()
+    # if pentest_task and pentest_task.PIC_ISM:
+    #     pic_set.add(pentest_task.PIC_ISM.strip())
+    # if verify_task and verify_task.PIC_ISM:
+    #     pic_set.add(verify_task.PIC_ISM.strip())
+
+    # appsec_task.PIC_ISM = ", ".join(sorted(pic_set)) if pic_set else None
+    # Đồng bộ PIC_ISM, loại bỏ trùng lặp và chuẩn hóa tên
     pic_set = set()
+
+    def normalize_pic(pic_string):
+        if not pic_string:
+            return []
+        return [p.strip().title() for p in pic_string.split(",") if p.strip()]
+
     if pentest_task and pentest_task.PIC_ISM:
-        pic_set.add(pentest_task.PIC_ISM.strip())
+        pic_set.update(normalize_pic(pentest_task.PIC_ISM))
+
     if verify_task and verify_task.PIC_ISM:
-        pic_set.add(verify_task.PIC_ISM.strip())
+        pic_set.update(normalize_pic(verify_task.PIC_ISM))
 
     appsec_task.PIC_ISM = ", ".join(sorted(pic_set)) if pic_set else None
+
 
     appsec_task.pentest_task = pentest_task
     appsec_task.verify_task = verify_task
