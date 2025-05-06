@@ -29,6 +29,12 @@ class AppSecTask(models.Model):
         ('Yes', 'Yes'),
         ('No', 'No'),
     ]
+    COMPONENT_CHOICES = [
+        ('Mobile Application', 'Mobile Application'),
+        ('Web Application', 'Web Application'),
+        ('API Application','API Application'),
+        ('Desktop Application','Desktop Application'),
+    ]
 
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
@@ -48,6 +54,7 @@ class AppSecTask(models.Model):
     is_newapp = models.CharField(max_length=50, choices=IS_NEWAPP_CHOICES, default='New App', null=True, blank=True)
     checklist_type = models.CharField(max_length=200, choices=CHECKLIST_TYPE_CHOICES, default='Full Checklist', null=True, blank=True)
     sharecost = models.CharField(max_length=10, choices=SHARE_COST_CHOICES, default='No',null=True, blank=True)
+    component = models.CharField(max_length=200, choices=COMPONENT_CHOICES, default='Web Application',null=True, blank=True)
     
     is_pentest_task = models.BooleanField(default=False)
     is_verify_task = models.BooleanField(default=False)

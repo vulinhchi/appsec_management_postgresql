@@ -31,7 +31,7 @@
         
         <label><input type="checkbox" class="column-toggle" data-column="14" checked> Checklist Type</label>
         <label><input type="checkbox" class="column-toggle" data-column="15" checked> Share Cost? </label>
-        
+        <label><input type="checkbox" class="column-toggle" data-column="16" checked> Component</label>
         
     </div>
 
@@ -103,6 +103,17 @@
                             <option value="No">No</option>
                         </select>
                     </div>
+                    <div class="col-md-3 mt-2">
+                        <label>Component </label>
+                        <select class="form-control filter-input" data-column="16">
+                            <option value="">All</option>
+                            <option value="Mobile Application">Mobile Application</option>
+                            <option value="Web Application">Web Application</option>
+                            <option value="API Application">API Application</option>
+                            <option value="Desktop Application">Desktop Application</option>
+                        </select>
+                    </div>
+
                     <div class="col-md-3 mt-4">
                         <button id="clearFilters" class="btn btn-danger">Clear Filters</button>
                     </div>
@@ -203,6 +214,16 @@
                                     
                                 </select>
                             </th>
+                            <th>Component <br> 
+                                <select class="form-control filter-input" data-column="16">
+                                    <option value="">All</option>
+                                    <option value="Mobile Application">Mobile Application</option>
+                                    <option value="Web Application">Web Application</option>
+                                    <option value="API Application">API Application</option>
+                                    <option value="Desktop Application">Desktop Application</option>
+                                    
+                                </select>
+                            </th>
                             
                             <th>Pentest</th>
                             <th>Verify</th>
@@ -245,6 +266,7 @@
                             <td>{{ task.is_newapp }}</td>
                             <td>{{ task.checklist_type }}</td>
                             <td>{{ task.sharecost }}</td>
+                            <td>{{ task.component }}</td>
                             <td>
                                 
                                 {% with pentest_task=task.pentest_tasks.first %}

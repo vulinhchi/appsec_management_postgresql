@@ -158,6 +158,7 @@ def import_appsec_tasks(request):
                         appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
                         appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                         appsec_task.sharecost = safe_str(row.get("Share Cost?"))
+                        pentest_task.component = safe_str(row.get("Component"))
                         appsec_task.save()
                         print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
 
@@ -226,6 +227,7 @@ def import_appsec_tasks(request):
                         appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
                         appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                         appsec_task.sharecost = safe_str(row.get("Share Cost?"))
+                        pentest_task.component = safe_str(row.get("Component"))
                         appsec_task.save()
                         print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
 
@@ -245,7 +247,7 @@ def import_appsec_tasks(request):
                         pentest_task.end_date = safe_date(row.get("Finish pentest date"))
                         pentest_task.start_retest = safe_date(row.get("Start retest date"))
                         pentest_task.end_retest = safe_date(row.get("Finish retest date"))
-                        pentest_task.component = safe_str(row.get("Component"))
+                        # pentest_task.component = safe_str(row.get("Component"))
                         pentest_task.save()
                         print(f"🔁 Đã cập nhật PentestTask cho '{appsec_name}'")
                         messages.warning(request, f"❌ Cập nhật PentestTask: {appsec_name}, row: {row.to_dict()}")
@@ -311,7 +313,7 @@ def export_appsec_tasks(request):
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
             "Share Cost?": task.appsec_task.sharecost,
-            
+            "Component": task.appsec_task.component,
         })
     verify_df = pd.DataFrame(verify_data)
 
@@ -342,7 +344,7 @@ def export_appsec_tasks(request):
             "Public Internet/Internal?": task.appsec_task.is_internet if task.appsec_task else "",
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
-            "Component": task.component,
+            "Component": task.appsec_task.component,
             "Share Cost?": task.appsec_task.sharecost,
             
         })
@@ -359,7 +361,7 @@ def export_appsec_tasks(request):
             "Notify":vuln.notify_date,
             "Status": vuln.status,
             "PIC": vuln.pentest_task.PIC_ISM,
-            "Component": vuln.pentest_task.component,
+            "Component": vuln.pentest_task.appsec_task.component,
             "Public Internet/Internal?": vuln.pentest_task.appsec_task.is_internet if vuln.pentest_task.appsec_task else "",
             "NewApp/OldApp?": vuln.pentest_task.appsec_task.is_newapp if vuln.pentest_task.appsec_task else "",
             "Checklist Type": vuln.pentest_task.appsec_task.checklist_type if vuln.pentest_task.appsec_task else "",
@@ -397,7 +399,10 @@ def export_appsec_tasks(request):
 
     output.seek(0)
     response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=ISM AppSec FollowUp.xlsx'
+    
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    filename = f"ISM AppSec FollowUp_{today_str}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 
