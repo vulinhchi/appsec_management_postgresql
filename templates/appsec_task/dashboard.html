@@ -3,6 +3,26 @@
 
 {% block content %}
 
+<!-- Dropdown cho Status -->
+<select id="statusFilter" class="form-control">
+  <option value="">All Status</option>
+  <option value="Done">Done</option>
+  <option value="Not Start">Not Start</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Retest">Retest</option>
+</select>
+<!-- Dropdown cho PIC -->
+<select id="picFilter_dropdown" class="form-control">
+  <option value="">All PIC</option>
+  <option value="NgocVB2">NgocVB2</option>
+  <option value="PhuocTT2">PhuocTT2</option>
+  <option value="TuanDA41">TuanDA41</option>
+  <option value="KhaDV2">KhaDV2</option>
+  <option value="KietLT11">KietLT11</option>
+  <option value="ChiVL1">ChiVL1</option>
+  <!-- Dynamically populate this with available PICs from tasks -->
+</select>
+
 
 <h4 class="mt-4">Monthly Task Timeline</h4>
 
@@ -182,11 +202,8 @@
 {{ vuln_total|json_script:"vuln-total" }}
 {{ vuln_closed|json_script:"vuln-closed" }}
 
-<!-- JS libraries -->
 <script src="{% static 'js/chart.js' %}"></script>
-<!-- <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
- -->
+
  <style>
   .calendar-grid {
     border: 1px solid #dee2e6;
@@ -195,74 +212,193 @@
     box-sizing: border-box;
   }
 </style>
+
 <script>
-  const pentestTasks = {{ pentest_tasks_json|safe }};
-  const verifyTasks = {{ verify_tasks_json|safe }};
-  let calMonth = new Date().getMonth();
-  let calYear = new Date().getFullYear();
+const pentestTasks = JSON.parse(`{{ pentest_tasks_json|escapejs }}`);
+const verifyTasks = JSON.parse(`{{ verify_tasks_json|escapejs }}`);
 
-  function renderCalendar(gridId, tasks, month, year) {
-    const grid = document.getElementById(gridId);
-    grid.innerHTML = "";
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let currentStatusFilter = "";
+let currentPICFilter = "";
 
-    const firstDay = new Date(year, month, 1);
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startDayOfWeek = (firstDay.getDay() + 6) % 7;
-    const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+function parseDateLocal(dateStr) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
 
-    for (let i = 0; i < totalCells; i++) {
-      const dayNum = i - startDayOfWeek + 1;
-      const cell = document.createElement("div");
-      cell.className = "bg-white p-1 small border";
-      cell.style.minHeight = "90px";
-      cell.style.position = "relative";
+function normalizePIC(picString) {
+  if (!picString) return [];
+  return picString
+    .split(/[,;]/)            // phân tách bởi "," hoặc ";"
+    .map(p => p.trim().toLowerCase())  // bỏ khoảng trắng và chuyển lowercase
+    .filter(p => p.length > 0);
+}
 
-      if (dayNum >= 1 && dayNum <= daysInMonth) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-        const taskDate = new Date(year, month, dayNum);
-        const dayLabel = document.createElement("div");
-        dayLabel.innerHTML = `<strong>${dayNum}</strong>`;
-        cell.appendChild(dayLabel);
+function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter = "", a="" ) {
+  console.log("statusFilter:", statusFilter);
 
+  console.log("picFilter:", picFilter);
+  console.log("gia tri a: " ,a);
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = "";
+
+  const firstDay = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startDayOfWeek = (firstDay.getDay() + 6) % 7;
+  const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - startDayOfWeek + 1;
+    const cell = document.createElement("div");
+    cell.className = "bg-white p-1 small border";
+    cell.style.minHeight = "90px";
+    cell.style.position = "relative";
+
+    if (dayNum >= 1 && dayNum <= daysInMonth) {
+      const taskDate = new Date(year, month, dayNum);
+      const dayLabel = document.createElement("div");
+      dayLabel.innerHTML = `<strong>${dayNum}</strong>`;
+      cell.appendChild(dayLabel);
+
+      const tasksForDay = tasks.filter(task => {
+        const start = parseDateLocal(task.start);
+        const end = task.end ? parseDateLocal(task.end) : new Date(year, 11, 31);
+        const matchesStatus = statusFilter ? task.status === statusFilter : true;
         
-        const tasksForDay = tasks.filter(task => {
-          const start = new Date(task.start);
-          const end = task.end ? new Date(task.end) : new Date(year, 11, 31);
-          return taskDate >= start && taskDate <= end;
-        });
+        const taskPICs = normalizePIC(task.pic); // Lấy danh sách PIC từ task
+        const matchesPIC = picFilter ? taskPICs.includes(picFilter) : true;  // So sánh với picFilter
+      
 
+        return taskDate >= start && taskDate <= end && matchesStatus && matchesPIC;
+      });
 
-        tasksForDay.forEach(task => {
-          const tag = document.createElement("div");
-          tag.className = "mt-1 px-1 py-1 d-block rounded";
-          tag.style.fontSize = "0.75rem";
-          tag.style.fontWeight = "600";
-          tag.style.lineHeight = "1.2";
-          tag.title = `${task.name} - (${task.pic})`;
-          tag.style.backgroundColor =
-            task.type === "pentest" ? "#f8d7da" :
-            task.type === "retest" ? "#f0e68c" :
-            "#d1ecf1";
-          tag.style.color = "#333";
-          tag.innerText = `${task.type} ${task.name} - (${task.pic})`;
-          tag.style.whiteSpace = "nowrap";
-          tag.style.overflow = "hidden";
-          tag.style.textOverflow = "ellipsis";
-          cell.appendChild(tag);
-        });
-      }
+      tasksForDay.forEach(task => {
+        const tag = document.createElement("div");
+        tag.className = "mt-1 px-1 py-1 d-block rounded";
+        tag.style.fontSize = "0.75rem";
+        tag.style.fontWeight = "600";
+        tag.style.lineHeight = "1.2";
+        tag.title = `${task.status} - ${task.name} - (${task.pic})`;
 
-      grid.appendChild(cell);
+        tag.style.backgroundColor =
+          task.type === "retest" ? "#ff00ff" :
+          task.status === "Done" ? "#00ff00" :
+          task.status === "Not Start" ? "#7fffd4" :
+          task.status === "In Progress" ? "#ffa500" :
+          "#d1ecf1";
+        tag.style.color = "#333";
+        tag.innerText = `${task.status} - ${task.type} - ${task.name} - (${task.pic})`;
+        tag.style.whiteSpace = "nowrap";
+        tag.style.overflow = "hidden";
+        tag.style.textOverflow = "ellipsis";
+        cell.appendChild(tag);
+      });
     }
-  }
 
-  // Initial render
-  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear);
-  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear);
-  // Điều khiển chuyển tháng
+    grid.appendChild(cell);
+  }
+}
+
 function renderBothCalendars() {
-  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear);
-  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear);
+  renderCalendar("pentestCalendar", pentestTasks, calMonth, calYear, currentStatusFilter, currentPICFilter, "ahihi");
+  renderCalendar("verifyCalendar", verifyTasks, calMonth, calYear, currentStatusFilter, currentPICFilter, "ahihi");
+   
+}
+
+document.getElementById("statusFilter").addEventListener("change", function () {
+  currentStatusFilter = this.value.trim().toLowerCase();
+  console.log("currentStatusFilter: ", currentStatusFilter);
+  renderBothCalendars();
+});
+
+document.getElementById("picFilter_dropdown").addEventListener("change", function () {
+  currentPICFilter = this.value.trim().toLowerCase();
+  console.log("currentPICFilter: ", currentPICFilter);
+  renderBothCalendars();
+});
+
+
+
+
+
+// const pentestTasks = JSON.parse(`{{ pentest_tasks_json|escapejs }}`);
+// const verifyTasks = JSON.parse(`{{ verify_tasks_json|escapejs }}`);
+
+// let calMonth = new Date().getMonth();
+// let calYear = new Date().getFullYear();
+// let currentStatusFilter = ""; // Biến để lưu status filter hiện tại
+
+// function parseDateLocal(dateStr) {
+//   const [year, month, day] = dateStr.split("-").map(Number);
+//   return new Date(year, month - 1, day); // month is 0-based
+// }
+
+// // Hàm renderCalendar với tham số lọc status
+// function renderCalendar(gridId, tasks, month, year, statusFilter = "") {
+//   const grid = document.getElementById(gridId);
+//   grid.innerHTML = "";
+
+//   const firstDay = new Date(year, month, 1);
+//   const daysInMonth = new Date(year, month + 1, 0).getDate();
+//   const startDayOfWeek = (firstDay.getDay() + 6) % 7;
+//   const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+//   for (let i = 0; i < totalCells; i++) {
+//     const dayNum = i - startDayOfWeek + 1;
+//     const cell = document.createElement("div");
+//     cell.className = "bg-white p-1 small border";
+//     cell.style.minHeight = "90px";
+//     cell.style.position = "relative";
+
+//     if (dayNum >= 1 && dayNum <= daysInMonth) {
+//       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+//       const taskDate = new Date(year, month, dayNum);
+//       const dayLabel = document.createElement("div");
+//       dayLabel.innerHTML = `<strong>${dayNum}</strong>`;
+//       cell.appendChild(dayLabel);
+
+//       // Lọc các tasks theo ngày và status
+//       const tasksForDay = tasks.filter(task => {
+//         const start = parseDateLocal(task.start);
+//         const end = task.end ? parseDateLocal(task.end) : new Date(year, 11, 31);
+//         const matchesStatus = statusFilter ? task.status === statusFilter : true;
+//         return taskDate >= start && taskDate <= end && matchesStatus;
+//       });
+
+//       tasksForDay.forEach(task => {
+//         const tag = document.createElement("div");
+//         tag.className = "mt-1 px-1 py-1 d-block rounded";
+//         tag.style.fontSize = "0.75rem";
+//         tag.style.fontWeight = "600";
+//         tag.style.lineHeight = "1.2";
+//         tag.title = `${task.status} - ${task.name} - (${task.pic})`;
+
+//         // Lấy màu sắc cho task theo status
+//         tag.style.backgroundColor =
+//           task.type === "retest" ? "#ff00ff" :
+//           task.status == "Done" ? "#00ff00" :
+//           task.status == "Not Start" ? "#7fffd4" :
+//           task.status == "In Progress" ? "#ffa500" :
+//           "#d1ecf1";
+//         tag.style.color = "#333";
+//         tag.innerText = `${task.status} - ${task.type} - ${task.name} - (${task.pic})`;
+//         tag.style.whiteSpace = "nowrap";
+//         tag.style.overflow = "hidden";
+//         tag.style.textOverflow = "ellipsis";
+//         cell.appendChild(tag);
+//       });
+//     }
+
+//     grid.appendChild(cell);
+//   }
+// }
+// code trên ok
+
+// Hàm để render cả hai lịch: Pentest và Verify
+function renderBothCalendars(statusFilter = "") {
+  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear, statusFilter);
+  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear, statusFilter);
 
   const monthTitle = new Date(calYear, calMonth, 1).toLocaleString("default", {
     month: "long",
@@ -271,6 +407,7 @@ function renderBothCalendars() {
   document.getElementById("calendar-month-title").innerText = monthTitle;
 }
 
+// Chuyển tháng
 function changeCalendarMonth(delta) {
   calMonth += delta;
   if (calMonth < 0) {
@@ -280,12 +417,137 @@ function changeCalendarMonth(delta) {
     calMonth = 0;
     calYear += 1;
   }
-  renderBothCalendars();
+  renderBothCalendars(currentStatusFilter); // Duy trì statusFilter khi chuyển tháng
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  renderBothCalendars();
+// Lắng nghe sự kiện thay đổi từ dropdown status
+document.getElementById("statusFilter").addEventListener("change", function() {
+  currentStatusFilter = this.value; // Lưu giá trị status chọn
+  renderBothCalendars(currentStatusFilter); // Render lại lịch với status filter mới
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  renderBothCalendars(currentStatusFilter); // Gọi render với status filter hiện tại
+});
+
+
+  //hiển thị calendar 
+  // const pentestTasks = {{ pentest_tasks_json|safe }};
+  // const verifyTasks = {{ verify_tasks_json|safe }};
+//   const pentestTasks = JSON.parse(`{{ pentest_tasks_json|escapejs }}`);
+//   const verifyTasks = JSON.parse(`{{ verify_tasks_json|escapejs }}`);
+ 
+//   let calMonth = new Date().getMonth();
+//   let calYear = new Date().getFullYear();
+//   function parseDateLocal(dateStr) {
+//     const [year, month, day] = dateStr.split("-").map(Number);
+//     return new Date(year, month - 1, day); // month is 0-based
+//   }
+
+//   function renderCalendar(gridId, tasks, month, year) {
+//     const grid = document.getElementById(gridId);
+//     grid.innerHTML = "";
+
+//     const firstDay = new Date(year, month, 1);
+//     const daysInMonth = new Date(year, month + 1, 0).getDate();
+//     const startDayOfWeek = (firstDay.getDay() + 6) % 7;
+//     const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+//     for (let i = 0; i < totalCells; i++) {
+//       const dayNum = i - startDayOfWeek + 1;
+//       const cell = document.createElement("div");
+//       cell.className = "bg-white p-1 small border";
+//       cell.style.minHeight = "90px";
+//       cell.style.position = "relative";
+
+//       if (dayNum >= 1 && dayNum <= daysInMonth) {
+//         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+//         const taskDate = new Date(year, month, dayNum);
+//         const dayLabel = document.createElement("div");
+//         dayLabel.innerHTML = `<strong>${dayNum}</strong>`;
+//         cell.appendChild(dayLabel);
+
+//         const tasksForDay = tasks.filter(task => {
+//           const start = parseDateLocal(task.start);
+//           const end = task.end ? parseDateLocal(task.end) : new Date(year, 11, 31);
+//           return taskDate >= start && taskDate <= end;
+//         });
+
+//         tasksForDay.forEach(task => {
+//           const tag = document.createElement("div");
+//           tag.className = "mt-1 px-1 py-1 d-block rounded";
+//           tag.style.fontSize = "0.75rem";
+//           tag.style.fontWeight = "600";
+//           tag.style.lineHeight = "1.2";
+//           tag.title = `${task.status} - ${task.name} - (${task.pic})`;
+//           // switch (task.status) {
+//           //   case "Done":
+//           //     tag.style.backgroundColor = "#00ff00"; // xanh lime (xanh lá non)
+//           //     break;
+//           //   case "Not Start":
+//           //     tag.style.backgroundColor = "#7fffd4"; // xanh aquamarine
+//           //     break;
+//           //   case "In Progress":
+//           //     tag.style.backgroundColor = "#ffa500"; // da cam 
+//           //     break;
+//           //   case "Retest":
+//           //     tag.style.backgroundColor = "#800000"; // màu maroon
+//           //     break;
+//           //   default:
+//           //     tag.style.backgroundColor = "#e2e3e5"; // xám nhạt
+//           // }
+
+
+//           tag.style.backgroundColor =
+//             // task.type === "pentest" ? "#f8d7da" :
+//             task.type === "retest" ? "#ff00ff" :
+//             task.status == "Done" ? "#00ff00" :
+//             task.status == "Not Start" ? "#7fffd4" :
+//             task.status == "In Progress" ? "#ffa500" :
+//             "#d1ecf1";
+//           tag.style.color = "#333";
+//           tag.innerText = `${task.status}- ${task.type} - ${task.name} - (${task.pic})`;
+//           tag.style.whiteSpace = "nowrap";
+//           tag.style.overflow = "hidden";
+//           tag.style.textOverflow = "ellipsis";
+//           cell.appendChild(tag);
+//         });
+//       }
+
+//       grid.appendChild(cell);
+//     }
+//   }
+
+//   // Initial render
+//   renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear);
+//   renderCalendar("calendar-verify", verifyTasks, calMonth, calYear);
+//   // Điều khiển chuyển tháng
+// function renderBothCalendars() {
+//   renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear);
+//   renderCalendar("calendar-verify", verifyTasks, calMonth, calYear);
+
+//   const monthTitle = new Date(calYear, calMonth, 1).toLocaleString("default", {
+//     month: "long",
+//     year: "numeric"
+//   });
+//   document.getElementById("calendar-month-title").innerText = monthTitle;
+// }
+
+// function changeCalendarMonth(delta) {
+//   calMonth += delta;
+//   if (calMonth < 0) {
+//     calMonth = 11;
+//     calYear -= 1;
+//   } else if (calMonth > 11) {
+//     calMonth = 0;
+//     calYear += 1;
+//   }
+//   renderBothCalendars();
+// }
+
+// document.addEventListener("DOMContentLoaded", function () {
+//   renderBothCalendars();
+// });
 
 
 </script>
@@ -444,9 +706,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const total = {{ vuln_total_json|safe }};
     const closed = {{ vuln_closed_json|safe }};
 
-    console.log("labels:", labels);
-    console.log("total:", total);
-    console.log("closed:", closed);
+    // console.log("labels:", labels);
+    // console.log("total:", total);
+    // console.log("closed:", closed);
 
     const ctx = document.getElementById("vulnChart2").getContext("2d");
 
@@ -504,10 +766,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const affectedLabels = JSON.parse('{{ affected_labels_json|safe }}');
     const affectedTotal = JSON.parse('{{ affected_total_json|safe }}');
     const affectedClosed = JSON.parse('{{ affected_closed_json|safe }}');
-
-    console.log("Affected Labels:", affectedLabels);
-    console.log("Affected Total:", affectedTotal);
-    console.log("Affected Closed:", affectedClosed);
 
     // Vẽ biểu đồ
     const ctx = document.getElementById("affectedUrlChart").getContext("2d");

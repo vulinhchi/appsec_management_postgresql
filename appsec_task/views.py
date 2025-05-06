@@ -20,6 +20,8 @@ import calendar
 import json
 from django.contrib.auth.decorators import login_required
 from task_manager.decorators import require_groups
+from django.utils.timezone import localtime
+from datetime import datetime
 
 
 def safe_str(value):
@@ -44,6 +46,17 @@ def safe_date(val):
         messages.error(request,f"❌ safe_date error: {e}, val: {val}")
         return None
 
+
+# def normalize_date(date_input):
+#     if isinstance(date_input, datetime):
+#         return date_input
+#     if isinstance(date_input, str):
+#         for fmt in ("%B %d, %Y", "%b. %d, %Y", "%Y-%m-%d", "%d-%m-%Y", "%m/%d/%Y"):
+#             try:
+#                 return datetime.strptime(date_input, fmt)
+#             except ValueError:
+#                 continue
+#     return None
 
 @login_required
 @require_groups(['Pentester', 'Leader'])
@@ -515,14 +528,7 @@ def sync_status(appsec_task_id):
         appsec_task.start_date = verify_task.start_date
         appsec_task.end_date = verify_task.end_date
         
-    # # Đồng bộ PIC_ISM, loại bỏ trùng lặp
-    # pic_set = set()
-    # if pentest_task and pentest_task.PIC_ISM:
-    #     pic_set.add(pentest_task.PIC_ISM.strip())
-    # if verify_task and verify_task.PIC_ISM:
-    #     pic_set.add(verify_task.PIC_ISM.strip())
-
-    # appsec_task.PIC_ISM = ", ".join(sorted(pic_set)) if pic_set else None
+    
     # Đồng bộ PIC_ISM, loại bỏ trùng lặp và chuẩn hóa tên
     pic_set = set()
 
@@ -538,7 +544,6 @@ def sync_status(appsec_task_id):
         pic_set.update(normalize_pic(verify_task.PIC_ISM))
 
     appsec_task.PIC_ISM = ", ".join(sorted(pic_set)) if pic_set else None
-
 
     appsec_task.pentest_task = pentest_task
     appsec_task.verify_task = verify_task
@@ -868,6 +873,8 @@ def task_timeline(current_year):
             "start": task.start_date.strftime("%Y-%m-%d") if task.start_date else "",
             "end": task.end_date.strftime("%Y-%m-%d") if task.end_date else "",
             "type": task_type,
+            "status": task.status if hasattr(task, "status") else "", 
+    
         }
 
         if task_type == "retest":
