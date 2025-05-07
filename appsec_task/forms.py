@@ -9,7 +9,7 @@ class AppSecTaskForm(forms.ModelForm):
             'PIC_ISM', 
             'environment_prod', 'owner', 'mail_loop', 'chat_group', 'link_ticket', 
             'link_sharepoint', 'is_internet', 'is_newapp', 'checklist_type', 'sharecost',
-            'is_pentest_task', 'is_verify_task',
+            'is_pentest_task', 'is_verify_task', 'component'
         ]
     def clean(self):
         """Kiểm tra lỗi khi nhập dữ liệu từ form."""

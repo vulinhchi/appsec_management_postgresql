@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from multiselectfield import MultiSelectField
+
 
 class AppSecTask(models.Model):
     STATUS_CHOICES = [
@@ -54,8 +56,8 @@ class AppSecTask(models.Model):
     is_newapp = models.CharField(max_length=50, choices=IS_NEWAPP_CHOICES, default='New App', null=True, blank=True)
     checklist_type = models.CharField(max_length=200, choices=CHECKLIST_TYPE_CHOICES, default='Full Checklist', null=True, blank=True)
     sharecost = models.CharField(max_length=10, choices=SHARE_COST_CHOICES, default='No',null=True, blank=True)
-    component = models.CharField(max_length=200, choices=COMPONENT_CHOICES, default='Web Application',null=True, blank=True)
-    
+    # component = models.CharField(max_length=200, choices=COMPONENT_CHOICES, default='Web Application',null=True, blank=True)
+    component = MultiSelectField(choices=COMPONENT_CHOICES, blank=True, null=True)
     is_pentest_task = models.BooleanField(default=False)
     is_verify_task = models.BooleanField(default=False)
     
