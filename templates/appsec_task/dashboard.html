@@ -11,8 +11,15 @@
   <option value="In Progress">In Progress</option>
   <option value="Retest">Retest</option>
 </select>
+<!-- <select id="picFilter_dropdown" class="form-control">
+  <option value="">All Status</option>
+  <option value="Done">Done</option>
+  <option value="Not Start">Not Start</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Retest">Retest</option>
+</select> -->
 <!-- Dropdown cho PIC -->
-<select id="picFilter_dropdown" class="form-control">
+<select id="picFilter" class="form-control">
   <option value="">All PIC</option>
   <option value="NgocVB2">NgocVB2</option>
   <option value="PhuocTT2">PhuocTT2</option>
@@ -20,7 +27,6 @@
   <option value="KhaDV2">KhaDV2</option>
   <option value="KietLT11">KietLT11</option>
   <option value="ChiVL1">ChiVL1</option>
-  <!-- Dynamically populate this with available PICs from tasks -->
 </select>
 
 
@@ -235,11 +241,11 @@ function normalizePIC(picString) {
     .filter(p => p.length > 0);
 }
 
-function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter = "", a="" ) {
+function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter = "" ) {
   console.log("statusFilter:", statusFilter);
 
   console.log("picFilter:", picFilter);
-  console.log("gia tri a: " ,a);
+  
   const grid = document.getElementById(gridId);
   grid.innerHTML = "";
 
@@ -300,10 +306,16 @@ function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter
   }
 }
 
-function renderBothCalendars() {
-  renderCalendar("pentestCalendar", pentestTasks, calMonth, calYear, currentStatusFilter, currentPICFilter, "ahihi");
-  renderCalendar("verifyCalendar", verifyTasks, calMonth, calYear, currentStatusFilter, currentPICFilter, "ahihi");
-   
+// Hàm để render cả hai lịch: Pentest và Verify
+function renderBothCalendars(statusFilter = "") {
+  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear,  currentStatusFilter, currentPICFilter);
+  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear,  currentStatusFilter, currentPICFilter);
+
+  const monthTitle = new Date(calYear, calMonth, 1).toLocaleString("default", {
+    month: "long",
+    year: "numeric"
+  });
+  document.getElementById("calendar-month-title").innerText = monthTitle;
 }
 
 document.getElementById("statusFilter").addEventListener("change", function () {
@@ -312,7 +324,7 @@ document.getElementById("statusFilter").addEventListener("change", function () {
   renderBothCalendars();
 });
 
-document.getElementById("picFilter_dropdown").addEventListener("change", function () {
+document.getElementById("picFilter").addEventListener("change", function () {
   currentPICFilter = this.value.trim().toLowerCase();
   console.log("currentPICFilter: ", currentPICFilter);
   renderBothCalendars();
@@ -395,17 +407,6 @@ document.getElementById("picFilter_dropdown").addEventListener("change", functio
 // }
 // code trên ok
 
-// Hàm để render cả hai lịch: Pentest và Verify
-function renderBothCalendars(statusFilter = "") {
-  renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear, statusFilter);
-  renderCalendar("calendar-verify", verifyTasks, calMonth, calYear, statusFilter);
-
-  const monthTitle = new Date(calYear, calMonth, 1).toLocaleString("default", {
-    month: "long",
-    year: "numeric"
-  });
-  document.getElementById("calendar-month-title").innerText = monthTitle;
-}
 
 // Chuyển tháng
 function changeCalendarMonth(delta) {
