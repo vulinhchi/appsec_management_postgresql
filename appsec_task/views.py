@@ -16,12 +16,15 @@ import traceback
 from datetime import datetime, date
 from collections import defaultdict
 import openpyxl
+# from openpyxl import load_workbook
 import calendar
 import json
 from django.contrib.auth.decorators import login_required
 from task_manager.decorators import require_groups
 from django.utils.timezone import localtime
 from datetime import datetime
+import io
+import html
 
 
 def safe_str(value):
@@ -45,18 +48,6 @@ def safe_date(val):
         # print(f"❌ safe_date error: {e}, val: {val}")
         messages.error(request,f"❌ safe_date error: {e}, val: {val}")
         return None
-
-
-# def normalize_date(date_input):
-#     if isinstance(date_input, datetime):
-#         return date_input
-#     if isinstance(date_input, str):
-#         for fmt in ("%B %d, %Y", "%b. %d, %Y", "%Y-%m-%d", "%d-%m-%Y", "%m/%d/%Y"):
-#             try:
-#                 return datetime.strptime(date_input, fmt)
-#             except ValueError:
-#                 continue
-#     return None
 
 @login_required
 @require_groups(['Pentester', 'Leader'])
@@ -117,6 +108,10 @@ def list_appsec_tasks(request):
 def import_appsec_tasks(request):
     if request.method == "POST" and request.FILES.get("task_file"):
         file = request.FILES["task_file"]
+        # Đọc file từ request.FILES một lần, rồi dùng lại
+        uploaded_file = request.FILES["task_file"]
+        file_bytes = uploaded_file.read()
+
         verify_names = set()
         pentest_names = set()
         try:
@@ -124,18 +119,41 @@ def import_appsec_tasks(request):
 
             # Sheet 1: VERIFY TASK
             verify_df = pd.read_excel(xls, sheet_name="Verify Request")
-            for _, row in verify_df.iterrows():
+
+            # Tạo file-like object
+            file_buffer = io.BytesIO(file_bytes)
+
+            # Cho pandas đọc từ buffer (nhớ seek về đầu)
+            file_buffer.seek(0)
+            xls = pd.ExcelFile(file_buffer)
+            # Dùng openpyxl để lấy hyperlink
+            file_buffer.seek(0)
+            wb = openpyxl.load_workbook(file, data_only=True)
+            sheet = wb["Verify Request"]
+            # Tìm index cột "Sharepoint Link" trong DataFrame
+            sharepoint_col_idx = verify_df.columns.get_loc("Sharepoint Link")  # 0-based index
+
+            for idx, row in verify_df.iterrows():
                 try:
                     appsec_name = safe_str(row.get("Task"))
                     if not appsec_name:
                         print("⚠️ Bỏ qua dòng vì không có appsec_name:", row.to_dict())
                         continue
+                    # Vì Excel bắt đầu từ hàng 1, còn pandas bỏ qua header (dòng 0), nên cần cộng thêm 2
+                    excel_row = idx + 2
+                    excel_col = sharepoint_col_idx + 1  # openpyxl dùng 1-based index cho cột
+
+                    cell = sheet.cell(row=excel_row, column=excel_col)
+                    link_sharepoint = cell.hyperlink.target if cell.hyperlink else None
+
+                
 
                     appsec_task, created = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
                         'description': safe_str(row.get("Description")),
                         'owner': safe_str(row.get("Owner/Requester")),
                         'environment_prod': safe_str(row.get("Domain PROD")),
-                        'link_sharepoint': safe_str(row.get("Sharepoint Link")),
+                        'name_sharepoint': safe_str(row.get("Sharepoint Link")),
+                        'link_sharepoint': link_sharepoint,
                         'link_ticket': safe_str(row.get("Ticket")),
                         'mail_loop': safe_str(row.get("Mail loop")),
                         'chat_group': safe_str(row.get("Chat group")),
@@ -150,7 +168,8 @@ def import_appsec_tasks(request):
                         appsec_task.description = safe_str(row.get("Description"))
                         appsec_task.owner = safe_str(row.get("Owner/Requester"))
                         appsec_task.environment_prod = safe_str(row.get("Domain PROD"))
-                        appsec_task.link_sharepoint = safe_str(row.get("Sharepoint Link"))
+                        appsec_task.name_sharepoint = safe_str(row.get("Sharepoint Link"))
+                        appsec_task.link_sharepoint = link_sharepoint
                         appsec_task.link_ticket = safe_str(row.get("Ticket"))
                         appsec_task.mail_loop = safe_str(row.get("Mail loop"))
                         appsec_task.chat_group = safe_str(row.get("Chat group"))
@@ -158,10 +177,10 @@ def import_appsec_tasks(request):
                         appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
                         appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                         appsec_task.sharecost = safe_str(row.get("Share Cost?"))
-                        pentest_task.component = safe_str(row.get("Component"))
+                        appsec_task.component = safe_str(row.get("Component"))
                         appsec_task.save()
                         print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
-
+                        messages.warning(request, f"❌ Cập nhật AppsecTask: {appsec_name},link_sharepoint: {link_sharepoint}, row: {row.to_dict()}")
                     verify_names.add(appsec_name)
 
                     verify_task = VerifyTask.objects.filter(appsec_task=appsec_task).first()
@@ -191,20 +210,43 @@ def import_appsec_tasks(request):
                     messages.error(request, f"❌ Lỗi tạo/cập nhật VerifyTask: {e}, row: {row.to_dict()}")
                     traceback.print_exc()
 
+
             # Sheet 2: PENTEST TASK
             pentest_df = pd.read_excel(xls, sheet_name="Pentest Request")
-            for _, row in pentest_df.iterrows():
+
+            # Tạo file-like object
+            file_buffer = io.BytesIO(file_bytes)
+
+            # Cho pandas đọc từ buffer (nhớ seek về đầu)
+            file_buffer.seek(0)
+            xls = pd.ExcelFile(file_buffer)
+            # Dùng openpyxl để lấy hyperlink
+            file_buffer.seek(0)
+            wb = openpyxl.load_workbook(file, data_only=True)
+            sheet = wb["Pentest Request"]
+            # Tìm index cột "Sharepoint Link" trong DataFrame
+            sharepoint_col_idx = pentest_df.columns.get_loc("Sharepoint Link")  # 0-based index
+            for idx, row in pentest_df.iterrows():
                 try:
                     appsec_name = safe_str(row.get("Task"))
                     if not appsec_name:
                         print("⚠️ Bỏ qua dòng vì không có appsec_name:", row.to_dict())
                         continue
 
+                    # Vì Excel bắt đầu từ hàng 1, còn pandas bỏ qua header (dòng 0), nên cần cộng thêm 2
+                    excel_row = idx + 2
+                    excel_col = sharepoint_col_idx + 1  # openpyxl dùng 1-based index cho cột
+
+                    cell = sheet.cell(row=excel_row, column=excel_col)
+                    link_sharepoint = cell.hyperlink.target if cell.hyperlink else None
+
+                
                     appsec_task, created = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
                         'description': safe_str(row.get("Description")),
                         'owner': safe_str(row.get("Owner/Requester")),
                         'environment_prod': safe_str(row.get("Domain PROD")),
-                        'link_sharepoint': safe_str(row.get("Sharepoint Link")),
+                        'name_sharepoint': safe_str(row.get("Sharepoint Link")),
+                        'link_sharepoint': link_sharepoint,
                         'link_ticket': safe_str(row.get("Ticket")),
                         'mail_loop': safe_str(row.get("Mail loop")),
                         'chat_group': safe_str(row.get("Chat group")),
@@ -219,7 +261,8 @@ def import_appsec_tasks(request):
                         appsec_task.description = safe_str(row.get("Description"))
                         appsec_task.owner = safe_str(row.get("Owner/Requester"))
                         appsec_task.environment_prod = safe_str(row.get("Domain PROD"))
-                        appsec_task.link_sharepoint = safe_str(row.get("Sharepoint Link"))
+                        appsec_task.name_sharepoint = safe_str(row.get("Sharepoint Link"))
+                        appsec_task.link_sharepoint = link_sharepoint
                         appsec_task.link_ticket = safe_str(row.get("Ticket"))
                         appsec_task.mail_loop = safe_str(row.get("Mail loop"))
                         appsec_task.chat_group = safe_str(row.get("Chat group"))
@@ -227,7 +270,7 @@ def import_appsec_tasks(request):
                         appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
                         appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                         appsec_task.sharecost = safe_str(row.get("Share Cost?"))
-                        pentest_task.component = safe_str(row.get("Component"))
+                        appsec_task.component = safe_str(row.get("Component"))
                         appsec_task.save()
                         print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
 
@@ -306,6 +349,7 @@ def export_appsec_tasks(request):
             "Finish date": task.end_date,
 
             "Sharepoint Link": task.appsec_task.link_sharepoint if task.appsec_task else "",
+            "Sharepoint Name": task.appsec_task.name_sharepoint if task.appsec_task else "",
             "Ticket": task.appsec_task.link_ticket if task.appsec_task else "",
             "Mail loop": task.appsec_task.mail_loop if task.appsec_task else "",
             "Chat group": task.appsec_task.chat_group if task.appsec_task else "",
@@ -316,6 +360,9 @@ def export_appsec_tasks(request):
             "Component": task.appsec_task.component,
         })
     verify_df = pd.DataFrame(verify_data)
+    # Chuyển sang DataFrame nhưng không export cột 'link_raw'
+    verify_df_display = verify_df.drop(columns=["Sharepoint Name"])
+
 
     # Sheet 2: Pentest Request 2025
     pentest_data = []
@@ -338,6 +385,7 @@ def export_appsec_tasks(request):
             "Pentest + Retest Effort (md)/person": task.effort_working_days,
             
             "Sharepoint Link": task.appsec_task.link_sharepoint if task.appsec_task else "",
+            "Sharepoint Name": task.appsec_task.name_sharepoint if task.appsec_task else "",
             "Ticket": task.appsec_task.link_ticket if task.appsec_task else "",
             "Mail loop": task.appsec_task.mail_loop if task.appsec_task else "",
             "Chat group": task.appsec_task.chat_group if task.appsec_task else "",
@@ -349,6 +397,7 @@ def export_appsec_tasks(request):
             
         })
     pentest_df = pd.DataFrame(pentest_data)
+    pentest_df_display = pentest_df.drop(columns=["Sharepoint Name"])
     # Sheet 3: Vulnerability
     vuln_data = []
     for vuln in vulnerabilities:
@@ -388,14 +437,91 @@ def export_appsec_tasks(request):
         })
     exception_df = pd.DataFrame(exception_data)
 
-    # Tạo file Excel với 2 sheet
+
+
+    def escape_excel_formula(s):
+        if not isinstance(s, str):
+            return ""
+        return s.replace('"', '""')  # Excel escape dấu "
+
+    
+
     output = BytesIO()
+    # Tạo file Excel với 2 sheet
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         verify_df.to_excel(writer, sheet_name="Verify Request", index=False)
+        worksheet = writer.sheets["Verify Request"]
+        col_link = verify_df.columns.get_loc("Sharepoint Link")
+
+
+        for row in range(len(verify_df)):
+            link = verify_df.iloc[row]["Sharepoint Link"]
+            name = verify_df.iloc[row]["Sharepoint Name"]
+
+            if pd.notna(link) and str(link).strip() != "":
+                safe_link = escape_excel_formula(str(link))
+                safe_name = escape_excel_formula(str(name))
+                formula = f'=HYPERLINK("{safe_link}", "{safe_name}")'
+                worksheet.write_formula(row + 1, col_link, formula)
+
+
+        # for row in range(len(verify_df)):
+        #     try:
+        #         link = verify_df.iloc[row]["Sharepoint Link"]
+        #         name = verify_df.iloc[row]["Sharepoint Name"]
+        #     except IndexError:
+        #         continue  # Bỏ qua dòng nếu xảy ra lỗi
+
+        #     if pd.notna(link) and link != "":
+        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{link}", "{name}")')
+
+
+        # for row in range(len(verify_df)):
+        #     link = verify_df.iloc[row]["Sharepoint Link"]
+        #     name = verify_df.iloc[row]["Sharepoint Name"]
+
+        #     if pd.notna(link) and link != "":
+        #         safe_link = escape_excel_formula(link)
+        #         safe_name = escape_excel_formula(name)
+        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{safe_link}", "{safe_name}")')
+
+
         pentest_df.to_excel(writer, sheet_name="Pentest Request", index=False)
+        worksheet = writer.sheets["Pentest Request"]
+        col_link = pentest_df.columns.get_loc("Sharepoint Link")
+
+        for row in range(len(pentest_df)):
+            link = pentest_df.iloc[row]["Sharepoint Link"]
+            name = pentest_df.iloc[row]["Sharepoint Name"]
+
+            if pd.notna(link) and str(link).strip() != "":
+                safe_link = escape_excel_formula(str(link))
+                safe_name = escape_excel_formula(str(name))
+                formula = f'=HYPERLINK("{safe_link}", "{safe_name}")'
+                worksheet.write_formula(row + 1, col_link, formula)
+
+        # for row in range(len(pentest_df)):
+        #     try:
+        #         link = pentest_df.iloc[row]["Sharepoint Link"]
+        #         name = pentest_df.iloc[row]["Sharepoint Name"]
+        #     except IndexError:
+        #         continue  # Bỏ qua dòng nếu xảy ra lỗi
+
+        #     if pd.notna(link) and link != "":
+        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{link}", "{name}")')
+
+        # for row in range(len(verify_df)):
+        #     link = verify_df.iloc[row]["Sharepoint Link"]
+        #     name = verify_df.iloc[row]["Sharepoint Name"]
+
+        #     if pd.notna(link) and link != "":
+        #         safe_link = escape_excel_formula(link)
+        #         safe_name = escape_excel_formula(name)
+        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{safe_link}", "{safe_name}")')
+         
         vuln_df.to_excel(writer, sheet_name="Vulnerability", index=False) 
         exception_df.to_excel(writer, sheet_name="Exception", index=False) 
-
+        
 
     output.seek(0)
     response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

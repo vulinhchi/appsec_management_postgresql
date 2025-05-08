@@ -261,7 +261,11 @@
                             <td>{{ task.mail_loop }}</td>
                             <td>{{ task.chat_group }}</td>
                             <td>{{ task.link_ticket }}</td>
-                            <td>{{ task.link_sharepoint }}</td>
+                            <td>
+                            <a href="{{ task.link_sharepoint }}" target="_blank">
+                                {{ task.name_sharepoint}}
+                            </a>
+                            </td>
                             <td>{{ task.is_internet }}</td>
                             <td>{{ task.is_newapp }}</td>
                             <td>{{ task.checklist_type }}</td>
