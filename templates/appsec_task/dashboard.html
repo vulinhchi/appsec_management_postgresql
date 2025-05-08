@@ -11,16 +11,13 @@
   <option value="In Progress">In Progress</option>
   <option value="Retest">Retest</option>
 </select>
-<select id="picFilter" class="form-control">
-  <option value="">All PIC</option>
-  <option value="NgocVB2">NgocVB2</option>
-  <option value="PhuocTT2">PhuocTT2</option>
-  <option value="TuanDA41">TuanDA41</option>
-  <option value="KhaDV2">KhaDV2</option>
-  <option value="KietLT11">KietLT11</option>
-  <option value="ChiVL1">ChiVL1</option>
-</select>
 
+<select name="picFilter" class="form-control">
+  <option value="">All PIC</option>
+  {% for value in user_choices %}
+    <option value="{{ value }}">{{ value }}</option>
+  {% endfor %}
+</select>
 
 <h4 class="mt-4">Monthly Task Timeline</h4>
 

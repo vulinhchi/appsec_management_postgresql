@@ -25,6 +25,7 @@ from django.utils.timezone import localtime
 from datetime import datetime
 import io
 import html
+from django.contrib.auth.models import User, Group
 
 
 def safe_str(value):
@@ -945,9 +946,15 @@ def task_timeline(current_year):
     ]
     verify_tasks = [serialize_task(task, "verify") for task in verify_all]
 
+     # Lấy tất cả PIC từ User
+    # user_choices = [(user.username, user.username) for user in User.objects.all()]
+    pentester_group = Group.objects.get(name="Pentester")
+    pentesters = User.objects.filter(groups=pentester_group)
+
     return {
         "pentest_tasks_json": json.dumps(pentest_retest_tasks),
         "verify_tasks_json": json.dumps(verify_tasks),
+        "user_choices": pentesters, 
     }
 
 
@@ -1048,8 +1055,8 @@ def dashboard(request):
         "exception_total_json": exception_stats["exception_total_json"],
         "exception_closed_json": exception_stats["exception_closed_json"],
         "pentest_tasks_json": timeline_stats["pentest_tasks_json"],
-        "verify_tasks_json": timeline_stats["verify_tasks_json"]
-
+        "verify_tasks_json": timeline_stats["verify_tasks_json"],
+        "user_choices": timeline_stats["user_choices"],
     }
 
     return render(request, "appsec_task/dashboard.html", context)
