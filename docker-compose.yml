@@ -3,15 +3,16 @@ services:
     build: .
     container_name: django_web_postgres
     command: >
-      sh -c "python manage.py makemigrations &&
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py makemigrations &&
              python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8001"
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
       - ./media:/app/media
     ports:
-      - "8001:8001"
+      - "8000:8000"
     depends_on:
       - db
 
@@ -23,16 +24,25 @@ services:
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - DATA_UPLOAD_MAX_MEMORY_SIZE=5242880
+    networks:
+      - petenet
 
-    # environment:
-    #   - DJANGO_SETTINGS_MODULE=task_manager.settings
-    #   - POSTGRES_DB=taskdb
-    #   - POSTGRES_USER=taskuser
-    #   - POSTGRES_PASSWORD=taskpassword
-    #   - POSTGRES_HOST=db
-    #   - POSTGRES_PORT=5432
-    #   - DATA_UPLOAD_MAX_MEMORY_SIZE=5242880
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx_https
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - .:/app
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    depends_on:
+      - web
+    networks:
+      - petenet
   db:
     image: postgres:latest
     container_name: django_db_postgres
@@ -45,6 +55,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - petenet
+
+networks:
+  petenet:
 
 volumes:
   static_volume:
