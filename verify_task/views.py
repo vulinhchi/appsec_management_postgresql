@@ -37,25 +37,31 @@ def create_verify_task(request, appsec_task_id):
             verify_task.name = appsec_task.name
             sync_status(appsec_task.id)
             verify_task.save()
-            if verify_task.PIC_ISM:
+            old_assignee = ""
+            old_assignees = set([x.strip() for x in old_assignee.split(",") if x.strip()])
+            new_assignees = set([x.strip() for x in verify_task.PIC_ISM.split(",") if x.strip()])
+
+            # Gửi noti cho những người mới được thêm vào
+            added_users = new_assignees - old_assignees
+
+            for username in added_users:
                 try:
-                    user_assignee = User.objects.get(username=new_assignee)
+                    user = User.objects.get(username=username)
                     Notification.objects.create(
-                        user=user_assignee,
+                        user=user,
                         title="New Verify Task Assigned",
-                        description=f"You are assigned to Verify task: {verify_task.name}",
-                        url=f"/verify/view/{task.id}", 
-                       
+                        description=f"You are assigned to Pentest task: {verify_task.name}",
+                        url=f"/pentest/view/{verify_task.id}",
                     )
                 except User.DoesNotExist:
-                    pass  
+                    continue
 
             return redirect("verify_task:list_verify_tasks")
     else:
         form = VerifyTaskForm(initial={"name": appsec_task.name, "description": appsec_task.description})  # Gán trước vào form
 
 
-    return render(request, "verify_task/create_verify_task.html", {"form": form, "appsec_task": appsec_task})
+    return render(request, "verify_task/create_verify_task.html", {"form": form, "appsec_task": appsec_task, 'usernames': form.usernames_json})
 
 
 @login_required
@@ -72,25 +78,29 @@ def edit_verify_task(request, verify_task_id):
             sync_status(appsec_task.id)
             verify_task.save()
 
-            new_assignee = verify_task.PIC_ISM
-            if new_assignee != old_assignee and new_assignee:
+            old_assignees = set([x.strip() for x in old_assignee.split(",") if x.strip()])
+            new_assignees = set([x.strip() for x in verify_task.PIC_ISM.split(",") if x.strip()])
+
+            # Gửi noti cho những người mới được thêm vào
+            added_users = new_assignees - old_assignees
+
+            for username in added_users:
                 try:
-                    user_assignee = User.objects.get(username=new_assignee)
+                    user = User.objects.get(username=username)
                     Notification.objects.create(
-                        user=user_assignee,
+                        user=user,
                         title="New Verify Task Assigned",
-                        description=f"You are assigned to Verify task: {verify_task.name}",
-                        url=f"/verify/view/{task.id}", 
-                       
+                        description=f"You are assigned to Pentest task: {verify_task.name}",
+                        url=f"/verify/view/{verify_task.id}",
                     )
                 except User.DoesNotExist:
-                    pass
+                    continue
 
             return redirect("verify_task:list_verify_tasks")
     else:
         form = VerifyTaskForm(instance=task, initial={"name": appsec_task.name, "description": appsec_task.description})  # Gán trước vào form
 
-    return render(request, "verify_task/edit_verify_task.html", {"form": form, "task": task, "appsec_task": appsec_task})
+    return render(request, "verify_task/edit_verify_task.html", {"form": form, "task": task, "appsec_task": appsec_task, 'usernames': form.usernames_json})
 
 
 @login_required

@@ -115,22 +115,31 @@
                     <div class="tab-pane fade" id="plan">
 
                         <div class="col-md-12">
-                            <div class="card card-outline card-danger">
-                                <div class="card-header">
-                                  <h3 class="card-title">
-                                    <b>PIC ISM</b>
-                                  </h3>
-                                  <div class="card-tools">
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                                      <i class="fas fa-minus"></i>
-                                    </button>
-                                  </div>
-
+                          <div class="card card-outline card-danger">
+                              <div class="card-header">
+                                <h3 class="card-title">
+                                  <b>PIC ISM</b>
+                                </h3>
+                                <div class="card-tools">
+                                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                  </button>
                                 </div>
-                                <div class="card-body">
-                                  {{ form.PIC_ISM}}
+
+                              </div>
+                              <div class="card-body">
+                                
+                                 <!-- Trường chính để lưu vào DB -->
+                                  <label for="id_PIC_ISM"></label>
+                                  {{ form.PIC_ISM }}
+                               
+                                <!-- Select2 dropdown cho chọn user -->
+                                <div class="form-group">
+                                  <label for="id_PIC_ISM_select">Select PIC ISM</label>
+                                  {{ form.PIC_ISM_select }}
                                 </div>
                               </div>
+                            </div>
                         </div>
                         
                         <div class="col-md-12">
@@ -345,8 +354,26 @@
     </div>
 </div>
 
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
 
+<script>
+  $(document).ready(function () {
+    $('#id_PIC_ISM_select').select2({
+      placeholder: "Nhập tên user...",
+      allowClear: true,
+      width: '100%'
+    });
 
+    // Khi chọn → cập nhật vào PIC_ISM text
+    $('#id_PIC_ISM_select').on('change', function () {
+      var selected = $(this).val();
+      $('#id_PIC_ISM').val(selected.join(', '));
+    });
 
+    // Khi load form (edit) → cũng sync lại giá trị text
+    var initial = $('#id_PIC_ISM_select').val();
+    $('#id_PIC_ISM').val(initial ? initial.join(', ') : '');
+  });
+</script>
 
 {% endblock %}

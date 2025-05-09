@@ -16,7 +16,7 @@ class VerifyTask(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     # plan
-    PIC_ISM = models.CharField(max_length=50, null=True, blank=True)
+    PIC_ISM = models.CharField(max_length=200, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Not Start')
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
