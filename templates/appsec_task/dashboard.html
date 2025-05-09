@@ -12,13 +12,12 @@
   <option value="Retest">Retest</option>
 </select>
 
-<select name="picFilter" class="form-control">
+<select id="picFilter" class="form-control">
   <option value="">All PIC</option>
   {% for value in user_choices %}
     <option value="{{ value }}">{{ value }}</option>
   {% endfor %}
 </select>
-
 <h4 class="mt-4">Monthly Task Timeline</h4>
 
 <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
@@ -221,7 +220,6 @@ function parseDateLocal(dateStr) {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
-
 function normalizePIC(picString) {
   if (!picString) return [];
   return picString
@@ -259,11 +257,10 @@ function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter
       const tasksForDay = tasks.filter(task => {
         const start = parseDateLocal(task.start);
         const end = task.end ? parseDateLocal(task.end) : new Date(year, 11, 31);
-        const matchesStatus = statusFilter ? task.status === statusFilter : true;
-        
-        const taskPICs = normalizePIC(task.pic); // Lấy danh sách PIC từ task
-        const matchesPIC = picFilter ? taskPICs.includes(picFilter) : true;  // So sánh với picFilter
-      
+
+        const matchesStatus = statusFilter ? task.status.toLowerCase() === statusFilter : true;
+        const taskPICs = normalizePIC(task.pic);
+        const matchesPIC = picFilter ? taskPICs.includes(picFilter) : true;
 
         return taskDate >= start && taskDate <= end && matchesStatus && matchesPIC;
       });
@@ -307,6 +304,12 @@ function changeCalendarMonth(delta) {
   renderBothCalendars(); // Duy trì statusFilter khi chuyển tháng
 }
 // Hàm để render cả hai lịch: Pentest và Verify
+console.log("PentestTasks parsed:", pentestTasks);
+console.log("VerifyTasks parsed:", verifyTasks);
+console.log("currentStatusFilter parsed:", currentStatusFilter);
+console.log("currentPICFilter parsed:", currentPICFilter);
+
+
 function renderBothCalendars() {
   renderCalendar("calendar-pentest", pentestTasks, calMonth, calYear,  currentStatusFilter, currentPICFilter);
   renderCalendar("calendar-verify", verifyTasks, calMonth, calYear,  currentStatusFilter, currentPICFilter);
@@ -328,13 +331,6 @@ document.getElementById("picFilter").addEventListener("change", function () {
   currentPICFilter = this.value.trim().toLowerCase();
   console.log("currentPICFilter: ", currentPICFilter);
   renderBothCalendars();
-});
-
-
-// Lắng nghe sự kiện thay đổi từ dropdown status
-document.getElementById("statusFilter").addEventListener("change", function() {
-  currentStatusFilter = this.value; // Lưu giá trị status chọn
-  renderBothCalendars(currentStatusFilter); // Render lại lịch với status filter mới
 });
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -926,8 +926,7 @@ def task_timeline(current_year):
     def serialize_task(task, task_type):
         data = {
             "name": task.name,
-            "pic": task.PIC_ISM,
-            # "pic": [user.username for user in task.PIC_ISM.all()], 
+            "pic": task.PIC_ISM or "",
             "start": task.start_date.strftime("%Y-%m-%d") if task.start_date else "",
             "end": task.end_date.strftime("%Y-%m-%d") if task.end_date else "",
             "type": task_type,
