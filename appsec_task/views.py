@@ -26,6 +26,7 @@ from datetime import datetime
 import io
 import html
 from django.contrib.auth.models import User, Group
+from urllib.parse import urlparse
 
 
 def safe_str(value):
@@ -446,46 +447,33 @@ def export_appsec_tasks(request):
         return s.replace('"', '""')  # Excel escape dấu "
 
     
+    def is_valid_url(url):
+        try:
+            result = urlparse(url)
+            return result.scheme in ["http", "https", "ftp", "mailto", "file"]
+        except:
+            return False
 
     output = BytesIO()
-    # Tạo file Excel với 2 sheet
+
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         verify_df.to_excel(writer, sheet_name="Verify Request", index=False)
         worksheet = writer.sheets["Verify Request"]
         col_link = verify_df.columns.get_loc("Sharepoint Link")
-
 
         for row in range(len(verify_df)):
             link = verify_df.iloc[row]["Sharepoint Link"]
             name = verify_df.iloc[row]["Sharepoint Name"]
 
             if pd.notna(link) and str(link).strip() != "":
-                safe_link = escape_excel_formula(str(link))
-                safe_name = escape_excel_formula(str(name))
-                formula = f'=HYPERLINK("{safe_link}", "{safe_name}")'
-                worksheet.write_formula(row + 1, col_link, formula)
+                link_str = str(link).strip()
+                name_str = str(name).strip()
 
-
-        # for row in range(len(verify_df)):
-        #     try:
-        #         link = verify_df.iloc[row]["Sharepoint Link"]
-        #         name = verify_df.iloc[row]["Sharepoint Name"]
-        #     except IndexError:
-        #         continue  # Bỏ qua dòng nếu xảy ra lỗi
-
-        #     if pd.notna(link) and link != "":
-        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{link}", "{name}")')
-
-
-        # for row in range(len(verify_df)):
-        #     link = verify_df.iloc[row]["Sharepoint Link"]
-        #     name = verify_df.iloc[row]["Sharepoint Name"]
-
-        #     if pd.notna(link) and link != "":
-        #         safe_link = escape_excel_formula(link)
-        #         safe_name = escape_excel_formula(name)
-        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{safe_link}", "{safe_name}")')
-
+                if is_valid_url(link_str):
+                    worksheet.write_url(row + 1, col_link, link_str, string=name_str)
+                else:
+                    # Fallback: ghi như chuỗi thường (hoặc dùng công thức nếu thật sự cần)
+                    worksheet.write(row + 1, col_link, name_str)
 
         pentest_df.to_excel(writer, sheet_name="Pentest Request", index=False)
         worksheet = writer.sheets["Pentest Request"]
@@ -496,30 +484,16 @@ def export_appsec_tasks(request):
             name = pentest_df.iloc[row]["Sharepoint Name"]
 
             if pd.notna(link) and str(link).strip() != "":
-                safe_link = escape_excel_formula(str(link))
-                safe_name = escape_excel_formula(str(name))
-                formula = f'=HYPERLINK("{safe_link}", "{safe_name}")'
-                worksheet.write_formula(row + 1, col_link, formula)
+                link_str = str(link).strip()
+                name_str = str(name).strip()
 
-        # for row in range(len(pentest_df)):
-        #     try:
-        #         link = pentest_df.iloc[row]["Sharepoint Link"]
-        #         name = pentest_df.iloc[row]["Sharepoint Name"]
-        #     except IndexError:
-        #         continue  # Bỏ qua dòng nếu xảy ra lỗi
+                if is_valid_url(link_str):
+                    worksheet.write_url(row + 1, col_link, link_str, string=name_str)
+                else:
+                    # Fallback: ghi như chuỗi thường (hoặc dùng công thức nếu thật sự cần)
+                    worksheet.write(row + 1, col_link, name_str)
 
-        #     if pd.notna(link) and link != "":
-        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{link}", "{name}")')
-
-        # for row in range(len(verify_df)):
-        #     link = verify_df.iloc[row]["Sharepoint Link"]
-        #     name = verify_df.iloc[row]["Sharepoint Name"]
-
-        #     if pd.notna(link) and link != "":
-        #         safe_link = escape_excel_formula(link)
-        #         safe_name = escape_excel_formula(name)
-        #         worksheet.write_formula(row + 1, col_link, f'=HYPERLINK("{safe_link}", "{safe_name}")')
-         
+        
         vuln_df.to_excel(writer, sheet_name="Vulnerability", index=False) 
         exception_df.to_excel(writer, sheet_name="Exception", index=False) 
         
