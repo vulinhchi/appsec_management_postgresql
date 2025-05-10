@@ -454,45 +454,35 @@ def export_appsec_tasks(request):
         except:
             return False
 
+    def input_link(name_df, writer, sheet="Verify Request" ):
+
+        # Chỉ ghi các cột bạn muốn (loại bỏ 'Sharepoint Name')
+        export_df = name_df.drop(columns=["Sharepoint Name"])
+        export_df.to_excel(writer, sheet_name=sheet, index=False)
+
+        worksheet = writer.sheets[sheet]
+        col_link = export_df.columns.get_loc("Sharepoint Link")
+
+        for row in range(len(export_df)):
+            link = name_df.iloc[row]["Sharepoint Link"]      # vẫn lấy từ verify_df gốc
+            name = name_df.iloc[row]["Sharepoint Name"]      # dùng làm text hiển thị
+
+            if pd.notna(link) and str(link).strip() != "":
+                worksheet.write_url(
+                    row + 1,
+                    col_link,
+                    str(link),
+                    string=str(name)
+                )
+
     output = BytesIO()
 
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         verify_df.to_excel(writer, sheet_name="Verify Request", index=False)
-        worksheet = writer.sheets["Verify Request"]
-        col_link = verify_df.columns.get_loc("Sharepoint Link")
-
-        for row in range(len(verify_df)):
-            link = verify_df.iloc[row]["Sharepoint Link"]
-            name = verify_df.iloc[row]["Sharepoint Name"]
-
-            if pd.notna(link) and str(link).strip() != "":
-                link_str = str(link).strip()
-                name_str = str(name).strip()
-
-                if is_valid_url(link_str):
-                    worksheet.write_url(row + 1, col_link, link_str, string=name_str)
-                else:
-                    # Fallback: ghi như chuỗi thường (hoặc dùng công thức nếu thật sự cần)
-                    worksheet.write(row + 1, col_link, name_str)
-
+        input_link(verify_df, writer, "Verify Request")
+        
         pentest_df.to_excel(writer, sheet_name="Pentest Request", index=False)
-        worksheet = writer.sheets["Pentest Request"]
-        col_link = pentest_df.columns.get_loc("Sharepoint Link")
-
-        for row in range(len(pentest_df)):
-            link = pentest_df.iloc[row]["Sharepoint Link"]
-            name = pentest_df.iloc[row]["Sharepoint Name"]
-
-            if pd.notna(link) and str(link).strip() != "":
-                link_str = str(link).strip()
-                name_str = str(name).strip()
-
-                if is_valid_url(link_str):
-                    worksheet.write_url(row + 1, col_link, link_str, string=name_str)
-                else:
-                    # Fallback: ghi như chuỗi thường (hoặc dùng công thức nếu thật sự cần)
-                    worksheet.write(row + 1, col_link, name_str)
-
+        input_link(pentest_df, writer, "Pentest Request")
         
         vuln_df.to_excel(writer, sheet_name="Vulnerability", index=False) 
         exception_df.to_excel(writer, sheet_name="Exception", index=False) 
