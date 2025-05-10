@@ -117,6 +117,13 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
+                            <a href="{% url 'pentest_task:list_all_vulnerabilities' %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List All Vulnerabilites</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{% url 'appsec_task:list_sharecost' %}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>List All Sharecost</p>
@@ -128,6 +135,7 @@
                                 <p>List All Exceptions</p>
                             </a>
                         </li>
+                    
                         
                     </ul>
                 </li>

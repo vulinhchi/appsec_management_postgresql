@@ -23,3 +23,4 @@ whitenoise  # Serve static files
 gunicorn  # Dùng cho deployment
 XlsxWriter>=3.0.0
 django-multiselectfield #dùng để multi choice 
+python-magic #check MIME type
