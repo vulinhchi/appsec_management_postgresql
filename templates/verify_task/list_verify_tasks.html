@@ -68,7 +68,7 @@
                 
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th onclick="sortTable(0)">ID</th>
                             <th>Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
                             <th>Status <br> 
                                 <select class="form-control filter-input" data-column="2">
@@ -81,8 +81,8 @@
                                 </select>
                             </th>
                             <th>PIC ISM <br> <input type="text" class="form-control filter-input" data-column="3"></th>
-                            <th>Start Date </th>
-                            <th>End Date </th>
+                            <th onclick="sortTable(4)">Start Date </th>
+                            <th onclick="sortTable(5)">End Date </th>
                             <th>Owner <br> <input type="text" class="form-control filter-input" data-column="6"></th>
                             <th>Actions</th>
                         </tr>

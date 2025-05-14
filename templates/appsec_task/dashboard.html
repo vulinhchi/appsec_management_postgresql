@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-
 <!-- Dropdown cho Status -->
 <select id="statusFilter" class="form-control">
   <option value="">All Status</option>
@@ -231,7 +230,7 @@ function normalizePIC(picString) {
 function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter = "" ) {
   console.log("statusFilter:", statusFilter);
 
-  console.log("picFilter:", picFilter);
+  console.log("picFilter1111:", picFilter);
   
   const grid = document.getElementById(gridId);
   grid.innerHTML = "";
