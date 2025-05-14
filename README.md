@@ -1,6 +1,6 @@
 # appsec_management_mongo
 
-##Tạo key SSL:
+## Tạo key SSL:
 ```
 openssl req -x509 -nodes -days 365 \
   -newkey rsa:2048 \
@@ -18,19 +18,19 @@ openssl req -x509 -nodes -days 365 \
   -config nginx/ssl/openssl.cnf
 ```
 
-##Build app
-###Tạo account thường
+## Build app
+### Tạo account thường
 - Account `webadmin`
 - Thư mục chứa code /home/webadmin/web
 
-###Tạo image của webapp
+### Tạo image của webapp
 - Chạy lệnh để build toàn bộ code: `docker-compose build`
 Sau khi build xong, sẽ có image `myapp_web:latest`
 
 -  Export tất cả image thành file .tar
 `docker save -o myapp_images.tar myapp_web:latest postgres:latest nginx:latest`
 
-###Build app từ image đã build
+### Build app từ image đã build
 - Sau đó copy file qua server, load image vào Docker:
 `docker load -i myapp_images.tar`
 Có thể check xem đã có những image nào `docker images`
@@ -46,18 +46,18 @@ Có thể check xem đã có những image nào `docker images`
 	`docker run -d -p 8000:8000 --name my_web myapp_web:latest`
 Tương tự với postgres, nginx…
 
-###Tạo account superuser
+### Tạo account superuser
 `docker-compose exec web python manage.py createsuperuser`
 sau khi tạo xong superuser, login tại `https://<ip/domain>/admin`
 
-##Vận hành app
-###Import dữ liệu
+## Vận hành app
+### Import dữ liệu
 
 
-##Backup
+## Backup
 
 
-##Một số câu lệnh có thể cần thiết
+## Một số câu lệnh có thể cần thiết
 `docker-compose down -v`  # Xóa toàn bộ dữ liệu tức là xóa volume DB
 `docker-compose up -d --build` #nếu muốn chạy lại cài đặt thư viện requirement **áp dụng khi build app từ source code**
 `docker-compose up -d` #nếu run lại image, k cài lại thư viện

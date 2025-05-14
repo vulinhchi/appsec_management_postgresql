@@ -10,6 +10,7 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
+      - .:/app
       - static_volume:/app/staticfiles
       - ./media:/app/media  # Nếu cần giữ media từ host
     ports:
@@ -37,6 +38,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - static_volume:/app/staticfiles
       - ./media:/app/media
+      - .:/app
     depends_on:
       - web
     networks:
