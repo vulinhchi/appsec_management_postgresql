@@ -50,6 +50,10 @@ Có thể check xem đã có những image nào `docker images`
 	`docker run -d -p 8000:8000 --name my_web myapp_web:latest`
 Tương tự với postgres, nginx…
 
+### Build table/models
+`docker-compose exec web python manage.py makemigrations pentest_task verify_task appsec_task accounts`
+
+`docker-compose exec web python manage.py migrate`
 ### Tạo account superuser
 `docker-compose exec web python manage.py createsuperuser`
 sau khi tạo xong superuser, login tại `https://<ip/domain>/admin`

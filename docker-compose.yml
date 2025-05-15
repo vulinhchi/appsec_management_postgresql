@@ -1,6 +1,6 @@
 services:
   web:
-    build: .
+    build: . #lúc dùng file docker-compose.yml trên server để run app thì bỏ dòng này ra
     image: myapp_web:latest  # Đặt tên image để export
     container_name: django_web_postgres
     command: >
@@ -10,7 +10,7 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      # - .:/app #lúc build để chạy trên server bằng image thì bỏ ra, còn để dòng này thì khi update code sẽ apply luôn
+      - .:/app #lúc build để chạy trên server bằng image thì bỏ ra, còn để dòng này thì khi update code sẽ apply luôn
       - static_volume:/app/staticfiles
       - ./media:/app/media  # Nếu cần giữ media từ host
     ports:
@@ -38,7 +38,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - static_volume:/app/staticfiles
       - ./media:/app/media
-      # - .:/app  #lúc build để chạy trên server bằng image thì bỏ ra
+      - .:/app  #lúc build để chạy trên server bằng image thì bỏ ra
     depends_on:
       - web
     networks:

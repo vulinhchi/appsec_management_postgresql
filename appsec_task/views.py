@@ -137,7 +137,15 @@ def list_appsec_tasks(request):
     for task in tasks:
         sync_status(task.id)
     return render(request, 'appsec_task/list_appsec_tasks.html', {'tasks': tasks})
+
   
+def parse_component_list(raw_value):
+    if not raw_value:
+        return []
+    parts = [p.strip() for p in raw_value.split(",")]
+    valid = dict(AppSecTask._meta.get_field('component').choices)
+    return [p for p in parts if p in valid]
+
 
 @login_required
 @require_groups(['Pentester', 'Leader'])
@@ -184,8 +192,6 @@ def import_appsec_tasks(request):
                         cell = sheet.cell(row=excel_row, column=excel_col)
                         link_sharepoint = cell.hyperlink.target if cell.hyperlink else None
 
-                    
-
                         appsec_task, created = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
                             'description': safe_str(row.get("Description")),
                             'owner': safe_str(row.get("Owner/Requester")),
@@ -199,6 +205,7 @@ def import_appsec_tasks(request):
                             'is_newapp': safe_str(row.get("NewApp/OldApp?")),
                             'checklist_type': safe_str(row.get("Checklist Type")),
                             'sharecost': safe_str(row.get("Share Cost?")),
+                            'component': parse_component_list(safe_str(row.get("Component"))),
                         })
 
                         if not created:
@@ -215,7 +222,8 @@ def import_appsec_tasks(request):
                             appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
                             appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                             appsec_task.sharecost = safe_str(row.get("Share Cost?"))
-                            appsec_task.component = safe_str(row.get("Component"))
+                            appsec_task.component = parse_component_list(safe_str(row.get("Component")))
+
                             appsec_task.save()
                             print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
                             messages.warning(request, f"❌ Cập nhật AppsecTask: {appsec_name},link_sharepoint: {link_sharepoint}, row: {row.to_dict()}")
@@ -277,7 +285,6 @@ def import_appsec_tasks(request):
 
                         cell = sheet.cell(row=excel_row, column=excel_col)
                         link_sharepoint = cell.hyperlink.target if cell.hyperlink else None
-
                     
                         appsec_task, created = AppSecTask.objects.get_or_create(name=appsec_name, defaults={
                             'description': safe_str(row.get("Description")),
@@ -292,6 +299,7 @@ def import_appsec_tasks(request):
                             'is_newapp': safe_str(row.get("NewApp/OldApp?")),
                             'checklist_type': safe_str(row.get("Checklist Type")),
                             'sharecost': safe_str(row.get("Share Cost?")),
+                            'component': parse_component_list(safe_str(row.get("Component"))),
                         })
 
                         if not created:
@@ -308,7 +316,8 @@ def import_appsec_tasks(request):
                             appsec_task.is_newapp = safe_str(row.get("NewApp/OldApp?"))
                             appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                             appsec_task.sharecost = safe_str(row.get("Share Cost?"))
-                            appsec_task.component = safe_str(row.get("Component"))
+                            appsec_task.component = parse_component_list(safe_str(row.get("Component")))
+                           
                             appsec_task.save()
                             print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
 
@@ -328,7 +337,6 @@ def import_appsec_tasks(request):
                             pentest_task.end_date = safe_date(row.get("Finish pentest date"))
                             pentest_task.start_retest = safe_date(row.get("Start retest date"))
                             pentest_task.end_retest = safe_date(row.get("Finish retest date"))
-                            # pentest_task.component = safe_str(row.get("Component"))
                             pentest_task.save()
                             print(f"🔁 Đã cập nhật PentestTask cho '{appsec_name}'")
                             messages.warning(request, f"❌ Cập nhật PentestTask: {appsec_name}, row: {row.to_dict()}")
@@ -347,7 +355,7 @@ def import_appsec_tasks(request):
                                 end_date=safe_date(row.get("Finish pentest date")),
                                 start_retest=safe_date(row.get("Start retest date")),
                                 end_retest=safe_date(row.get("Finish retest date")),
-                                component=safe_str(row.get("Component")),
+                                
                             )
                             print(f"✅ Tạo PentestTask cho '{appsec_name}'")
                     except Exception as e:
@@ -396,7 +404,8 @@ def export_appsec_tasks(request):
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
             "Share Cost?": task.appsec_task.sharecost,
-            "Component": task.appsec_task.component,
+            "Component": ", ".join(task.appsec_task.component) if task.appsec_task and task.appsec_task.component else "",
+
         })
     verify_df = pd.DataFrame(verify_data)
     # Chuyển sang DataFrame nhưng không export cột 'link_raw'
@@ -431,7 +440,8 @@ def export_appsec_tasks(request):
             "Public Internet/Internal?": task.appsec_task.is_internet if task.appsec_task else "",
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
-            "Component": task.appsec_task.component,
+            "Component": ", ".join(task.appsec_task.component) if task.appsec_task and task.appsec_task.component else "",
+
             "Share Cost?": task.appsec_task.sharecost,
             
         })
