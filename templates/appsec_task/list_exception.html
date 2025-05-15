@@ -91,7 +91,11 @@
                                 <br> 
                                 <input type="text" class="form-control filter-input" data-column="8">
                             </th>
-
+                            <th>
+                                <span onclick="sortTable(9)">Mail Loop</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="9">
+                            </th>
                             
                             <th>Actions</th>
                         </tr>
@@ -109,14 +113,7 @@
                                      {% else %}badge-secondary{% endif %}">
                                 {{ task.status }}
                                 </span>
-                                
-                               <!--  {% if task.status == "Open" %}
-                                    <span class="badge bg-warning text-dark">{{ task.status }}</span>
-                                {% elif task.status == "Closed" %}
-                                    <span class="badge bg-success">{{ task.status }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ task.status }}</span>
-                                {% endif %} -->
+                            
                             </td>
                             
                             <td>
@@ -153,15 +150,15 @@
                             
                             <td>{{ task.exception_date }}</td>
                             <td>{{ task.exception_create }}</td>
-
+                            <td>{{ task.mail_loop }}</td>
                             
                             <td>
                                 <a href="{% url 'appsec_task:exception_detail' appsec_task.id task.id %}" class="btn btn-info">View</a>
                                 <a href="{% url 'appsec_task:exception_edit' appsec_task.id task.id %}" class="btn btn-warning">Edit</a>
                                 <form action="{% url 'appsec_task:exception_delete' appsec_task.id task.id %}" method="POST" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this exception?');">Delete</button>
-                                                </form>
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this exception?');">Delete</button>
+                                </form>
                                 
                             </td>
                         </tr>

@@ -90,6 +90,11 @@
                                 <br> 
                                 <input type="text" class="form-control filter-input" data-column="8">
                             </th>
+                            <th>
+                                <span onclick="sortTable(10)">Mail Loop</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="10">
+                            </th>
                             
                             <th>Actions</th>
                         </tr>
@@ -147,7 +152,7 @@
                             <td>{{ task.exception_date }}</td>
                             <td>{{ task.exception_create }}</td>
                             <td>{{ task.appsec_task.name }}</td>
-                            
+                            <td>{{ task.mail_loop }}</td>
                             <td>
                                 <a href="{% url 'appsec_task:exception_detail' task.appsec_task.id task.id %}" class="btn btn-info">View</a>
                                 <a href="{% url 'appsec_task:exception_edit' task.appsec_task.id task.id %}" class="btn btn-warning">Edit</a>

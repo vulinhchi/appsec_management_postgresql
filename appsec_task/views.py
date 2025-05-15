@@ -373,11 +373,6 @@ def import_appsec_tasks(request):
                 xls = pd.ExcelFile(file)
                 vuln_df = pd.read_excel(xls, sheet_name="Vulnerability")
                 for _, row in vuln_df.iterrows():
-                    # pentest_task_name = safe_str(row.get("Task"))
-                    
-                    # if not pentest_task_name:
-                    #     print("⚠️ Bỏ qua dòng vì không có pentest_task_name:", row.to_dict())
-                    #     continue
                     ref=safe_str(row.get("REF")) #giá trị ref của vulnerability
                     ref_prefix = "-".join(ref.split("-")[:-1]) # Lấy phần trước dấu "-" để lấy giá trị ref của pentest_task
                     ref_prefix = safe_str(ref_prefix)  
@@ -386,31 +381,79 @@ def import_appsec_tasks(request):
                     try:
                         pentest_task = PentestTask.objects.get(ref=ref_prefix)
                         if pentest_task:
-                            print(f"Found pentest_task: {pentest_task}")
+                            print(f"Vulnerability: Found pentest_task: {pentest_task}")
                             messages.success(request, f"Đã tìm thấy PentestTask với ref: {pentest_task.ref}")
                             # messages.warning(request, f"Đã tìm thấy PentestTask với ref: {ref_prefix}")
                         else:
-                            print("No pentest_task found.")
+                            print("Vulnerability: No pentest_task found.")
                             messages.error(request, f"Không tìm thấy PentestTask với ref: {pentest_task.ref}")
+                        # ✅ Bỏ qua nếu Vulnerability đã tồn tại với pentest_task và name_vuln
+                        if Vulnerability.objects.filter(pentest_task=pentest_task, name_vuln=name_vuln_row).exists():
+                            print(f"⚠️ Vulnerability '{name_vuln_row}' đã tồn tại cho task '{ref_prefix}', bỏ qua.")
+                            continue
+
+                        Vulnerability.objects.create(
+                            pentest_task=pentest_task,
+                            ref=ref,
+                            name_vuln=safe_str(row.get("Issue Description ")),
+                            risk_rating=safe_str(row.get("Risk")),
+                            notify_date=safe_date(row.get("Notify")),
+                            status=safe_str(row.get("Status")),
+                        )
                     except PentestTask.DoesNotExist:
-                        messages.warning(request, f"Không tìm thấy PentestTask với ref: {ref_prefix}")
+                        messages.warning(request, f"Vulnerability: Không tìm thấy PentestTask với ref: {ref_prefix}")
                         continue
-
-                    # ✅ Bỏ qua nếu Vulnerability đã tồn tại với pentest_task và name_vuln
-                    if Vulnerability.objects.filter(pentest_task=pentest_task, name_vuln=name_vuln_row).exists():
-                        print(f"⚠️ Vulnerability '{name_vuln_row}' đã tồn tại cho task '{ref_prefix}', bỏ qua.")
-                        continue
-
-                    Vulnerability.objects.create(
-                        pentest_task=pentest_task,
-                        ref=ref,
-                        name_vuln=safe_str(row.get("Issue Description ")),
-                        risk_rating=safe_str(row.get("Risk")),
-                        notify_date=safe_date(request,row.get("Notify")),
-                        status=safe_str(row.get("Status")),
-                    )
            
-                messages.success(request, "✅ Tasks and Vulnerability imported and updated successfully!")
+                # Sheet 4: Exception
+                xls = pd.ExcelFile(file)
+                exception_df = pd.read_excel(xls, sheet_name="Exception")
+                
+                for _, row in exception_df.iterrows():
+                    try:
+                        task_name = safe_str(row.get("Task"))
+                        if not task_name:
+                            print("⚠️ Bỏ qua dòng vì không có task_name:", row.to_dict())
+                            continue
+
+                        try:
+                            appsec_task = AppSecTask.objects.get(name=task_name)
+                            messages.success(request, f"✅ Excpetion: Đã tìm thấy AppSecTask: {task_name}")
+                        except AppSecTask.DoesNotExist:
+                            messages.warning(request, f"❌ Excpetion: Không tìm thấy AppSecTask: {task_name}")
+                            continue
+
+                        vulnerability = safe_str(row.get("Vulnerability"))
+
+                        # Kiểm tra nếu đã có exception trùng task + vulnerability
+                        exception_obj = SecurityException.objects.get(appsec_task=appsec_task, vulnerability=vulnerability)
+                            # Nếu đã tồn tại → update
+                        if exception_obj:
+                            exception_obj.risk = safe_str(row.get("Risk Level"))
+                            exception_obj.status = safe_str(row.get("Status Exception"))
+                            exception_obj.exception_date = safe_date(row.get("Exception Expire Date"))
+                            exception_obj.exception_create = safe_date(row.get("Exception Create Date"))
+                            exception_obj.mail_loop = safe_str(row.get("Mail Loop"))
+                            exception_obj.save()
+                            print(f"✅ Đã cập nhật Exception: {vulnerability} cho task: {task_name}")
+                        else:
+                            # Nếu chưa tồn tại → tạo mới
+                            SecurityException.objects.create(
+                                appsec_task=appsec_task,
+                                vulnerability=vulnerability,
+                                risk=safe_str(row.get("Risk Level")),
+                                status=safe_str(row.get("Status Exception")),
+                                exception_date=safe_date(row.get("Exception Expire Date")),
+                                exception_create=safe_date(row.get("Exception Create Date")),
+                                mail_loop=safe_str(row.get("Mail Loop")),
+                            )
+                            print(f"✅ Đã tạo mới Exception: {vulnerability} cho task: {task_name}")
+
+                    except Exception as e:
+                        messages.error(request, f"❌ Error in Exception import: {e}, row: {row.to_dict()}")
+                        continue
+
+   
+                messages.success(request, "✅ Tasks, Vulnerability and Exception imported and updated successfully!")
 
             except Exception as e:
                 messages.error(request, f"❌ Lỗi đọc file hoặc xử lý tổng quát: {e}")
@@ -519,18 +562,18 @@ def export_appsec_tasks(request):
     exception_data = []
     for exception in security_exceptions:
         exception_data.append({
-            "task_name": exception.appsec_task.name if exception.appsec_task else "",
-            "environment_prod": exception.appsec_task.environment_prod if exception.appsec_task else "",
-            "vulnerability": exception.vulnerability,
-            "risk_level": exception.risk_level,
-            "status": exception.status,
-            "exception_create":exception.exception_create,
-            "exception_date":exception.exception_date,
-            "owner":exception.appsec_task.owner,
+            "Task": exception.appsec_task.name if exception.appsec_task else "",
+            "Application/Domain name": exception.appsec_task.environment_prod if exception.appsec_task else "",
+            "Vulnerability": exception.vulnerability,
+            "Risk Level": exception.risk_level,
+            "Status Exception": exception.status,
+            "Exception Create Date":exception.exception_create,
+            "Exception Expire Date":exception.exception_date,
+            "Owner/PIC":exception.appsec_task.owner,
 
-            "PIC_ISM": exception.appsec_task.PIC_ISM,
-            "mail_loop": exception.appsec_task.mail_loop if exception.appsec_task else "",
-            "link_sharepoint": exception.appsec_task.link_sharepoint if exception.appsec_task else "",
+            "PIC ISM": exception.appsec_task.PIC_ISM,
+            "Mail Loop": exception.mail_loop,
+            "Sharepoint link": exception.appsec_task.link_sharepoint if exception.appsec_task else "",
         })
     exception_df = pd.DataFrame(exception_data)
 

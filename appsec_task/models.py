@@ -127,6 +127,8 @@ class SecurityException(models.Model):
     exception_date = models.DateField(blank=True, null=True)
     exception_create = models.DateField(blank=True, null=True)
 
+    mail_loop = models.TextField(blank=True, null=True)
+   
     def __str__(self):
         return f"[{self.vulnerability}] Exception for {self.appsec_task}"
 
