@@ -32,6 +32,7 @@
         <label><input type="checkbox" class="column-toggle" data-column="14" checked> Checklist Type</label>
         <label><input type="checkbox" class="column-toggle" data-column="15" checked> Share Cost? </label>
         <label><input type="checkbox" class="column-toggle" data-column="16" checked> Component</label>
+        <label><input type="checkbox" class="column-toggle" data-column="17" checked> Pentest Vendor</label>
         
     </div>
 
@@ -75,7 +76,7 @@
                             <option value="Not Start">Not Start</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Interrupt">Interrupt</option>
-                            <option value="Completed">Completed</option>
+                            <option value="Done">Done</option>
                             <option value="Cancel">Cancel</option>
                         </select>
                     </div>
@@ -141,7 +142,7 @@
                                     <option value="Not Start">Not Start</option>
                                     <option value="In Progress">In Progress</option>
                                     <option value="Interrupt">Interrupt</option>
-                                    <option value="Completed">Completed</option>
+                                    <option value="Done">Done</option>
                                     <option value="Cancel">Cancel</option>
                                 </select>
                             </th>
@@ -159,7 +160,7 @@
                             </th>
 
                             <th>
-                                <span onclick="sortTable(6)">Production URL </span>
+                                <span>Production URL </span>
                                 <br> 
                                 <input type="text" class="form-control filter-input" data-column="6">
                             </th>
@@ -224,6 +225,11 @@
                                     
                                 </select>
                             </th>
+                            <th>
+                                <span>Pentest Vendor</span>
+                                <br> 
+                                <input type="text" class="form-control filter-input" data-column="17">
+                            </th>
                             
                             <th>Pentest</th>
                             <th>Verify</th>
@@ -271,6 +277,7 @@
                             <td>{{ task.checklist_type }}</td>
                             <td>{{ task.sharecost }}</td>
                             <td>{{ task.component }}</td>
+                            <td>{{ task.pentest_vendor }}</td>
                             <td>
                                 
                                 {% with pentest_task=task.pentest_tasks.first %}

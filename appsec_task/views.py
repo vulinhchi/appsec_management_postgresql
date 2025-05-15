@@ -206,6 +206,7 @@ def import_appsec_tasks(request):
                             'checklist_type': safe_str(row.get("Checklist Type")),
                             'sharecost': safe_str(row.get("Share Cost?")),
                             'component': parse_component_list(safe_str(row.get("Component"))),
+                            'pentest_vendor': safe_str(row.get("Pentest Vendor")),
                         })
 
                         if not created:
@@ -223,7 +224,8 @@ def import_appsec_tasks(request):
                             appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                             appsec_task.sharecost = safe_str(row.get("Share Cost?"))
                             appsec_task.component = parse_component_list(safe_str(row.get("Component")))
-
+                            appsec_task.pentest_vendor = safe_str(row.get("Pentest Vendor"))
+                            
                             appsec_task.save()
                             print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
                             messages.warning(request, f"❌ Cập nhật AppsecTask: {appsec_name},link_sharepoint: {link_sharepoint}, row: {row.to_dict()}")
@@ -300,6 +302,7 @@ def import_appsec_tasks(request):
                             'checklist_type': safe_str(row.get("Checklist Type")),
                             'sharecost': safe_str(row.get("Share Cost?")),
                             'component': parse_component_list(safe_str(row.get("Component"))),
+                            'pentest_vendor': safe_str(row.get("Pentest Vendor")),
                         })
 
                         if not created:
@@ -317,6 +320,7 @@ def import_appsec_tasks(request):
                             appsec_task.checklist_type = safe_str(row.get("Checklist Type"))
                             appsec_task.sharecost = safe_str(row.get("Share Cost?"))
                             appsec_task.component = parse_component_list(safe_str(row.get("Component")))
+                            appsec_task.pentest_vendor = safe_str(row.get("Pentest Vendor"))
                            
                             appsec_task.save()
                             print(f"🔁 Đã cập nhật AppSecTask '{appsec_name}'")
@@ -449,7 +453,7 @@ def export_appsec_tasks(request):
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
             "Share Cost?": task.appsec_task.sharecost,
             "Component": ", ".join(task.appsec_task.component) if task.appsec_task and task.appsec_task.component else "",
-
+            "Pentest Vendor": task.appsec_task.pentest_vendor,
         })
     verify_df = pd.DataFrame(verify_data)
     # Chuyển sang DataFrame nhưng không export cột 'link_raw'
@@ -485,7 +489,7 @@ def export_appsec_tasks(request):
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
             "Component": ", ".join(task.appsec_task.component) if task.appsec_task and task.appsec_task.component else "",
-
+            "Pentest Vendor": task.appsec_task.pentest_vendor,
             "Share Cost?": task.appsec_task.sharecost,
             
         })

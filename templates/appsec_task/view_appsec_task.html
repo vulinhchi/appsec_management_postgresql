@@ -110,7 +110,7 @@
                                     <span class="badge bg-danger">{{ form.status }}</span>
                                 {% elif form.status == "Interrupt" %}
                                     <span class="badge bg-danger text-dark">{{ form.status }}</span>
-                                {% elif form.status == "Completed" %}
+                                {% elif form.status == "Done" %}
                                     <span class="badge bg-success">{{ form.status }}</span>
                                 {% elif form.status == "Cancel" %}
                                     <span class="badge bg-danger text-dark">{{ form.status }}</span>
@@ -365,6 +365,25 @@
                                 </div>
                                 <div class="card-body">
                                   {{ form.component }}
+                                </div>
+                              </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="card card-outline card-danger">
+                                <div class="card-header">
+                                  <h3 class="card-title">
+                                    <b>Pentest Vendor</b>
+                                  </h3>
+                                  <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                      <i class="fas fa-minus"></i>
+                                    </button>
+                                  </div>
+
+                                </div>
+                                <div class="card-body">
+                                  {{ form.pentest_vendor }}
                                 </div>
                               </div>
                         </div>

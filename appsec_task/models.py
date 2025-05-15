@@ -56,6 +56,7 @@ class AppSecTask(models.Model):
     is_internet = models.CharField(max_length=50, choices=INTERNET_CHOICES, default='Internet', null=True, blank=True)
     is_newapp = models.CharField(max_length=50, choices=IS_NEWAPP_CHOICES, default='New App', null=True, blank=True)
     checklist_type = models.CharField(max_length=200, choices=CHECKLIST_TYPE_CHOICES, default='Full Checklist', null=True, blank=True)
+    pentest_vendor = models.CharField(max_length=250, null=True, blank=True)
     sharecost = models.CharField(max_length=10, choices=SHARE_COST_CHOICES, default='No',null=True, blank=True)
     # component = models.CharField(max_length=200, choices=COMPONENT_CHOICES, default='Web Application',null=True, blank=True)
     component = MultiSelectField(choices=COMPONENT_CHOICES, blank=True, null=True)
