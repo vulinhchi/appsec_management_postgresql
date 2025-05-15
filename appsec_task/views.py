@@ -362,7 +362,51 @@ def import_appsec_tasks(request):
                         messages.error(request, f"❌ Lỗi tạo/cập nhật PentestTask: {e}, row: {row.to_dict()}")
                         traceback.print_exc()
 
-                messages.success(request, "✅ Tasks imported and updated successfully!")
+                
+                # Sheet 3: Vulnerability
+                
+                vulnerabilities = set()
+                xls = pd.ExcelFile(file)
+                vuln_df = pd.read_excel(xls, sheet_name="Vulnerability")
+                for _, row in vuln_df.iterrows():
+                    # pentest_task_name = safe_str(row.get("Task"))
+                    
+                    # if not pentest_task_name:
+                    #     print("⚠️ Bỏ qua dòng vì không có pentest_task_name:", row.to_dict())
+                    #     continue
+                    ref=safe_str(row.get("REF")) #giá trị ref của vulnerability
+                    ref_prefix = "-".join(ref.split("-")[:-1]) # Lấy phần trước dấu "-" để lấy giá trị ref của pentest_task
+                    ref_prefix = safe_str(ref_prefix)  
+                    name_vuln_row = safe_str(row.get("Issue Description "))
+                    
+                    try:
+                        pentest_task = PentestTask.objects.get(ref=ref_prefix)
+                        if pentest_task:
+                            print(f"Found pentest_task: {pentest_task}")
+                            messages.success(request, f"Đã tìm thấy PentestTask với ref: {pentest_task.ref}")
+                            # messages.warning(request, f"Đã tìm thấy PentestTask với ref: {ref_prefix}")
+                        else:
+                            print("No pentest_task found.")
+                            messages.error(request, f"Không tìm thấy PentestTask với ref: {pentest_task.ref}")
+                    except PentestTask.DoesNotExist:
+                        messages.warning(request, f"Không tìm thấy PentestTask với ref: {ref_prefix}")
+                        continue
+
+                    # ✅ Bỏ qua nếu Vulnerability đã tồn tại với pentest_task và name_vuln
+                    if Vulnerability.objects.filter(pentest_task=pentest_task, name_vuln=name_vuln_row).exists():
+                        print(f"⚠️ Vulnerability '{name_vuln_row}' đã tồn tại cho task '{ref_prefix}', bỏ qua.")
+                        continue
+
+                    Vulnerability.objects.create(
+                        pentest_task=pentest_task,
+                        ref=ref,
+                        name_vuln=safe_str(row.get("Issue Description ")),
+                        risk_rating=safe_str(row.get("Risk")),
+                        notify_date=safe_date(request,row.get("Notify")),
+                        status=safe_str(row.get("Status")),
+                    )
+           
+                messages.success(request, "✅ Tasks and Vulnerability imported and updated successfully!")
 
             except Exception as e:
                 messages.error(request, f"❌ Lỗi đọc file hoặc xử lý tổng quát: {e}")
