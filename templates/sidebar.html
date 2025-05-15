@@ -164,22 +164,34 @@
                         
                     </ul>
                 </li>
-                <!-- Ticket -->
-                <li class="nav-item">
-                    <a href="{% url 'pentest_task:list_pentest_tasks' %}" class="nav-link">
-                        <i class="nav-icon fas fa-ticket-alt"></i>
-                        <p>Ticket</p>
-                    </a>
-                </li>
-
+                
                 <!-- logout -->
-                <li class="nav-item">
-                    <a href="{% url 'logout' %}" class="nav-link text-danger">
-                        <i class="nav-icon fas fa-sign-out-alt"></i>
-                        <p>Logout</p>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bug"></i>
+                        <p>
+                            Account
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'password_change'  %}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Change Password</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'logout' %}" class="nav-link text-danger">
+                                <i class="nav-icon fas fa-sign-out-alt"></i>
+                                <p>Logout</p>
+                            </a>
+                        </li>
+                        
+                    </ul>
                 </li>
 
+                
             </ul>
         </nav>
     </div>
