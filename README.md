@@ -27,9 +27,13 @@ openssl req -x509 -nodes -days 365 \
 - Chạy lệnh để build toàn bộ code: `docker-compose build`
 Sau khi build xong, sẽ có image `myapp_web:latest`
 
--  Export tất cả image thành file .tar
-`docker save -o myapp_images.tar myapp_web:latest postgres:latest nginx:latest`
+- Nếu chỉ muốn build 1 web image thôi: `docker build -t myapp_web:latest .` (cũng k cần lắm, cứ build hết rồi nén file .tar riêng sau)
 
+-  Import tất cả image thành file .tar
+`docker save -o myapp_images.tar myapp_web:latest postgres:latest nginx:latest`
+Nếu chỉ cần nén 1 image thôi: `docker save -o myapp_web.tar myapp_web:latest`
+
+Có thể lỗi không đủ space, chạy `docker image prune -a`  `docker system prune -a --volumes` để xóa image k dùng tới
 ### Build app từ image đã build
 - Sau đó copy file qua server, load image vào Docker:
 `docker load -i myapp_images.tar`

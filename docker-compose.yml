@@ -10,7 +10,7 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app
+      # - .:/app #lúc build để chạy trên server bằng image thì bỏ ra, còn để dòng này thì khi update code sẽ apply luôn
       - static_volume:/app/staticfiles
       - ./media:/app/media  # Nếu cần giữ media từ host
     ports:
@@ -38,7 +38,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - static_volume:/app/staticfiles
       - ./media:/app/media
-      - .:/app
+      # - .:/app  #lúc build để chạy trên server bằng image thì bỏ ra
     depends_on:
       - web
     networks:
