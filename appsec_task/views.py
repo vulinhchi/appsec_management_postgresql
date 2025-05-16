@@ -425,7 +425,10 @@ def import_appsec_tasks(request):
                         vulnerability = safe_str(row.get("Vulnerability"))
 
                         # Kiểm tra nếu đã có exception trùng task + vulnerability
-                        exception_obj = SecurityException.objects.get(appsec_task=appsec_task, vulnerability=vulnerability)
+                        exception_obj = SecurityException.objects.filter(
+                            appsec_task=appsec_task,
+                            vulnerability=vulnerability
+                        ).first()
                             # Nếu đã tồn tại → update
                         if exception_obj:
                             exception_obj.risk = safe_str(row.get("Risk Level"))

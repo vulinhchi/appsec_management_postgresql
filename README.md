@@ -34,6 +34,8 @@ Sau khi build xong, sẽ có image `myapp_web:latest`
 Nếu chỉ cần nén 1 image thôi: `docker save -o myapp_web.tar myapp_web:latest`
 
 Có thể lỗi không đủ space, chạy `docker image prune -a`  `docker system prune -a --volumes` để xóa image k dùng tới
+Hoặc xóa từng images, container
+
 ### Build app từ image đã build
 - Sau đó copy file qua server, load image vào Docker:
 `docker load -i myapp_images.tar`
@@ -71,4 +73,9 @@ sau khi tạo xong superuser, login tại `https://<ip/domain>/admin`
 `docker-compose up -d` #nếu run lại image, k cài lại thư viện
 `docker-compose restart web` #nếu chỉ cần restart container web để apply code mới.
 `docker-compose exec web bash` #access vào container
+`docker images` #list all image
+`docker rmi -f <image id>` # xóa image theo id
+`docker ps -a` #list all container, kể cả container k running
+`docker stop < container id>` #stop container đang running
+`docker rm <container id>`# xóa container cụ thể
 
