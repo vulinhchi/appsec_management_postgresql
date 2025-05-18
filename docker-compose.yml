@@ -1,7 +1,7 @@
 services:
   web:
     build: . #lúc dùng file docker-compose.yml trên server để run app thì bỏ dòng này ra
-    image: myapp_web:v1_16M  # Đặt tên image để export
+    image: myapp_web:v2_18May  # Đặt tên image để export
     container_name: django_web_v1
     command: >
       sh -c "python manage.py collectstatic --noinput &&
@@ -10,7 +10,7 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app #lúc build để chạy trên server bằng image thì bỏ ra, còn để dòng này thì khi update code sẽ apply luôn
+      # - .:/app #lúc build để chạy trên server bằng image thì bỏ ra, còn để dòng này thì khi update code sẽ apply luôn
       - static_volume:/app/staticfiles
       - ./media:/app/media  # Nếu cần giữ media từ host
     ports:
@@ -29,7 +29,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx_https_v1
+    container_name: nginx_https_v2
     ports:
       - "443:443"
       - "80:80"
@@ -38,7 +38,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - static_volume:/app/staticfiles
       - ./media:/app/media
-      - .:/app  #lúc build để chạy trên server bằng image thì bỏ ra
+      # - .:/app  #lúc build để chạy trên server bằng image thì bỏ ra
     depends_on:
       - web
     networks:
@@ -46,7 +46,7 @@ services:
 
   db:
     image: postgres:latest
-    container_name: django_db_v1
+    container_name: django_db_v2
     restart: always
     environment:
       - POSTGRES_DB=taskdb
