@@ -840,6 +840,7 @@ def import_sharecost(request):
                         appsec_task = AppSecTask.objects.get(name=task_name)
                         
                     except AppSecTask.DoesNotExist:
+                        messages.warning(request, f"❌ Sharecost: Không tìm thấy AppSecTask: {task_name}")
                         continue
 
                     sharecost_obj = ShareCostDetails.objects.filter(appsec_task=appsec_task).first()
@@ -853,7 +854,7 @@ def import_sharecost(request):
                         sharecost_obj.pay_status = safe_str(row.get("Pay Status"))
                         sharecost_obj.note = safe_str(row.get("Note"))
                         sharecost_obj.save()
-                        messages.success(request, f"✅ Sharecost: updated Sharecost for AppSecTask: {task_name}")
+                        messages.warning(request, f"✅ Sharecost: updated Sharecost for AppSecTask: {task_name}")
                         print(f"✅ Sharecost: updated Sharecost for AppSecTask: {task_name}")
                     else:
                         ShareCostDetails.objects.create(
