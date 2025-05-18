@@ -632,7 +632,7 @@ def export_appsec_tasks(request):
     output.seek(0)
     response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"ISM AppSec FollowUp_{today_str}.xlsx"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
