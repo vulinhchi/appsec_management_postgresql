@@ -8,7 +8,7 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Add/Edit Sharecost</h1>
+                <h1 class="m-0">Add/Edit Sharecost for {{appsec_task.name}}</h1>
             </div>
         </div>
     </div>
@@ -50,7 +50,7 @@
                     <div class="card card-outline card-danger">
                         <div class="card-header">
                           <h3 class="card-title">
-                            <b>PIC</b>
+                            <b>Pentest Vendor</b>
                           </h3>
                           <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -60,7 +60,25 @@
 
                         </div>
                         <div class="card-body">
-                          {{ form.pic }}
+                          {{ appsec_task.pentest_vendor}}
+                        </div>
+                      </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="card card-outline card-danger">
+                        <div class="card-header">
+                          <h3 class="card-title">
+                            <b>Sharecost?</b>
+                          </h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                          </div>
+
+                        </div>
+                        <div class="card-body">
+                          {{ appsec_task.sharecost}}
                         </div>
                       </div>
                 </div>
@@ -205,7 +223,7 @@
                 
             </div>
             <button type="submit" class="btn btn-primary">Create/Edit Sharecost</button>
-            <a href="{% url 'appsec_task:list_appsec_tasks' %}" class="btn btn-secondary">Back to Appsec Task List</a>
+            <a href="{% url 'appsec_task:list_sharecost' %}" class="btn btn-secondary">Back to Sharecost List</a>
         </div>
       
     </form>

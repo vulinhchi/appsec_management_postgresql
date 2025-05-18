@@ -721,6 +721,8 @@ def add_sharecost(request, appsec_task_id):
         if form.is_valid():
             share_cost = form.save(commit=False)
             share_cost.appsec_task = appsec_task
+            share_cost.pentest_vendor = appsec_task.pentest_vendor
+
             share_cost.save()
             messages.success(request, "Sharecost created successfully.")
             return redirect('appsec_task:list_sharecost')
@@ -735,17 +737,13 @@ def edit_sharecost(request, appsec_task_id, sharecost_id):
     appsec_task = get_object_or_404(AppSecTask, id=appsec_task_id)
     sharecost = get_object_or_404(ShareCostDetails, id=sharecost_id, appsec_task=appsec_task)
 
-    # sharecost = get_object_or_404(ShareCostDetails, id=sharecost_id)
-    # if sharecost.appsec_task.id != appsec_task_id:
-    #     raise PermissionDenied("Sharecost không thuộc về Appsec Task này.")
-
-    # appsec_task = sharecost.appsec_task  # Lấy AppSecTask liên kết
-    
     if request.method == "POST":
         form = ShareCostDetailsForm(request.POST, instance=sharecost)
         if form.is_valid():
             share_cost = form.save(commit=False)
             share_cost.appsec_task = appsec_task
+            share_cost.pentest_vendor = appsec_task.pentest_vendor
+
             share_cost.save()
             
             return redirect("appsec_task:list_sharecost")
@@ -793,10 +791,10 @@ def export_sharecost_excel(request):
     # Tạo workbook Excel
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "ShareCost Report"
+    ws.title = "ShareCost"
 
     # Header
-    headers = ["Task Name", "Sharecost?", "PIC", "Project Code", "Owner", "Cost (MM)",  "Cost Dolla", "Month Pay", "Pay Status", "Note",]
+    headers = ["Task", "Sharecost?", "Pentest Vendor", "Project Code", "Owner", "Cost (MM)",  "Cost Dolla", "Month Pay", "Pay Status", "Note",]
     ws.append(headers)
 
     # Data rows
@@ -804,11 +802,11 @@ def export_sharecost_excel(request):
         ws.append([
             obj.appsec_task.name if obj.appsec_task else "",  # lấy tên task
             obj.appsec_task.sharecost,
-            obj.pic,
+            obj.appsec_task.pentest_vendor,
             obj.project_code,
             obj.owner,
-            float(obj.cost_mm.to_decimal()) if obj.cost_mm else 0,
-            float(obj.cost_dolla.to_decimal()) if obj.cost_dolla else 0,
+            float(obj.cost_mm) if obj.cost_mm else 0,
+            float(obj.cost_dolla) if obj.cost_dolla else 0,
             obj.month_pay,
             obj.pay_status,
             obj.note,
@@ -820,6 +818,70 @@ def export_sharecost_excel(request):
     response["Content-Disposition"] = 'attachment; filename=sharecost_report.xlsx'
     wb.save(response)
     return response
+
+@login_required
+@require_groups(['Leader', 'Manager'])
+def import_sharecost(request):
+    if request.method == "POST" and request.FILES.get("task_file"):
+        file = request.FILES["task_file"]
+        try:
+            handle_uploaded_file(file)
+            xls = pd.ExcelFile(file)
+            sharecost_df = pd.read_excel(xls, sheet_name="ShareCost")
+
+            for _, row in sharecost_df.iterrows():
+                try:
+                    task_name = safe_str(row.get("Task"))
+                    if not task_name:
+                        print("⚠️ Bỏ qua dòng vì không có task_name:", row.to_dict())
+                        continue
+
+                    try:
+                        appsec_task = AppSecTask.objects.get(name=task_name)
+                        
+                    except AppSecTask.DoesNotExist:
+                        continue
+
+                    sharecost_obj = ShareCostDetails.objects.filter(appsec_task=appsec_task).first()
+                    
+                    if sharecost_obj:
+                        sharecost_obj.project_code = safe_str(row.get("Project Code"))
+                        sharecost_obj.owner = safe_str(row.get("Owner"))
+                        sharecost_obj.cost_mm = row.get("Cost (MM)")
+                        sharecost_obj.cost_dolla = row.get("Cost Dolla")
+                        sharecost_obj.month_pay = safe_str(row.get("Month Pay"))
+                        sharecost_obj.pay_status = safe_str(row.get("Pay Status"))
+                        sharecost_obj.note = safe_str(row.get("Note"))
+                        sharecost_obj.save()
+                        messages.success(request, f"✅ Sharecost: updated Sharecost for AppSecTask: {task_name}")
+                        print(f"✅ Sharecost: updated Sharecost for AppSecTask: {task_name}")
+                    else:
+                        ShareCostDetails.objects.create(
+                            appsec_task=appsec_task,
+                            project_code=safe_str(row.get("Project Code")),
+                            owner=safe_str(row.get("Owner")),
+                            cost_mm=row.get("Cost (MM)"),
+                            cost_dolla=row.get("Cost Dolla"),
+                            month_pay=safe_str(row.get("Month Pay")),
+                            pay_status=safe_str(row.get("Pay Status")),
+                            note=safe_str(row.get("Note")),
+                        )
+                        messages.success(request, f"✅ Sharecost: created Sharecost for AppSecTask: {task_name}")
+                        print(f"✅ Sharecost: created Sharecost for AppSecTask: {task_name}")
+
+                except Exception as e:
+                    print(f"❌ Error in Sharecost import: {e}, row: {row.to_dict()}")
+                    messages.error(request, f"❌ Error in Sharecost import: {e}, row: {row.to_dict()}")
+                    continue
+
+        except Exception as e:
+            traceback.print_exc()
+            messages.error(request, f"❌ Error while processing import sharecost data: {e}")
+            return HttpResponse(f"Lỗi xử lý file: {e}", status=500)
+
+        return redirect("appsec_task:list_sharecost")
+
+    return HttpResponseBadRequest("❌ No file uploaded.")
 
 
 @login_required

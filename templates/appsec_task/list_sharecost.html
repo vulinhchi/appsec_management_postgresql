@@ -5,6 +5,17 @@
 
 
 <a href="{% url 'appsec_task:export_sharecost_excel' %}" class="btn btn-primary">Export Sharecost Excel</a>
+<form method="POST" enctype="multipart/form-data" action="{% url 'appsec_task:import_sharecost' %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <input type="file" name="task_file" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-success">Import Sharecost</button>
+        </div>
+    </div>
+</form>  
 <div class="content">
     <div class="container-fluid">
         <div class="card">
@@ -34,13 +45,9 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label>PIC Pentest</label>
-                        <select class="form-control filter-input" data-column="3">
-                            <option value="">All</option>
-                            <option value="ISM">ISM</option>
-                            <option value="SAS">SAS</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <label>Pentest Vendor</label><br>
+                        <input type="text" class="form-control filter-input" data-column="3"> 
+                        
                     </div>
                     <div class="col-md-3">
                         <label>Month Pay</label>
@@ -89,16 +96,10 @@
                         </th>
                         <!-- <th onclick="sortTable(0)">AppSec Name</th> -->
                         <th>
-                            <span onclick="sortTable(3)">PIC  </span>
+                            <span onclick="sortTable(3)">Pentest Vendor  </span>
                             <br>
-                            <select class="form-control filter-input" data-column="3">
-                                <option value="">All</option>
-                                <option value="ISM">ISM</option>
-                                <option value="SAS">SAS</option>
-                                <option value="Other">Other</option>
-                                
-                            </select>
-
+                            <input type="text" class="form-control filter-input" data-column="3"> 
+                            
                         </th>
                         <th>
                             <span>Project Code </span>
@@ -144,7 +145,7 @@
                         <td>{{ task.id }}</td>
                         <td>{{ task.appsec_task.name }}</td>
                         <td>{{ task.appsec_task.sharecost }}</td>
-                        <td>{{ task.pic }}</td>
+                        <td>{{ task.appsec_task.pentest_vendor }}</td>
                         
                         <td>{{ task.project_code }}</td>
                         <td>{{ task.owner }}</td>

@@ -9,7 +9,7 @@ class AppSecTaskForm(forms.ModelForm):
             'PIC_ISM', 
             'environment_prod', 'owner', 'mail_loop', 'chat_group', 'link_ticket', 
             'link_sharepoint', 'is_internet', 'is_newapp', 'checklist_type', 'sharecost',
-            'is_pentest_task', 'is_verify_task', 'component'
+            'is_pentest_task', 'is_verify_task', 'component', 'pentest_vendor'
         ]
     def clean(self):
         """Kiểm tra lỗi khi nhập dữ liệu từ form."""
@@ -23,8 +23,8 @@ class AppSecTaskForm(forms.ModelForm):
 class ShareCostDetailsForm(forms.ModelForm):
     class Meta:
         model = ShareCostDetails
-        fields = ['pic', 'project_code', 'owner', 'cost_mm', 'cost_dolla' , 'month_pay', 'pay_status', 'note']
-
+        fields = ['project_code', 'owner', 'cost_mm', 'cost_dolla' , 'month_pay', 'pay_status', 'note']
+        
 
 class SecurityExceptionForm(forms.ModelForm):
     class Meta:

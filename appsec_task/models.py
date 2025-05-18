@@ -47,7 +47,7 @@ class AppSecTask(models.Model):
     end_date = models.DateField(null=True, blank=True)
     # additional information
     environment_prod = models.CharField(max_length=100, null=True, blank=True)
-    owner = models.CharField(max_length=250, null=True, blank=True)
+    owner = models.CharField(max_length=250, null=True, blank=True) # requester
     mail_loop = models.TextField(null=True, blank=True)
     chat_group = models.TextField(null=True, blank=True)
     link_ticket = models.URLField(max_length=500, null=True, blank=True)
@@ -68,12 +68,6 @@ class AppSecTask(models.Model):
 
 
 class ShareCostDetails(models.Model):
-    PIC_CHOICES = [
-        ('ISM', 'ISM'),
-        ('SAS', 'SAS'),
-        ('Other', 'Other'),
-    ]
-    
     PAY_CHOICES = [
         ('Done', 'Done'),
         ('Information Sent', 'Information Sent'),
@@ -81,12 +75,12 @@ class ShareCostDetails(models.Model):
     ]
     
     appsec_task = models.ForeignKey('AppSecTask', on_delete=models.CASCADE, related_name='share_cost_details')
-    pic = models.CharField(max_length=10, choices=PIC_CHOICES, default='ISM')
+    # pentest_vendor = models.CharField(max_length=100, null=True, blank=True)
     project_code = models.CharField(max_length=50,null=True, blank=True)
     owner = models.CharField(max_length=100, null=True, blank=True)
     cost_mm = models.DecimalField(max_digits=100, validators=[MinValueValidator(0)], decimal_places=2, null=True, blank=True) # cost for ISM
     cost_dolla = models.DecimalField(max_digits=100, validators=[MinValueValidator(0)],decimal_places=2, null=True, blank=True) # cost for SAS
-    month_pay = models.CharField(max_length=10, null=True, blank=True)  #month pay
+    month_pay = models.CharField(max_length=101, null=True, blank=True)  #month pay
     pay_status = models.CharField(max_length=20, choices=PAY_CHOICES, default='Not yet', null=True, blank=True)
     note = models.TextField(blank=True, null=True)
 

@@ -22,6 +22,8 @@ urlpatterns = [
     path('appsec/<int:appsec_task_id>/sharecost/<int:sharecost_id>/view/', views.view_sharecost, name='view_sharecost'),
     path('appsec/<int:appsec_task_id>//sharecost/<int:sharecost_id>/delete/', views.delete_sharecost, name='delete_sharecost'),
     path('appsec/export/sharecost/', views.export_sharecost_excel, name='export_sharecost_excel'),
+    path('appsec/import/sharecost/', views.import_sharecost, name='import_sharecost'),
+    
     
     path('appsec/all_exceptions/', views.all_exceptions, name='all_exceptions'),
     path('appsec/<int:appsec_task_id>/exceptions/', views.exception_list, name='exception_list'),

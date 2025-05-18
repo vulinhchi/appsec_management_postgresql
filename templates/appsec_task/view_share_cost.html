@@ -46,24 +46,42 @@
             <!-- Tab 1: Task Description -->
             <div class="tab-pane fade show active" id="task_description" role="tabpanel">
 	    		
-	    		<div class="col-md-12">
-                    <div class="card card-outline card-danger">
-                        <div class="card-header">
-                          <h3 class="card-title">
-                            <b>PIC cost</b>
-                          </h3>
-                          <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                              <i class="fas fa-minus"></i>
-                            </button>
-                          </div>
-
+	    		     <div class="col-md-12">
+                  <div class="card card-outline card-danger">
+                      <div class="card-header">
+                        <h3 class="card-title">
+                          <b>Pentest Vendor</b>
+                        </h3>
+                        <div class="card-tools">
+                          <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                          </button>
                         </div>
+
+                      </div>
                         <div class="card-body">
-                          {{ form.pic}}
+                          {{ form.appsec_task.pentest_vendor}}
                         </div>
                       </div>
-                </div>
+                 </div>
+                 <div class="col-md-12">
+                  <div class="card card-outline card-danger">
+                      <div class="card-header">
+                        <h3 class="card-title">
+                          <b>Sharecost?</b>
+                        </h3>
+                        <div class="card-tools">
+                          <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                          </button>
+                        </div>
+
+                      </div>
+                        <div class="card-body">
+                          {{ form.appsec_task.sharecost}}
+                        </div>
+                      </div>
+                 </div>
 
                 <div class="col-md-12">
                     <div class="card card-outline card-danger">
@@ -199,7 +217,8 @@
                 </div>
             </div>
 
-			    <a href="{% url 'appsec_task:list_appsec_tasks' %}" class="btn btn-secondary">Back</a>
+			    <a href="{% url 'appsec_task:list_appsec_tasks' %}" class="btn btn-secondary">Back to Appsec Task</a>
+          <a href="{% url 'appsec_task:edit_sharecost' form.appsec_task.id form.id %}" class="btn btn-warning">Edit Sharecost</a>
           <a href="{% url 'appsec_task:list_sharecost' %}" class="btn btn-primary">List Sharecost</a>
 			</div>
 		</div>
