@@ -65,6 +65,16 @@ sau khi tạo xong superuser, login tại `https://<ip/domain>/admin`
 
 
 ## Backup
+1. Backup ALL Database: file `appsec_management_postgresql/backups/backup_db.sh`
+`cd /path/of/backup/script.sh`
+`chmod +x backup_db.sh`
+`./backup_db.sh`
+
+2. Restore ALL Database: file `appsec_management_postgresql/backups/restore_db.sh` 
+and DB file `taskdb_20250524_212014.backup`
+`cd /path/of/restore/script.sh`
+`chmod +x restore_db.sh`
+`./restore_db.sh /path/to/backup/file.backup`
 
 
 ## Một số câu lệnh có thể cần thiết
@@ -78,4 +88,6 @@ sau khi tạo xong superuser, login tại `https://<ip/domain>/admin`
 `docker ps -a` #list all container, kể cả container k running
 `docker stop < container id>` #stop container đang running
 `docker rm <container id>`# xóa container cụ thể
+`docker stop $(docker ps -aq)` # dừng toàn bộ container
+`docker rm $(docker ps -aq)` # xóa toàn bộ container
 

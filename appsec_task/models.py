@@ -14,17 +14,20 @@ class AppSecTask(models.Model):
     INTERNET_CHOICES = [
         ('Internet', 'Internet'),
         ('Internal', 'Internal'),
+        ('None', 'None'),
     ]
     
     IS_NEWAPP_CHOICES = [
         ('New App', 'New App'),
         ('Old App', 'Old App'),
+        ('None', 'None'),
     ]
     
     CHECKLIST_TYPE_CHOICES = [
         ('Full Checklist', 'Full Checklist'),
         ('New Function Checklist', 'New Function Checklist'),
         ('No Checklist', 'No Checklist'),
+        ('None', 'None'),
     ]
     
     SHARE_COST_CHOICES = [
@@ -38,6 +41,7 @@ class AppSecTask(models.Model):
         ('Web Application', 'Web Application'),
         ('API Application','API Application'),
         ('Desktop Application','Desktop Application'),
+        ('None', 'None'),
     ]
 
     name = models.CharField(max_length=255)
