@@ -318,7 +318,7 @@ def import_appsec_tasks(request):
                             appsec_task.owner = safe_str(row.get("Owner/Requester"))
                             appsec_task.environment_prod = safe_str(row.get("Domain PROD"))
                             appsec_task.name_sharepoint = safe_str(row.get("Sharepoint Link"))
-                            appsec_task.link_sharepoint = link_sharepoint
+                            # appsec_task.link_sharepoint = link_sharepoint #bỏ ra để chỉ cần update ở verify_task thôi.
                             appsec_task.link_ticket = safe_str(row.get("Ticket"))
                             appsec_task.mail_loop = safe_str(row.get("Mail loop"))
                             appsec_task.chat_group = safe_str(row.get("Chat group"))
