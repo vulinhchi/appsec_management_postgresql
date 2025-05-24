@@ -31,6 +31,6 @@ urlpatterns = [
     path('appsec/<int:appsec_task_id>/exceptions/<int:pk>/edit/', views.exception_edit, name='exception_edit'),
     path('appsec/<int:appsec_task_id>/exceptions/<int:pk>/delete/', views.exception_delete, name='exception_delete'),
     path('appsec/<int:appsec_task_id>/exceptions/<int:pk>/', views.exception_detail, name='exception_detail'),
-
+    path('appsec/<int:appsec_task_id>/export_exception_template/', views.export_exception_template, name='export_exception_template'),
     path('', views.dashboard, name='dashboard'),
 ]

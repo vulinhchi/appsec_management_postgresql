@@ -30,6 +30,8 @@ class AppSecTask(models.Model):
     SHARE_COST_CHOICES = [
         ('Yes', 'Yes'),
         ('No', 'No'),
+        ('None', 'None'),
+
     ]
     COMPONENT_CHOICES = [
         ('Mobile Application', 'Mobile Application'),

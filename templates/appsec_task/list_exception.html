@@ -8,8 +8,7 @@
 <a href="{% url 'appsec_task:view_appsec_task' appsec_task.id%}" class="btn btn-secondary">Back to Appsec task </a>
 
 <!-- code để export ra file excel đã có template -->
-<a href="{% url 'appsec_task:export_appsec_tasks' %}" class="btn btn-primary">Export Exception Form</a>
-
+<a href="{% url 'appsec_task:export_exception_template' appsec_task.id %}" class="btn btn-primary">Export Exception for Approval</a>
 
 <div class="content">
     <div class="container-fluid">

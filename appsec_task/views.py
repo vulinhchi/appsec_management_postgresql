@@ -31,6 +31,13 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
 import magic  # pip install python-magic
 import os
+from django.conf import settings
+from openpyxl.styles import PatternFill
+
+from openpyxl import load_workbook
+from io import BytesIO
+from datetime import datetime
+from openpyxl.styles import Font
 
 
 def safe_str(value):
@@ -431,7 +438,7 @@ def import_appsec_tasks(request):
                         ).first()
                             # Nếu đã tồn tại → update
                         if exception_obj:
-                            exception_obj.risk = safe_str(row.get("Risk Level"))
+                            exception_obj.risk_level = safe_str(row.get("Risk Level"))
                             exception_obj.status = safe_str(row.get("Status Exception"))
                             exception_obj.exception_date = safe_date(row.get("Exception Expire Date"))
                             exception_obj.exception_create = safe_date(row.get("Exception Create Date"))
@@ -1228,5 +1235,215 @@ def dashboard(request):
     }
 
     return render(request, "appsec_task/dashboard.html", context)
+
+
+# export exception approval
+
+
+@login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
+def export_exception_template(request, appsec_task_id):
+    task = get_object_or_404(AppSecTask, id=appsec_task_id)
+    exceptions = SecurityException.objects.filter(appsec_task=task)
+
+    template_path = os.path.join(settings.BASE_DIR, "media/templates/exception", "template_exception_approval.xlsx")
+    wb = load_workbook(template_path)
+    ws = wb["Template"]
+
+    # Bổ sung màu chữ theo mức độ
+    risk_text_colors = {
+        "Critical": "8B0000",  # Đỏ đậm
+        "High": "FF0000",      # Đỏ
+        "Medium": "FFA500",    # Cam
+        "Low": "008000",       # Xanh lá đậm
+        "Recommend": "32CD32"  # Xanh lá nhạt
+    }
+
+    # ========================
+    # ✅ Thay {{domain}}, {{exception_create}} toàn file
+    # ========================
+    exception1 = SecurityException.objects.filter(appsec_task=task).first()
+    base_context = {
+        "domain": str(task.environment_prod) if task.environment_prod else "",
+        "exception_create":exception1.exception_create.strftime('%d-%b-%y') if exception1.exception_date else "",
+    }
+
+    for row in ws.iter_rows():
+        for cell in row:
+            if isinstance(cell.value, str):
+                for key, val in base_context.items():
+                    if f"{{{{{key}}}}}" in cell.value:
+                        cell.value = cell.value.replace(f"{{{{{key}}}}}", val)
+
+    # ========================
+    # ✅ Tìm dòng mẫu chứa {{exc.xxx}}
+    # ========================
+    template_row = None
+    for row in ws.iter_rows(min_row=1, max_row=50):
+        if any(cell.value and "{{exc." in str(cell.value) for cell in row):
+            template_row = row
+            break
+
+    if not template_row:
+        return HttpResponse("Không tìm thấy dòng mẫu chứa {{exc.xxx}} trong file Excel", status=400)
+
+    start_row = template_row[0].row + 1
+
+    for idx, exception in enumerate(exceptions, start=1):
+        context = {
+            **base_context,
+            "No": idx,
+            "exception_create":exception.exception_create,
+            "vulnerability": exception.vulnerability or "",
+            "overview": exception.overview or "",
+            "exploitability": exception.exploitability or "",
+            "exploitability_level": exception.exploitability_level or "",
+            "impact": exception.impact or "",
+            "impact_level": exception.impact_level or "",
+            "risk": exception.risk or "",
+            "risk_level": exception.risk_level or "",
+            "remediation": exception.remediation or "",
+            "reason_of_exception": exception.reason_of_exception or "",
+            "exception_date": exception.exception_date.strftime('%d-%b-%y') if exception.exception_date else "",
+        }
+
+        # Insert dòng mới
+        insert_row = start_row + idx - 1
+        ws.insert_rows(insert_row)
+
+        # Copy từng cell từ dòng template và thay thế biến
+        for col_idx, cell in enumerate(template_row):
+            new_cell = ws.cell(row=insert_row, column=col_idx + 1)
+            val = cell.value
+
+            if isinstance(val, str) and "{{exc." in val:
+                for key, val_replace in context.items():
+                    val = val.replace(f"{{{{exc.{key}}}}}", str(val_replace))
+                new_cell.value = val
+            else:
+                new_cell.value = val
+
+        #apply theo màu, nhưng lại màu của cả cell, chứ k tách được
+        # for col_idx, cell_template in enumerate(template_row):
+        #     new_cell = ws.cell(row=insert_row, column=col_idx + 1)
+        #     original_val = cell_template.value
+        #     val = original_val
+
+        #     if isinstance(original_val, str) and "{{exc." in original_val:
+        #         for key, val_replace in context.items():
+        #             val = val.replace(f"{{{{exc.{key}}}}}", str(val_replace))
+        #         new_cell.value = val
+
+        #         # ✅ Tô màu chữ và in đậm nếu là risk/impact/exploitability level
+        #         font_color = None
+        #         font_bold = False
+
+        #         if "{{exc.risk_level}}" in original_val:
+        #             level = context["risk_level"]
+        #             font_color = risk_text_colors.get(level)
+        #             font_bold = True
+        #         elif "{{exc.impact_level}}" in original_val:
+        #             level = context["impact_level"]
+        #             font_color = risk_text_colors.get(level)
+        #             font_bold = True
+        #         elif "{{exc.exploitability_level}}" in original_val:
+        #             level = context["exploitability_level"]
+        #             font_color = risk_text_colors.get(level)
+        #             font_bold = True
+
+        #         if font_color:
+        #             new_cell.font = Font(color=font_color, bold=font_bold)
+
+        #     else:
+        #         new_cell.value = val
+
+    # Xoá dòng mẫu
+    ws.delete_rows(template_row[0].row)
+
+    # Ghi ra file
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"Exception_Approval_{task.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+def export_exception_template_OK(request, appsec_task_id):
+    task = get_object_or_404(AppSecTask, id=appsec_task_id)
+    exceptions = SecurityException.objects.filter(appsec_task=task)
+
+    # Load template Excel
+    template_path = os.path.join(settings.BASE_DIR, "media/templates/exception", "template_exception_approval.xlsx")
+    wb = load_workbook(template_path)
+    ws = wb["Template"]
+
+    # Tìm dòng chứa {{exc.xxx}} để dùng làm mẫu
+    template_row = None
+    for row in ws.iter_rows(min_row=1, max_row=50):
+        if any(cell.value and "{{exc." in str(cell.value) for cell in row):
+            template_row = row
+            break
+
+    if not template_row:
+        return HttpResponse("Không tìm thấy dòng mẫu chứa {{exc.xxx}} trong file Excel", status=400)
+
+    start_row = template_row[0].row + 1
+
+    for idx, exception in enumerate(exceptions, start=1):
+        context = {
+            "domain": task.environment_prod,
+            "exception_create":exception.exception_create,
+            "No": idx,
+            "vulnerability": exception.vulnerability or "",
+            "overview": exception.overview or "",
+            "exploitability": exception.exploitability or "",
+            "exploitability_level": exception.exploitability_level or "",
+            "impact": exception.impact or "",
+            "impact_level": exception.impact_level or "",
+            "risk": exception.risk or "",
+            "risk_level": exception.risk_level or "",
+            "remediation": exception.remediation or "",
+            "reason_of_exception": exception.reason_of_exception or "",
+            "exception_date": exception.exception_date.strftime('%d-%b-%y') if exception.exception_date else "",
+        }
+
+        # Insert row
+        insert_row = start_row + idx - 1
+        ws.insert_rows(insert_row)
+
+        # Copy từng cell từ dòng template và thay thế biến
+        for col_idx, cell in enumerate(template_row):
+            new_cell = ws.cell(row=insert_row, column=col_idx + 1)
+            val = cell.value
+
+            if isinstance(val, str) and "{{exc." in val:
+                for key, val_replace in context.items():
+                    val = val.replace(f"{{{{exc.{key}}}}}", str(val_replace))
+                new_cell.value = val
+            else:
+                new_cell.value = val
+
+    # Xoá dòng chứa template ban đầu
+    ws.delete_rows(template_row[0].row)
+
+    # Ghi ra response
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"Exception_Approval_{task.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
 
 
