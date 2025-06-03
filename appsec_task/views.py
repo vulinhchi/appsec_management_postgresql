@@ -811,10 +811,39 @@ def list_sharecost(request):
     share_cost_choices = AppSecTask._meta.get_field('sharecost').choices
     pay_status_choices = ShareCostDetails._meta.get_field('pay_status').choices
     
+    monthly_totals = defaultdict(lambda: {'cost_mm': 0, 'cost_dolla': 0})
+    quarterly_totals = defaultdict(lambda: {'cost_mm': 0, 'cost_dolla': 0})
+
+    for task in tasks:
+        if task.month_pay:
+            try:
+                # Parse chuỗi "1/2025"
+                month_str, year_str = task.month_pay.strip().split("/")
+                month = int(month_str)
+                year = int(year_str)
+                month_key = f"{year}-{month:02d}"
+                quarter = (month - 1) // 3 + 1
+                quarter_key = f"Q{quarter}-{year}"
+            except ValueError:
+                month_key = "Invalid"
+                quarter_key = "Invalid"
+        else:
+            month_key = "N/A"
+            quarter_key = "N/A"
+
+        # Gộp tổng
+        monthly_totals[month_key]['cost_mm'] += task.cost_mm or 0
+        monthly_totals[month_key]['cost_dolla'] += task.cost_dolla or 0
+        quarterly_totals[quarter_key]['cost_mm'] += task.cost_mm or 0
+        quarterly_totals[quarter_key]['cost_dolla'] += task.cost_dolla or 0
+
+
     return render(request, 'appsec_task/list_sharecost.html', 
         {'tasks': tasks,
         'share_cost_choices': share_cost_choices,
         'pay_status_choices': pay_status_choices,
+        'monthly_totals': dict(monthly_totals),
+        'quarterly_totals': dict(quarterly_totals),
         
         })
 
