@@ -851,8 +851,11 @@ def export_sharecost_excel(request):
         ])
 
     # Trả file về client
+    today_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response["Content-Disposition"] = 'attachment; filename=sharecost_report.xlsx'
+    filename = f"sharecost_report_{today_str}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
     wb.save(response)
     return response
 
