@@ -151,7 +151,6 @@ $(document).ready(function() {
         
     }
 
-
     // ✅ Chạy filter khi nhập input hoặc chọn ngày
     $(".filter-input, .filter-date").on("input change", filterTable);
 

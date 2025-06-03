@@ -112,6 +112,22 @@
                 </div>
             </div>
         </div>
+<h5>📊 Filter calculator</h5>
+<table class="table table-bordered" id="searchTotals">
+    <thead>
+        <tr><th>Number of Task</th><th>Sum Cost MM</th><th>Sum Cost Dolla</th></tr>
+    </thead>
+    <tbody>
+        
+            <tr>
+                <td><span id="searchCount">0</span> </td>
+                <td><span id="searchMM">0</span></td>
+                <td><span id="searchDolla">0</span></td>
+            </tr>
+        
+    </tbody>
+</table>
+
 
         <div class="table-container">
 
@@ -122,6 +138,7 @@
                     <tr>
                         <th onclick="sortTable(0)">ID</th>
                         <th>
+                            <span id="searchCount">0</span>
                             <span>Task Name </span>
                              <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
                         </th>
@@ -147,17 +164,22 @@
                         </th>
                         <th>
                             <span>Project Code </span>
-                            <br> <input type="text" class="form-control filter-input" data-column="4"> <br> 
+                            <br>
+                            <input type="text" class="form-control filter-input" data-column="4">
                             
                         </th>
                         <th>
                             <span>Owner </span>
                             <br> <input type="text" class="form-control filter-input" data-column="5"></th>
                         <th>
+                            <span id="searchMM">0</span>
                             <span onclick="sortTable(6)">Cost (MM) </span>
+                            
                         </th>
                         <th>
+                            <span id="searchDolla">0</span>
                             <span onclick="sortTable(7)">Cost Dolla </span>
+                            
                         </th>
                         <th>
                             <span>Month Pay</span>
@@ -192,8 +214,8 @@
                         
                         <td>{{ task.project_code }}</td>
                         <td>{{ task.owner }}</td>
-                        <td>{{ task.cost_mm }}</td>
-                        <td>{{ task.cost_dolla }}</td>
+                        <td class="cost-mm">{{ task.cost_mm }}</td>
+                        <td class="cost-dolla">{{ task.cost_dolla }}</td>
                         <td>{{ task.month_pay }}</td>
                         <td>{{ task.pay_status }}</td>
                         <td>{{ task.note }}</td>
@@ -217,6 +239,71 @@
        </div>
     </div>
 </div>
+<!-- JavaScript xử lý lọc và tính tổng -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filters = document.querySelectorAll(".filter-input");
+
+    filters.forEach(function(input) {
+        input.addEventListener("keyup", filterTable);
+        input.addEventListener("change", filterTable);
+    });
+
+    function filterTable() {
+        const table = document.getElementById("taskTable");
+        const rows = table.querySelectorAll("tbody tr");
+
+        rows.forEach(function(row) {
+            let visible = true;
+            filters.forEach(function(input) {
+                const column = input.dataset.column;
+                const filterValue = input.value.toLowerCase();
+                const cell = row.cells[column];
+
+                if (cell && filterValue) {
+                    const text = cell.textContent.toLowerCase();
+                    if (!text.includes(filterValue)) {
+                        visible = false;
+                    }
+                }
+            });
+
+            row.style.display = visible ? "" : "none";
+        });
+
+        updateSearchTotals();
+    }
+
+    function updateSearchTotals() {
+        let totalMM = 0;
+        let totalDolla = 0;
+        let count = 0;
+
+        const rows = document.querySelectorAll("#taskTable tbody tr");
+
+        rows.forEach(row => {
+            if (row.offsetParent !== null) {
+                const mmText = row.querySelector(".cost-mm")?.textContent || "0";
+                const dollaText = row.querySelector(".cost-dolla")?.textContent || "0";
+
+                const mm = parseFloat(mmText) || 0;
+                const dolla = parseFloat(dollaText) || 0;
+
+                totalMM += mm;
+                totalDolla += dolla;
+                count += 1;
+            }
+        });
+
+        document.getElementById("searchMM").textContent = totalMM.toFixed(2);
+        document.getElementById("searchDolla").textContent = totalDolla.toFixed(2);
+        document.getElementById("searchCount").textContent = count;
+    }
+
+    // Khởi động lần đầu
+    filterTable();
+});
+</script>
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
 <script src="{% static 'js/custome.js' %}"></script>
 
