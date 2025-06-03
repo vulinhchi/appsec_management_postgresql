@@ -13,6 +13,7 @@ class AppSecTaskForm(forms.ModelForm):
         ]
         widgets = {
             'PIC_ISM': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'component': forms.CheckboxSelectMultiple(attrs={'class': 'component-checkbox'}),
         }
 
     def clean(self):
