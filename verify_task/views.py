@@ -130,6 +130,21 @@ def delete_verify_task(request, verify_task_id):
 @login_required
 @require_groups(['Pentester', 'Leader'])
 def my_task_view(request):
-    my_tasks = VerifyTask.objects.filter(PIC_ISM=request.user)
-    return render(request, 'verify_task/my_tasks.html', {'tasks': my_tasks})
+    username = request.user.username.strip().lower()  # normalize username
+
+    # Lấy tất cả các task có PIC_ISM không rỗng
+    all_tasks = VerifyTask.objects.exclude(PIC_ISM__isnull=True).exclude(PIC_ISM__exact="")
+
+    def user_in_pic(pic_ism, username):
+        users = [u.strip().lower() for u in pic_ism.split(",") if u.strip()]
+        return username in users
+
+    # Lọc lại danh sách task
+    my_tasks = [task for task in all_tasks if user_in_pic(task.PIC_ISM, username)]
+    status_choices = VerifyTask._meta.get_field('status').choices 
+    return render(request, 'verify_task/my_tasks.html', 
+        {'tasks': my_tasks,
+        "status_choices":status_choices,
+        })
+
     

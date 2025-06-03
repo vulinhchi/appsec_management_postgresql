@@ -48,11 +48,9 @@
                             <label>Status</label>
                             <select class="form-control filter-input" data-column="2">
                                 <option value="">All</option>
-                                <option value="Not Start">Not Start</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Interrupt">Interrupt</option>
-                                <option value="Done">Done</option>
-                                <option value="Cancel">Cancel</option>
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         
@@ -68,21 +66,19 @@
                 
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
-                            <th>Status <br> 
+                            <th onclick="sortTable(0)">ID</th>
+                            <th onclick="sortTable(1)">Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
+                            <th onclick="sortTable(2)">Status <br> 
                                 <select class="form-control filter-input" data-column="2">
                                     <option value="">All</option>
-                                    <option value="Not Start">Not Start</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Interrupt">Interrupt</option>
-                                    <option value="Done">Done</option>
-                                    <option value="Cancel">Cancel</option>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>PIC ISM <br> <input type="text" class="form-control filter-input" data-column="3"></th>
-                            <th>Start Date </th>
-                            <th>End Date </th>
+                            <th onclick="sortTable(4)">Start Date </th>
+                            <th onclick="sortTable(5)">End Date </th>
                             <th>Owner <br> <input type="text" class="form-control filter-input" data-column="6"></th>
                             <th>Actions</th>
                         </tr>
@@ -114,7 +110,7 @@
                             <td>
                                 {% if task.appsec_task %}
                                     <a href="{% url 'appsec_task:view_appsec_task' task.appsec_task.id %}" class="text-primary">
-                                        👁️AppSec Task
+                                        AppSec Task
                                     </a>
                                 {% else %}
                                     <span class="text-muted">No AppSec Task</span>

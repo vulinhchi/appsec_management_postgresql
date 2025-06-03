@@ -167,7 +167,6 @@
                         <td>{{ task.note }}</td>
                         
                         <td>
-                            <a href="{% url 'appsec_task:view_sharecost' task.appsec_task.id task.id %}" class="btn btn-info">View</a>
                             <a href="{% url 'appsec_task:edit_sharecost' task.appsec_task.id task.id %}" class="btn btn-warning">Edit</a>
                             <form action="{% url 'appsec_task:delete_sharecost' task.appsec_task.id task.id %}" method="POST" style="display:inline;">
                                                 {% csrf_token %}
