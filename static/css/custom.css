@@ -55,9 +55,9 @@
             width: 100%;
             border-collapse: collapse;
         }
-
+       
         th, td {
-            padding: 10px;
+            padding: 4px 10px;
             border: 1px solid #ddd;
             white-space: nowrap; /* Ngăn nội dung tự động xuống dòng */
             cursor: pointer; /* Hiệu ứng khi di chuột */

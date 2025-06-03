@@ -129,14 +129,8 @@
                     <thead>
                         <tr>
                             <th onclick="sortTable(0)">ID</th>
-                            <th>
-                                <span onclick="sortTable(1)">Task Name</span>
-                                <br>
-                                <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
-                            </th>
-                            <!-- <th onclick="sortTable(1)">Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th> -->
-                            <th>
-                                <span onclick="sortTable(2)">Status </span>
+                            <th>Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
+                            <th onclick="sortTable(2)">Status
                                 <br> 
                                 <select class="form-control filter-input" data-column="2">
                                     <option value="">All</option>
@@ -145,18 +139,12 @@
                                     {% endfor %}
                                 </select>
                             </th>
-                            <th>
-                                <span onclick="sortTable(3)">PIC ISM</span>
-                                <br> 
+                            <th>PIC ISM
+                                <br>
                                 <input type="text" class="form-control filter-input" data-column="3">
                             </th>
-                            <th>
-
-                                <span onclick="sortTable(4)">Start Date </span> 
-                                </th>
-                            <th>
-                                <span onclick="sortTable(5)">End Date </span>
-                            </th>
+                            <th onclick="sortTable(4)">Start Date </th>
+                            <th onclick="sortTable(5)">End Date </th>
 
                             <th>
                                 <span>Production URL </span>
@@ -173,8 +161,7 @@
                             <th>Ticket link <br> <input type="text" class="form-control filter-input" data-column="10"> </th>
                             
                             <th>Sharepoint link <br> <input type="text" class="form-control filter-input" data-column="11"></th>
-                            <th>
-                                <span onclick="sortTable(12)">Internet/Internal? </span>
+                            <th onclick="sortTable(12)">Internet/Internal?>
                                 <br> 
                                 <select class="form-control filter-input" data-column="12">
                                     <option value="">All</option>
@@ -183,8 +170,7 @@
                                     {% endfor %}
                                 </select>
                             </th>
-                            <th>
-                                <span onclick="sortTable(13)">New App/Old App? </span>
+                            <th onclick="sortTable(13)">New App/Old App?>
                                 <br> 
                                 <select class="form-control filter-input" data-column="13">
                                     <option value="">All</option>
@@ -194,8 +180,7 @@
                                 </select>
 
                             </th>
-                            <th>
-                                <span onclick="sortTable(14)">Checklist Type</span>
+                            <th onclick="sortTable(14)">Checklist Type>
                                 <br> 
                                 <select class="form-control filter-input" data-column="14">
                                     <option value="">All</option>
@@ -204,8 +189,7 @@
                                     {% endfor %}
                                 </select>
                             </th>
-                            <th>
-                                <span onclick="sortTable(15)">Share Cost? </span>
+                            <th onclick="sortTable(15)">Share Cost?
                                 <br>
                                 <select class="form-control filter-input" data-column="15">
                                     <option value="">All</option>
@@ -215,7 +199,7 @@
                                 </select>
                                 
                             </th>
-                            <th>Component <br> 
+                            <th onclick="sortTable(16)">Component <br> 
                                 <select class="form-control filter-input" data-column="16">
                                     <option value="">All</option>
                                     {% for value, label in component_choices %}
