@@ -8,7 +8,8 @@ class VerifyTask(models.Model):
         ('In Progress', 'In Progress'),
         ('Done', 'Done'),
         ('Interrupt', 'Interrupt'),
-        ('Cancel', "Cancel")
+        ('Cancel', "Cancel"),
+        ('None', "None"),
     ]
     
     appsec_task = models.ForeignKey('appsec_task.AppSecTask', related_name="verify_tasks",on_delete=models.SET_NULL, null=True, blank=True)

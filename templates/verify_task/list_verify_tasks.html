@@ -48,11 +48,9 @@
                             <label>Status</label>
                             <select class="form-control filter-input" data-column="2">
                                 <option value="">All</option>
-                                <option value="Not Start">Not Start</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Interrupt">Interrupt</option>
-                                <option value="Done">Done</option>
-                                <option value="Cancel">Cancel</option>
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         
@@ -73,11 +71,9 @@
                             <th>Status <br> 
                                 <select class="form-control filter-input" data-column="2">
                                     <option value="">All</option>
-                                    <option value="Not Start">Not Start</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Interrupt">Interrupt</option>
-                                    <option value="Done">Done</option>
-                                    <option value="Cancel">Cancel</option>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>PIC ISM <br> <input type="text" class="form-control filter-input" data-column="3"></th>

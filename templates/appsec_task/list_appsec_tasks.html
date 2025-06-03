@@ -73,45 +73,46 @@
                         <label>Status</label>
                         <select class="form-control filter-input" data-column="2">
                             <option value="">All</option>
-                            <option value="Not Start">Not Start</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Interrupt">Interrupt</option>
-                            <option value="Done">Done</option>
-                            <option value="Cancel">Cancel</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
                         <label>Internet/Internal? </label>
                         <select class="form-control filter-input" data-column="12">
                             <option value="">All</option>
-                            <option value="Internet">Internet</option>
-                            <option value="Internal">Internal</option>
+                            {% for value, label in is_internet_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
                         <label>New App/Old App? </label>
                         <select class="form-control filter-input" data-column="13">
                             <option value="">All</option>
-                            <option value="New App">New App</option>
-                            <option value="Old App">Old App</option>
+                            {% for value, label in is_newapp_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
                         <label>Share Cost</label>
                         <select class="form-control filter-input" data-column="15">
                             <option value="">All</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
+                            {% for value, label in share_cost_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
                         <label>Component </label>
+
                         <select class="form-control filter-input" data-column="16">
                             <option value="">All</option>
-                            <option value="Mobile Application">Mobile Application</option>
-                            <option value="Web Application">Web Application</option>
-                            <option value="API Application">API Application</option>
-                            <option value="Desktop Application">Desktop Application</option>
+                            {% for value, label in component_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -139,11 +140,9 @@
                                 <br> 
                                 <select class="form-control filter-input" data-column="2">
                                     <option value="">All</option>
-                                    <option value="Not Start">Not Start</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Interrupt">Interrupt</option>
-                                    <option value="Done">Done</option>
-                                    <option value="Cancel">Cancel</option>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
@@ -179,9 +178,9 @@
                                 <br> 
                                 <select class="form-control filter-input" data-column="12">
                                     <option value="">All</option>
-                                    <option value="Internet">Internet</option>
-                                    <option value="Internal">Internal</option>
-                                    
+                                    {% for value, label in is_internet_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
@@ -189,20 +188,20 @@
                                 <br> 
                                 <select class="form-control filter-input" data-column="13">
                                     <option value="">All</option>
-                                    <option value="New App">New App</option>
-                                    <option value="Old App">Old App</option>
-                                    
+                                    {% for value, label in is_newapp_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
+
                             </th>
                             <th>
                                 <span onclick="sortTable(14)">Checklist Type</span>
                                 <br> 
                                 <select class="form-control filter-input" data-column="14">
                                     <option value="">All</option>
-                                    <option value="Full Checklist">Full Checklist</option>
-                                    <option value="New Function Checklist">New Function Checklist</option>
-                                    <option value="No Checklist">No Checklist</option>
-                                    
+                                    {% for value, label in checklist_type_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
@@ -210,20 +209,20 @@
                                 <br>
                                 <select class="form-control filter-input" data-column="15">
                                     <option value="">All</option>
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                    
+                                    {% for value, label in share_cost_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
+                                
                             </th>
                             <th>Component <br> 
                                 <select class="form-control filter-input" data-column="16">
                                     <option value="">All</option>
-                                    <option value="Mobile Application">Mobile Application</option>
-                                    <option value="Web Application">Web Application</option>
-                                    <option value="API Application">API Application</option>
-                                    <option value="Desktop Application">Desktop Application</option>
-                                    
+                                    {% for value, label in component_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
+
                             </th>
                             <th>
                                 <span>Pentest Vendor</span>

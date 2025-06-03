@@ -21,7 +21,12 @@ status_colors = {
 def list_verify_tasks(request):
     # tasks = VerifyTask.objects.all()
     tasks = VerifyTask.objects.select_related("appsec_task").all()
-    return render(request, 'verify_task/list_verify_tasks.html', {'tasks': tasks,"status_colors": status_colors })
+    status_choices = VerifyTask._meta.get_field('status').choices 
+    return render(request, 'verify_task/list_verify_tasks.html', {
+        'tasks': tasks,
+        "status_colors": status_colors,
+        "status_choices":status_choices,
+         })
 
 
 @login_required

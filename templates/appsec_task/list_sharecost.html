@@ -16,16 +16,26 @@
         </div>
     </div>
 </form>  
+<div class="mb-3">
+
+        <label><input type="checkbox" class="column-toggle" data-column="0" checked> ID</label>
+        <label><input type="checkbox" class="column-toggle" data-column="1" checked> Task Name</label>
+        
+        <label><input type="checkbox" class="column-toggle" data-column="2" checked> Share Cost? </label>
+        
+        <label><input type="checkbox" class="column-toggle" data-column="3" checked> Pentest Vendor</label>
+        <label><input type="checkbox" class="column-toggle" data-column="4" checked> Project Code</label>
+        <label><input type="checkbox" class="column-toggle" data-column="5" checked> Owner</label>
+        <label><input type="checkbox" class="column-toggle" data-column="8" checked> Month Pay</label>
+        <label><input type="checkbox" class="column-toggle" data-column="9" checked> Pay Status</label>
+        <label><input type="checkbox" class="column-toggle" data-column="10" checked> Note</label>
+    </div>
 <div class="content">
     <div class="container-fluid">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">List All Sharecost</h3>
             </div>
-            
-            
-
-                
             <div class="card mb-3">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Advanced Filters</h5>
@@ -38,10 +48,11 @@
                     </div>
                     <div class="col-md-3 mt-2">
                         <label>Share Cost?</label>
-                        <select class="form-control filter-input" data-column="2">
+                        <select class="form-control filter-input" data-column="15">
                             <option value="">All</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
+                            {% for value, label in share_cost_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -58,9 +69,9 @@
                         <label>Pay Status</label>
                         <select class="form-control filter-input" data-column="9">
                             <option value="">All</option>
-                            <option value="Done">Done</option>
-                            <option value="Information Sent">Information Sent</option>
-                            <option value="Not yet">Not yet</option>
+                            {% for value, label in pay_status_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 mt-4">
@@ -86,12 +97,13 @@
                         <th>
                             <span>Sharecost?</span>
                             <br>
-                            <select class="form-control filter-input" data-column="8">
+                            <select class="form-control filter-input" data-column="2">
                                 <option value="">All</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                                
+                                {% for value, label in share_cost_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
+                            
                             
                         </th>
                         <!-- <th onclick="sortTable(0)">AppSec Name</th> -->
@@ -125,10 +137,9 @@
                             <br>
                             <select class="form-control filter-input" data-column="9">
                                 <option value="">All</option>
-                                <option value="Done">Done</option>
-                                <option value="Information Sent">Information Sent</option>
-                                <option value="Not yet">Not yet</option>
-                                
+                                {% for value, label in pay_status_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </th>
                         <th>
@@ -143,7 +154,7 @@
                     {% for task in tasks %}
                     <tr>
                         <td>{{ task.id }}</td>
-                        <td>{{ task.appsec_task.name }}</td>
+                        <td><a href="{% url 'appsec_task:view_appsec_task' task.appsec_task.id %}" >{{ task.appsec_task.name }}</a> </td>
                         <td>{{ task.appsec_task.sharecost }}</td>
                         <td>{{ task.appsec_task.pentest_vendor }}</td>
                         
@@ -162,7 +173,7 @@
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this Sharecost?');">Delete</button>
                                             </form>
-                            <a href="{% url 'appsec_task:view_appsec_task' task.appsec_task.id %}" class="btn btn-info">View AppSec Task</a>
+                            
                             
                         </td>
                     </tr>

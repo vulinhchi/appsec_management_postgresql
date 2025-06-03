@@ -141,9 +141,23 @@ def view_appsec_task(request, task_id):
 def list_appsec_tasks(request):
     # tasks = AppSecTask.objects.all()
     tasks = AppSecTask.objects.prefetch_related("pentest_tasks", "verify_tasks").all()
+    share_cost_choices = AppSecTask._meta.get_field('sharecost').choices
+    component_choices = AppSecTask._meta.get_field('component').choices
+    is_newapp_choices = AppSecTask._meta.get_field('is_newapp').choices 
+    is_internet_choices = AppSecTask._meta.get_field('is_internet').choices 
+    checklist_type_choices = AppSecTask._meta.get_field('checklist_type').choices 
+    status_choices = AppSecTask._meta.get_field('status').choices 
     for task in tasks:
         sync_status(task.id)
-    return render(request, 'appsec_task/list_appsec_tasks.html', {'tasks': tasks})
+    return render(request, 'appsec_task/list_appsec_tasks.html', 
+        {'tasks': tasks,
+        'share_cost_choices': share_cost_choices,
+        'component_choices': component_choices,
+        'is_newapp_choices': is_newapp_choices,
+        'is_internet_choices': is_internet_choices,
+        'checklist_type_choices': checklist_type_choices,
+        'status_choices': status_choices,
+        })
 
   
 def parse_component_list(raw_value):
@@ -786,7 +800,15 @@ def delete_sharecost(request, appsec_task_id, sharecost_id):
 @require_groups(['Leader', 'Manager'])
 def list_sharecost(request):
     tasks = ShareCostDetails.objects.all()
-    return render(request, 'appsec_task/list_sharecost.html', {'tasks': tasks})
+    share_cost_choices = AppSecTask._meta.get_field('sharecost').choices
+    pay_status_choices = ShareCostDetails._meta.get_field('pay_status').choices
+    
+    return render(request, 'appsec_task/list_sharecost.html', 
+        {'tasks': tasks,
+        'share_cost_choices': share_cost_choices,
+        'pay_status_choices': pay_status_choices,
+        
+        })
 
 
 @login_required
@@ -904,7 +926,20 @@ def all_exceptions(request):
 def exception_list(request, appsec_task_id):
     task = get_object_or_404(AppSecTask, id=appsec_task_id)
     exceptions = SecurityException.objects.filter(appsec_task=task)
-    return render(request, 'appsec_task/list_exception.html', {'exceptions': exceptions, 'appsec_task': task})
+    status_choices = SecurityException._meta.get_field('status').choices 
+    exploitability_level_choices = SecurityException._meta.get_field('exploitability_level').choices 
+    impact_level_choices = SecurityException._meta.get_field('impact_level').choices 
+    risk_level_choices = SecurityException._meta.get_field('risk_level').choices 
+    
+
+    return render(request, 'appsec_task/list_exception.html', {
+        'exceptions': exceptions,
+        'appsec_task': task,
+        'status_choices': status_choices,
+        'exploitability_level_choices': exploitability_level_choices,
+        'impact_level_choices': impact_level_choices,
+        'risk_level_choices': risk_level_choices,
+        })
 
 
 @login_required

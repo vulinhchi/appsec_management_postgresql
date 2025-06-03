@@ -9,7 +9,21 @@
 
 <!-- code để export ra file excel đã có template -->
 <a href="{% url 'appsec_task:export_exception_template' appsec_task.id %}" class="btn btn-primary">Export Exception for Approval</a>
+<div class="mb-3">
 
+        <label><input type="checkbox" class="column-toggle" data-column="0" checked> ID</label>
+        <label><input type="checkbox" class="column-toggle" data-column="1" checked> Vulnerability</label>
+        
+        <label><input type="checkbox" class="column-toggle" data-column="2" checked> Overview </label>
+        
+        <label><input type="checkbox" class="column-toggle" data-column="3" checked> Status</label>
+        <label><input type="checkbox" class="column-toggle" data-column="4" checked> Exploitability Level</label>
+        <label><input type="checkbox" class="column-toggle" data-column="5" checked> Impact Level</label>
+        <label><input type="checkbox" class="column-toggle" data-column="6" checked> Risk Level</label>
+        <label><input type="checkbox" class="column-toggle" data-column="7" checked> Exception Date</label>
+        <label><input type="checkbox" class="column-toggle" data-column="8" checked> Exception Create</label>
+        <label><input type="checkbox" class="column-toggle" data-column="9" checked> Mail Loop</label>
+</div>
 <div class="content">
     <div class="container-fluid">
         <div class="card">
@@ -38,34 +52,31 @@
                             <th>
                                 <span onclick="sortTable(3)">Status </span>
                                 <br> 
-                                <select class="form-control filter-input" data-column="3">
+                                <select class="form-control filter-input" data-column="6">
                                     <option value="">All</option>
-                                    <option value="Open">Open</option>
-                                    <option value="Closed">Close</option>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
                                 <span onclick="sortTable(4)">Exploitability Level</span>
                                 <br> 
-                                <select class="form-control filter-input" data-column="4">
+                                <select class="form-control filter-input" data-column="6">
                                     <option value="">All</option>
-                                    <option value="Critical">Critical</option>
-                                    <option value="High">High</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Recommend">Recommend</option>
+                                    {% for value, label in exploitability_level_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
                                 <span onclick="sortTable(5)">Impact Level</span>
                                 <br> 
-                                <select class="form-control filter-input" data-column="5">
+                                <select class="form-control filter-input" data-column="6">
                                     <option value="">All</option>
-                                    <option value="Critical">Critical</option>
-                                    <option value="High">High</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Recommend">Recommend</option>
+                                    {% for value, label in impact_level_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
@@ -73,11 +84,9 @@
                                 <br> 
                                 <select class="form-control filter-input" data-column="6">
                                     <option value="">All</option>
-                                    <option value="Critical">Critical</option>
-                                    <option value="High">High</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Recommend">Recommend</option>
+                                    {% for value, label in risk_level_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
                                 </select>
                             </th>
                             <th>
