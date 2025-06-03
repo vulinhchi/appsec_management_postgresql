@@ -712,21 +712,29 @@ def sync_status(appsec_task_id):
         appsec_task.end_date = verify_task.end_date
         
     
-    # Đồng bộ PIC_ISM, loại bỏ trùng lặp và chuẩn hóa tên
-    pic_set = set()
-
+    # Đồng bộ PIC_ISM, loại bỏ trùng lặp (không phân biệt hoa thường) và giữ nguyên định dạng ban đầu
     def normalize_pic(pic_string):
         if not pic_string:
             return []
-        return [p.strip().title() for p in pic_string.split(",") if p.strip()]
+        return [p.strip() for p in pic_string.split(",") if p.strip()]
+
+    pic_dict = {}
+    pic_set = set()
+
+    # Ưu tiên định dạng đầu tiên nếu trùng tên (case-insensitive)
+    def add_pics(pic_string):
+        for p in normalize_pic(pic_string):
+            key = p.lower()
+            if key not in pic_dict:
+                pic_dict[key] = p  # giữ nguyên định dạng gốc lần đầu tiên xuất hiện
 
     if pentest_task and pentest_task.PIC_ISM:
-        pic_set.update(normalize_pic(pentest_task.PIC_ISM))
+        add_pics(pentest_task.PIC_ISM)
 
     if verify_task and verify_task.PIC_ISM:
-        pic_set.update(normalize_pic(verify_task.PIC_ISM))
+        add_pics(verify_task.PIC_ISM)
 
-    appsec_task.PIC_ISM = ", ".join(sorted(pic_set)) if pic_set else None
+    appsec_task.PIC_ISM = ", ".join(sorted(pic_dict.values())) if pic_dict else None
 
     appsec_task.pentest_task = pentest_task
     appsec_task.verify_task = verify_task
