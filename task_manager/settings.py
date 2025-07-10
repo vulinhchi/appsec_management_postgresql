@@ -270,7 +270,7 @@ MARTOR_ENABLE_CONFIGS = {
     'imgur': 'true',        # to enable/disable imgur/custom uploader.
     'mention': 'false',     # to enable/disable mention
     'jquery': 'true',       # to include/revoke jquery (require for admin default django)
-    'living': 'false',      # to enable/disable live updates in preview
+    'living': 'true',      # to enable/disable live updates in preview
     'spellcheck': 'false',  # to enable/disable spellcheck in form textareas
     'hljs': 'true', 
     'upload': 'true'        # to enable/disable hljs highlighting in preview
