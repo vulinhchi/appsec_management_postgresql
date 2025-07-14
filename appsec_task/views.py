@@ -6,7 +6,7 @@ from verify_task.models import VerifyTask
 from .models import AppSecTask, ShareCostDetails, SecurityException
 from .forms import AppSecTaskForm, ShareCostDetailsForm, SecurityExceptionForm
 from django.contrib import messages
-from django.db.models import Q, Min, Max
+from django.db.models import Q, Min, Max, Count
 #import, export file
 import pandas as pd
 import xlsxwriter
@@ -1103,6 +1103,72 @@ def get_vuln_stats(selected_year):
     return vuln_stats
 
 
+def get_affected_url_stats_by_month(selected_year):
+    current_year = selected_year
+    stats = {
+        'labels': [],
+        'affected_apps': [],
+        'critical_open': [],
+        'critical_close': [],
+        'high_open': [],
+        'high_close': [],
+        'medium_open': [],
+        'medium_close': [],
+        'total_all': [],
+        'total_closed': [],
+    }
+
+    for month in range(1, 13):
+        stats['labels'].append(f'{month}')
+        start_date = date(current_year, month, 1)
+        last_day = calendar.monthrange(current_year, month)[1]
+        end_date = date(current_year, month, last_day)
+
+        base_filter = Q(notify_date__gte=start_date, notify_date__lte=end_date, notify_date__isnull=False)
+
+        
+        # Tính affected apps theo pentest_task_id trong AffectedURL
+        task_ids = AffectedURL.objects.filter(
+            vulnerability__notify_date__gte=start_date,
+            vulnerability__notify_date__lte=end_date,
+            vulnerability__notify_date__isnull=False,
+        ).values_list('vulnerability__pentest_task_id', flat=True).distinct()
+
+        stats['affected_apps'].append(len(set(task_ids)))
+
+
+        def count_vulns(risk, status):
+            return AffectedURL.objects.filter(
+                vulnerability__notify_date__gte=start_date,
+                vulnerability__notify_date__lte=end_date,
+                vulnerability__notify_date__isnull=False,
+                vulnerability__risk_rating__iexact=risk,
+                status__iexact=status
+            ).count()
+
+        critical_open = count_vulns('Critical', 'Open')
+        critical_close = count_vulns('Critical', 'Closed')
+        high_open = count_vulns('High', 'Open')
+        high_close = count_vulns('High', 'Closed')
+        medium_open = count_vulns('Medium', 'Open')
+        medium_close = count_vulns('Medium', 'Closed')
+
+        total_all = critical_open + critical_close + high_open + high_close + medium_open + medium_close
+        total_closed = critical_close + high_close + medium_close
+
+        stats['critical_open'].append(critical_open)
+        stats['critical_close'].append(critical_close)
+        stats['high_open'].append(high_open)
+        stats['high_close'].append(high_close)
+        stats['medium_open'].append(medium_open)
+        stats['medium_close'].append(medium_close)
+        stats['total_all'].append(total_all)
+        stats['total_closed'].append(total_closed)
+
+    return stats
+
+
+
 
 def get_affected_url_stats(selected_year):
     affected_urls = AffectedURL.objects.select_related('vulnerability').all()
@@ -1207,6 +1273,28 @@ def task_timeline(current_year):
         "user_choices": pentesters, 
     }
 
+def top_10_vuln_apis(year):
+    top_10_common_vulns = (
+        Vulnerability.objects
+        .filter(pentest_task__start_date__year=year)
+        .values('name_vuln')
+        .annotate(vuln_count=Count('id'))
+        .order_by('-vuln_count')[:10]
+    )
+
+    top_10_by_api_count = (
+        Vulnerability.objects
+        .filter(pentest_task__start_date__year=year)
+        .values('name_vuln')
+        .annotate(api_count=Count('affected_urls'))
+        .order_by('-api_count')[:10]
+    )
+
+    return {
+        'top_common': list(top_10_common_vulns),
+        'top_api': list(top_10_by_api_count),
+    }
+
 
 @login_required
 @require_groups(['Pentester', 'Leader', 'Manager'])
@@ -1273,7 +1361,11 @@ def dashboard(request):
         exception_stats["exception_closed"]
     ))
     timeline_stats = task_timeline(current_year)
-    
+        
+    top_vulns = top_10_vuln_apis(current_year)
+
+    apis_starts = get_affected_url_stats_by_month(current_year)
+
     context = {
         "years": years,
         "selected_year": current_year,
@@ -1307,6 +1399,12 @@ def dashboard(request):
         "pentest_tasks_json": timeline_stats["pentest_tasks_json"],
         "verify_tasks_json": timeline_stats["verify_tasks_json"],
         "user_choices": timeline_stats["user_choices"],
+
+        "top_10_common_vulns": top_vulns["top_common"],
+        "top_10_vuln_by_api": top_vulns["top_api"],
+
+        'apis_starts':apis_starts,
+
     }
 
     return render(request, "appsec_task/dashboard.html", context)
@@ -1449,76 +1547,6 @@ def export_exception_template(request, appsec_task_id):
     return response
 
 
-def export_exception_template_OK(request, appsec_task_id):
-    task = get_object_or_404(AppSecTask, id=appsec_task_id)
-    exceptions = SecurityException.objects.filter(appsec_task=task)
-
-    # Load template Excel
-    template_path = os.path.join(settings.BASE_DIR, "media/templates/exception", "template_exception_approval.xlsx")
-    wb = load_workbook(template_path)
-    ws = wb["Template"]
-
-    # Tìm dòng chứa {{exc.xxx}} để dùng làm mẫu
-    template_row = None
-    for row in ws.iter_rows(min_row=1, max_row=50):
-        if any(cell.value and "{{exc." in str(cell.value) for cell in row):
-            template_row = row
-            break
-
-    if not template_row:
-        return HttpResponse("Không tìm thấy dòng mẫu chứa {{exc.xxx}} trong file Excel", status=400)
-
-    start_row = template_row[0].row + 1
-
-    for idx, exception in enumerate(exceptions, start=1):
-        context = {
-            "domain": task.environment_prod,
-            "exception_create":exception.exception_create,
-            "No": idx,
-            "vulnerability": exception.vulnerability or "",
-            "overview": exception.overview or "",
-            "exploitability": exception.exploitability or "",
-            "exploitability_level": exception.exploitability_level or "",
-            "impact": exception.impact or "",
-            "impact_level": exception.impact_level or "",
-            "risk": exception.risk or "",
-            "risk_level": exception.risk_level or "",
-            "remediation": exception.remediation or "",
-            "reason_of_exception": exception.reason_of_exception or "",
-            "exception_date": exception.exception_date.strftime('%d-%b-%y') if exception.exception_date else "",
-        }
-
-        # Insert row
-        insert_row = start_row + idx - 1
-        ws.insert_rows(insert_row)
-
-        # Copy từng cell từ dòng template và thay thế biến
-        for col_idx, cell in enumerate(template_row):
-            new_cell = ws.cell(row=insert_row, column=col_idx + 1)
-            val = cell.value
-
-            if isinstance(val, str) and "{{exc." in val:
-                for key, val_replace in context.items():
-                    val = val.replace(f"{{{{exc.{key}}}}}", str(val_replace))
-                new_cell.value = val
-            else:
-                new_cell.value = val
-
-    # Xoá dòng chứa template ban đầu
-    ws.delete_rows(template_row[0].row)
-
-    # Ghi ra response
-    output = BytesIO()
-    wb.save(output)
-    output.seek(0)
-
-    response = HttpResponse(
-        output.getvalue(),
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    filename = f"Exception_Approval_{task.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response
 
 
 

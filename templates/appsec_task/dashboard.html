@@ -150,6 +150,52 @@
     </div>
   </div>
 </div>
+<div class="mt-5">
+  <h5>📊 Affected APIs by Risk level in month</h5>
+  <canvas id="vulnChart_api"></canvas>
+</div>
+
+
+<h3>🔝 Top 10 Frequent Vulnerabilities</h3>
+<table class="table table-sm table-bordered">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Vulnerability</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in top_10_common_vulns %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ item.name_vuln }}</td>
+        <td>{{ item.vuln_count }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>🚨 Top 10 Vulnerabilities by Affected API Count</h3>
+<table class="table table-sm table-bordered">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Vulnerability</th>
+      <th>API Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in top_10_vuln_by_api %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ item.name_vuln }}</td>
+        <td>{{ item.api_count }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 
 <!-- exception -->
 <div class="container-fluid">
@@ -228,10 +274,6 @@ function normalizePIC(picString) {
 }
 
 function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter = "" ) {
-  console.log("statusFilter:", statusFilter);
-
-  console.log("picFilter1111:", picFilter);
-  
   const grid = document.getElementById(gridId);
   grid.innerHTML = "";
 
@@ -302,11 +344,6 @@ function changeCalendarMonth(delta) {
   }
   renderBothCalendars(); // Duy trì statusFilter khi chuyển tháng
 }
-// Hàm để render cả hai lịch: Pentest và Verify
-console.log("PentestTasks parsed:", pentestTasks);
-console.log("VerifyTasks parsed:", verifyTasks);
-console.log("currentStatusFilter parsed:", currentStatusFilter);
-console.log("currentPICFilter parsed:", currentPICFilter);
 
 
 function renderBothCalendars() {
@@ -414,7 +451,7 @@ document.addEventListener("DOMContentLoaded", function () {
       labels: {{ vuln_stats.labels|safe }},
       datasets: [
         {
-          label: 'Số lượng App bị ảnh hưởng',
+          label: 'Affected App',
           data: {{ vuln_stats.affected_apps|safe }},
           backgroundColor: '#007bff',  // xanh nước biển
         },
@@ -467,7 +504,7 @@ document.addEventListener("DOMContentLoaded", function () {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Số lượng'
+            text: 'Count'
           }
         }
       },
@@ -483,6 +520,87 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 </script>
+
+<canvas id="vulnChart_api" height="120"></canvas>
+<script>
+  const vulnChart_api = new Chart(document.getElementById("vulnChart_api"), {
+    type: 'bar',
+    data: {
+      labels: {{ apis_starts.labels|safe }},
+      datasets: [
+        {
+          label: 'Affected App',
+          data: {{ apis_starts.affected_apps|safe }},
+          backgroundColor: '#007bff',  // xanh nước biển
+        },
+        {
+          label: 'Critical - Open',
+          data: {{ apis_starts.critical_open|safe }},
+          backgroundColor: '#8B0000', // đỏ đậm
+          stack: 'Critical',
+        },
+        {
+          label: 'Critical - Closed',
+          data: {{ apis_starts.critical_close|safe }},
+          backgroundColor: '#28a745', // xanh lá
+          stack: 'Critical',
+        },
+        {
+          label: 'High - Open',
+          data: {{ apis_starts.high_open|safe }},
+          backgroundColor: '#FF0000', // đỏ tươi
+          stack: 'High',
+        },
+        {
+          label: 'High - Closed',
+          data: {{ apis_starts.high_close|safe }},
+          backgroundColor: '#28a745', // xanh lá
+          stack: 'High',
+        },
+        {
+          label: 'Medium - Open',
+          data: {{ apis_starts.medium_open|safe }},
+          backgroundColor: '#FFA500', // cam
+          stack: 'Medium',
+        },
+        {
+          label: 'Medium - Closed',
+          data: {{ apis_starts.medium_close|safe }},
+          backgroundColor: '#28a745', // xanh lá
+          stack: 'Medium',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Count'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top'
+        },
+        title: {
+          display: true,
+          text: 'Affected APIs in month chart'
+        }
+      }
+    }
+  });
+</script>
+
+
+
 
 <canvas id="vulnChart2" width="600" height="300"></canvas>
 
