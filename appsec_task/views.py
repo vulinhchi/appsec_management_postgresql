@@ -958,7 +958,17 @@ def import_sharecost(request):
 @require_groups(['Pentester', 'Leader', 'Manager'])
 def all_exceptions(request):
     exceptions = SecurityException.objects.all()
-    return render(request, 'appsec_task/all_exceptions.html', {'exceptions': exceptions})
+    status_choices = SecurityException._meta.get_field('status').choices 
+    exploitability_level_choices = SecurityException._meta.get_field('exploitability_level').choices 
+    impact_level_choices = SecurityException._meta.get_field('impact_level').choices 
+    risk_level_choices = SecurityException._meta.get_field('risk_level').choices 
+    return render(request, 'appsec_task/all_exceptions.html', {
+        'exceptions': exceptions,
+        'status_choices': status_choices,
+        'exploitability_level_choices': exploitability_level_choices,
+        'impact_level_choices': impact_level_choices,
+        'risk_level_choices': risk_level_choices,
+        })
 
 
 @login_required
@@ -970,8 +980,6 @@ def exception_list(request, appsec_task_id):
     exploitability_level_choices = SecurityException._meta.get_field('exploitability_level').choices 
     impact_level_choices = SecurityException._meta.get_field('impact_level').choices 
     risk_level_choices = SecurityException._meta.get_field('risk_level').choices 
-    
-
     return render(request, 'appsec_task/list_exception.html', {
         'exceptions': exceptions,
         'appsec_task': task,

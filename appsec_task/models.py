@@ -98,6 +98,7 @@ class SecurityException(models.Model):
     STATUS_CHOICES = [
         ('Open', 'Open'),
         ('Closed', 'Closed'),
+        ('Draf', 'Draf'),
     ]
 
     LEVEL_CHOICES = [
@@ -110,7 +111,7 @@ class SecurityException(models.Model):
     appsec_task = models.ForeignKey(AppSecTask, on_delete=models.CASCADE, related_name='exceptions')
     vulnerability = models.CharField(max_length=255)
     overview = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Open')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Draf')
 
     exploitability_level = models.CharField(max_length=50, choices=LEVEL_CHOICES, blank=True, null=True)
     exploitability = models.TextField(blank=True, null=True)
