@@ -186,6 +186,7 @@ def import_appsec_tasks(request):
 
                 # Sheet 1: VERIFY TASK
                 verify_df = pd.read_excel(xls, sheet_name="Verify Request")
+                verify_df.columns = verify_df.columns.str.strip()  # 🔥 Quan trọng
 
                 # Tạo file-like object
                 file_buffer = io.BytesIO(file_bytes)

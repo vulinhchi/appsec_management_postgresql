@@ -41,6 +41,7 @@ class AppSecTask(models.Model):
         ('Web Application', 'Web Application'),
         ('API Application','API Application'),
         ('Desktop Application','Desktop Application'),
+        ('ChatBot', 'ChatBot'),
         ('None', 'None'),
     ]
 

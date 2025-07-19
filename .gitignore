@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 **/migrations/
 !**/migrations/__init__.py
+media/templates/report
 
 # C extensions
 *.so
