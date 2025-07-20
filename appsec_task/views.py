@@ -69,12 +69,12 @@ ALLOWED_MIME_TYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',       # .xlsx
     'application/vnd.ms-excel'                                                 # .xls
 ]
-MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+MAX_FILE_SIZE = 200 * 1024 * 1024  # 100MB
 
 def handle_uploaded_file(file):
     # 1. Kiểm tra dung lượng
     if file.size > MAX_FILE_SIZE:
-        raise ValidationError("File size limit 100MB")
+        raise ValidationError("File size limit 200MB")
 
     # 2. Kiểm tra đuôi file
     ext = os.path.splitext(file.name)[1].lower()
@@ -171,6 +171,10 @@ def parse_component_list(raw_value):
 @login_required
 @require_groups(['Pentester', 'Leader'])
 def import_appsec_tasks(request):
+    if not request.FILES.get("task_file"):
+        messages.error(request, "⚠️ Bạn chưa chọn file để upload.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
     if request.method == "POST" and request.FILES.get("task_file"):
         file = request.FILES["task_file"]
         try:
@@ -892,6 +896,10 @@ def export_sharecost_excel(request):
 @login_required
 @require_groups(['Leader', 'Manager'])
 def import_sharecost(request):
+    if not request.FILES.get("task_file"):
+        messages.error(request, "⚠️ Bạn chưa chọn file để upload.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
     if request.method == "POST" and request.FILES.get("task_file"):
         file = request.FILES["task_file"]
         try:
