@@ -3,11 +3,14 @@ from appsec_task.models import AppSecTask
 from django.contrib import messages
 from .forms import VerifyTaskForm
 from .models import AppSecTask, VerifyTask
-from appsec_task.views import sync_status 
+from appsec_task.views import sync_status, send_outlook_email, send_assigned_mail_and_notification
 from django.contrib.auth.decorators import login_required
 from pentest_task.models import Notification
 from task_manager.decorators import require_groups
 from django.contrib.auth.models import User
+from django.conf import settings
+
+
 
 status_colors = {
         "Not Started": "bg-info",
@@ -15,6 +18,7 @@ status_colors = {
         "Done": "bg-success",
         "Cancel": "bg-danger text-dark",
     }
+
 
 @login_required
 @require_groups(['Pentester', 'Leader', 'Manager'])
@@ -43,8 +47,14 @@ def create_verify_task(request, appsec_task_id):
             sync_status(appsec_task.id)
             verify_task.save()
             old_assignee = ""
-            old_assignees = set([x.strip() for x in old_assignee.split(",") if x.strip()])
-            new_assignees = set([x.strip() for x in verify_task.PIC_ISM.split(",") if x.strip()])
+           
+            old_assignees = set([
+                x.strip() for x in (old_assignee or "").split(",") if x.strip()
+            ])
+
+            new_assignees = set([
+                x.strip() for x in (verify_task.PIC_ISM or "").split(",") if x.strip()
+            ])
 
             # Gửi noti cho những người mới được thêm vào
             added_users = new_assignees - old_assignees
@@ -52,12 +62,8 @@ def create_verify_task(request, appsec_task_id):
             for username in added_users:
                 try:
                     user = User.objects.get(username=username)
-                    Notification.objects.create(
-                        user=user,
-                        title="New Verify Task Assigned",
-                        description=f"You are assigned to Pentest task: {verify_task.name}",
-                        url=f"/pentest/view/{verify_task.id}",
-                    )
+                    send_assigned_mail_and_notification(verify_task, user, "verify")
+                    
                 except User.DoesNotExist:
                     continue
 
@@ -83,8 +89,15 @@ def edit_verify_task(request, verify_task_id):
             sync_status(appsec_task.id)
             verify_task.save()
 
-            old_assignees = set([x.strip() for x in old_assignee.split(",") if x.strip()])
-            new_assignees = set([x.strip() for x in verify_task.PIC_ISM.split(",") if x.strip()])
+            # old_assignees = set([x.strip() for x in old_assignee.split(",") if x.strip()])
+            # new_assignees = set([x.strip() for x in verify_task.PIC_ISM.split(",") if x.strip()])
+            old_assignees = set([
+                x.strip() for x in (old_assignee or "").split(",") if x.strip()
+            ])
+
+            new_assignees = set([
+                x.strip() for x in (verify_task.PIC_ISM or "").split(",") if x.strip()
+            ])
 
             # Gửi noti cho những người mới được thêm vào
             added_users = new_assignees - old_assignees
@@ -92,12 +105,8 @@ def edit_verify_task(request, verify_task_id):
             for username in added_users:
                 try:
                     user = User.objects.get(username=username)
-                    Notification.objects.create(
-                        user=user,
-                        title="New Verify Task Assigned",
-                        description=f"You are assigned to Pentest task: {verify_task.name}",
-                        url=f"/verify/view/{verify_task.id}",
-                    )
+                    send_assigned_mail_and_notification(verify_task, user, "verify")
+                    
                 except User.DoesNotExist:
                     continue
 

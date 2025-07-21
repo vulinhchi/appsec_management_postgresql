@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from pentest_task.models import PentestTask, Vulnerability, AffectedURL
 from verify_task.models import VerifyTask
-from .models import AppSecTask, ShareCostDetails, SecurityException
+from .models import AppSecTask, ShareCostDetails, SecurityException, AppSecTask
 from .forms import AppSecTaskForm, ShareCostDetailsForm, SecurityExceptionForm
 from django.contrib import messages
 from django.db.models import Q, Min, Max, Count
@@ -38,6 +38,15 @@ from openpyxl import load_workbook
 from io import BytesIO
 from datetime import datetime
 from openpyxl.styles import Font
+from django.core.mail import send_mail
+from django.utils import timezone
+from django.template.loader import render_to_string
+from django.template import Context, Template
+from django.utils.html import format_html
+from collections import defaultdict
+from pentest_task.models import Notification
+
+
 
 
 def safe_str(value):
@@ -1186,7 +1195,6 @@ def get_affected_url_stats_by_month(selected_year):
 
 
 
-
 def get_affected_url_stats(selected_year):
     affected_urls = AffectedURL.objects.select_related('vulnerability').all()
 
@@ -1564,6 +1572,79 @@ def export_exception_template(request, appsec_task_id):
     return response
 
 
+def send_outlook_email(subject, message, recipient_list, html_message=None):
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipient_list,
+            html_message=html_message,
+            fail_silently=False
+        )
+        return True
+    except Exception as e:
+        print(f"❌ Gửi mail thất bại: {e}")
+        return False
 
 
+def send_assigned_mail_and_notification(task, username, task_type):
+    Notification.objects.create(
+        user=username,
+        title=f"New {task_type} Task Assigned",
+        description=f"You are assigned to {task_type} task: {task.name}",
+        url=f"/{task_type}/view/{task.id}",
+    )
+
+    html_content = render_to_string("emails/assigned_task.html", {
+        "username": username,
+        "task_name": task.name,
+        "description":f"You are assigned to {task_type} task:",
+        "task_url": f"{settings.SERVER_LOCATION}/pentest/view/{task.id}",
+    })
+
+    send_outlook_email(
+        subject=f"AppSecTool - New {task_type} Task Assigned".upper(),
+        message=f"You are assigned to task: {task.name}",
+        recipient_list=[f"{username}@fpt.com"],
+        html_message=html_content
+    )
+
+
+@login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
+def send_reminder_emails(request):
+    pentest_tasks = PentestTask.objects.filter(
+        Q(status__in=['Not Start', 'In Progress', 'Done']) &
+        (Q(start_date__isnull=True) | Q(end_date__isnull=True)),
+        is_active=True
+    )
+
+    verify_tasks = VerifyTask.objects.filter(
+        Q(status__in=['Not Start', 'In Progress', 'Done']) &
+        (Q(start_date__isnull=True) | Q(end_date__isnull=True)),
+        is_active=True
+    )
+
+    # Lấy danh sách user trong hệ thống, convert thành lowercase set
+    valid_users = set(user.username.lower() for user in User.objects.all())
+
+    # Key sẽ là username dạng lowercase, Value là dict chứa tasks
+    tasks_by_pic = defaultdict(lambda: {'pentest': [], 'verify': []})
+
+    for task in list(pentest_tasks) + list(verify_tasks):
+        # Tách PIC_ISM theo dấu `,`, bỏ khoảng trắng và lowercase
+        raw_pics = [p.strip().lower() for p in task.PIC_ISM.split(",") if p.strip()]
+        for pic in raw_pics:
+            if pic in valid_users:
+                if isinstance(task, PentestTask):
+                    tasks_by_pic[pic]['pentest'].append(task)
+                elif isinstance(task, VerifyTask):
+                    tasks_by_pic[pic]['verify'].append(task)
+
+    # Truyền tasks_by_pic cho template (pic dạng lowercase)
+    return render(request, "appsec_task/tmp_reminder.html", {
+        'tasks_by_pic': tasks_by_pic.items(),
+        'server_location': settings.SERVER_LOCATION,
+    })
 

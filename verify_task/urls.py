@@ -12,5 +12,5 @@ urlpatterns = [
     path('delete/<int:verify_task_id>/', views.delete_verify_task, name='delete_verify_task'),
     path('view/<int:verify_task_id>/', views.view_verify_task, name='view_verify_task'),
     path('my-tasks/', views.my_task_view, name='my_task_view'),
-    
+ 
 ]

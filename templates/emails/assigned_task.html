@@ -1,0 +1,16 @@
+<html>
+  <body style="font-family: sans-serif; background-color: #e6f7ff; padding: 20px;">
+    <p>Hi <strong>{{ username }}</strong>,</p>
+
+    <p>{{ description }}</p> <p style="color: red; font-size: 14px"><strong>{{ task_name }}</strong></p>
+
+    
+    <p>
+      👉 <a href="{{ task_url }}" style="color: red; text-decoration: underline;">Click to view task</a>
+      or access {{ task_url}}
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #ccc;">
+    <p style="font-size: 12px; color: gray;">This is an automated email from AppSecTool.</p>
+  </body>
+</html>
