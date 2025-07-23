@@ -3,12 +3,12 @@
 {% block title %}List All Sharecost{% endblock %}
 {% block content %}
 <h2>Reminder Email Preview</h2>
-  {% for pic, task_data in tasks_by_pic %}
   <div style="margin-bottom: 50px; background-color: #e6f7ff; padding: 20px;">
-    <p>Hi <strong>{{ pic|upper }}</strong>,</p>
-    <p>You have the following tasks that need attention.</p>
-    <p style="color: red; font-size: 14px;"><strong>Pending Tasks Reminder</strong></p>
-
+    <p style="font-size: 18px">Hi <strong>{{ pic|upper }}</strong>,</p>
+   
+    <!-- <p style="font-size: 18px ">You have the following tasks that need attention.</p> -->
+    <p style="font-size: 18px; color:red; "><strong>{{ description }}</strong></p>
+    
     {% if task_data.pentest %}
       <h3>Pentest Tasks</h3>
       <table border="1" cellpadding="5" cellspacing="0">
@@ -24,7 +24,7 @@
         <tbody>
           {% for task in task_data.pentest %}
             <tr>
-              <td><a href="/tasks/{{ task.id }}/">{{ task.name }}</a></td>
+              <td><a href="/pentest/view/{{ task.id }}/">{{ task.name }}</a></td>
               <td>{{ task.PIC_ISM }}</td>
               <td>{{ task.status }}</td>
               <td>{{ task.start_date|default:"N/A" }}</td>
@@ -50,7 +50,7 @@
         <tbody>
           {% for task in task_data.verify %}
             <tr>
-              <td><a href="/tasks/{{ task.id }}/">{{ task.name }}</a></td>
+              <td><a href="/verify/view/{{ task.id }}/">{{ task.name }}</a></td>
               <td>{{ task.PIC_ISM }}</td>
               <td>{{ task.status }}</td>
               <td>{{ task.start_date|default:"N/A" }}</td>
@@ -64,7 +64,6 @@
     <hr style="border-top: 1px solid #ccc; margin-top: 40px;">
     <p style="font-size: 12px; color: gray;">This is an automated reminder from AppSecTool.</p>
   </div>
-{% endfor %}
 
 
 {% endblock %}

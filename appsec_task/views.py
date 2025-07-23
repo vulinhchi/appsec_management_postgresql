@@ -1626,8 +1626,13 @@ def send_reminder_emails(request):
         is_active=True
     )
 
-    # Lấy danh sách user trong hệ thống, convert thành lowercase set
-    valid_users = set(user.username.lower() for user in User.objects.all())
+    # Lấy danh sách user trong hệ thống còn active, convert thành lowercase set
+    # valid_users = set(user.username.lower() for user in User.objects.all())
+
+    valid_users = set(
+        user.username.lower()
+        for user in User.objects.filter(is_active=True)
+    )
 
     # Key sẽ là username dạng lowercase, Value là dict chứa tasks
     tasks_by_pic = defaultdict(lambda: {'pentest': [], 'verify': []})
@@ -1642,9 +1647,51 @@ def send_reminder_emails(request):
                 elif isinstance(task, VerifyTask):
                     tasks_by_pic[pic]['verify'].append(task)
 
+    for pic in valid_users:
+        #nếu pic nào k có task nào cần update thì k gửi nữa.
+        task_data = tasks_by_pic.get(pic, {"pentest": [], "verify": []})
+        has_tasks = bool(task_data['pentest'] or task_data['verify'])
+        description =""
+        # if tasks_by_pic[pic]['pentest'] or tasks_by_pic[pic]['verify']:
+        if has_tasks:
+            description = 'You have the following tasks that need attention. Please update "STATUS", "START_DATE", "END_DATE" FOR EVERY TASK BELOW'
+            html_content = render_to_string("emails/reminder_email_template.html", {
+                "pic": pic,
+                'description':description,
+                "task_data": tasks_by_pic[pic],
+                'server_location': settings.SERVER_LOCATION,
+            })
+            send_outlook_email(
+                subject=f"AppSecTool - Reminder Email Preview".upper(),
+                message=f"You have the following tasks that need attention.",
+                recipient_list=[f"{pic}@fpt.com"],
+                html_message=html_content
+            )
+
+            
+            messages.success(request, f"pic {pic} output {description}")
+        else:
+            description = "All your tasks is up-to-date, just chill"
+            html_content = render_to_string("emails/reminder_email_template.html", {
+                "pic": pic,
+                "description": description,
+                "task_data": tasks_by_pic[pic],
+                'server_location': settings.SERVER_LOCATION,
+            })
+            messages.success(request, f" KHONG CAN UPDATE pic {pic} output {description}")
+            send_outlook_email(
+                subject=f"AppSecTool - Reminder Email Preview".upper(),
+                message=f"You have the following tasks that need attention.",
+                recipient_list=[f"{pic}@fpt.com"],
+                html_message=html_content
+            )
+
     # Truyền tasks_by_pic cho template (pic dạng lowercase)
     return render(request, "appsec_task/tmp_reminder.html", {
-        'tasks_by_pic': tasks_by_pic.items(),
+        # 'tasks_by_pic': tasks_by_pic.items(),
+        'pic':'admin',
+        'description': description,
+        'task_data': tasks_by_pic['admin'],
         'server_location': settings.SERVER_LOCATION,
     })
 

@@ -1,21 +1,71 @@
 <html>
   <body style="font-family: sans-serif; background-color: #e6f7ff; padding: 20px;">
-    <p>Hi <strong>{{ username }}</strong>,</p>
+ 
+  <h2>Reminder Email Preview</h2>
+  <div style="margin-bottom: 50px; background-color: #e6f7ff; padding: 20px;">
+    <p style="font-size: 18px">Hi <strong>{{ pic|upper }}</strong>,</p>
+    
+    <p style="font-size: 18px; color:red; "><strong>{{ description }}</strong></p>
+    
+    <!-- <p style="color: red; font-size: 18px "><strong>Update "STATUS", "START_DATE", "END_DATE" FOR EVERY TASK BELOW</strong></p> -->
+    
+    {% if task_data.pentest %}
+      <h3>Pentest Tasks</h3>
+      <table border="1" cellpadding="5" cellspacing="0" width="100%" style="border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="width: 20%;">Task Link</th>
+            <th style="width: 20%;">PIC</th>
+            <th style="width: 20%;">Status</th>
+            <th style="width: 20%;">Start Date</th>
+            <th style="width: 20%;">End Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in task_data.pentest %}
+          <tr>
+            <td style="width: 20%;"><a href="{{ server_location }}/pentest/view/{{ task.id }}/">{{ task.name }}</a></td>
+            <td style="width: 20%;">{{ task.PIC_ISM }}</td>
+            <td style="width: 20%;">{{ task.status }}</td>
+            <td style="width: 20%;">{{ task.start_date|default:"N/A" }}</td>
+            <td style="width: 20%;">{{ task.end_date|default:"N/A" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
-    <p>{{ description }}</p> 
-    <p style="color: red; font-size: 14px"><strong>{{ task_name }}</strong></p>
+    {% endif %}
 
-    <!-- 🔽 CHỖ NÀY THÊM BẢNG CHI TIẾT TASK -->
-    <div style="margin-top: 20px;">
-      {{ task_details|safe }}
-    </div>
+    {% if task_data.verify %}
+      <h3 style="margin-top: 30px;">Verify Tasks</h3>
+      <table border="1" cellpadding="5" cellspacing="0" width="100%" style="border-collapse: collapse;">
+        <thead>
+          <tr>
+              <th style="width: 20%;">Task Link</th>
+              <th style="width: 20%;">PIC</th>
+              <th style="width: 20%;">Status</th>
+              <th style="width: 20%;">Start Date</th>
+              <th style="width: 20%;">End Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in task_data.verify %}
+            <tr>
+              <td><a href="{{ server_location }}/verify/view/{{ task.id }}/">{{ task.name }}</a></td>
+              <td>{{ task.PIC_ISM }}</td>
+              <td>{{ task.status }}</td>
+              <td>{{ task.start_date|default:"N/A" }}</td>
+              <td>{{ task.end_date|default:"N/A" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
 
-    <p>
-      👉 <a href="{{ task_url }}" style="color: red; text-decoration: underline;">Click to view task</a>
-      or access {{ task_url }}
-    </p>
+    <hr style="border-top: 1px solid #ccc; margin-top: 40px;">
+    <p style="font-size: 12px; color: gray;">This is an automated reminder from AppSecTool.</p>
+  </div>
 
-    <hr style="border: none; border-top: 1px solid #ccc;">
-    <p style="font-size: 12px; color: gray;">This is an automated email from AppSecTool.</p>
+  
   </body>
 </html>
