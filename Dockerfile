@@ -1,7 +1,7 @@
 # Sử dụng Python 3.10
 FROM python:3.10
 
-RUN apt-get update && apt-get install -y tzdata
+RUN apt-get update && apt-get install -y tzdata nano
 
 ENV TZ=Asia/Bangkok
 

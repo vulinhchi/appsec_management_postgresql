@@ -1611,9 +1611,7 @@ def send_assigned_mail_and_notification(task, username, task_type):
     )
 
 
-@login_required
-@require_groups(['Pentester', 'Leader', 'Manager'])
-def send_reminder_emails(request):
+def send_reminder():
     pentest_tasks = PentestTask.objects.filter(
         Q(status__in=['Not Start', 'In Progress', 'Done']) &
         (Q(start_date__isnull=True) | Q(end_date__isnull=True)),
@@ -1633,7 +1631,6 @@ def send_reminder_emails(request):
         user.username.lower()
         for user in User.objects.filter(is_active=True)
     )
-
     # Key sẽ là username dạng lowercase, Value là dict chứa tasks
     tasks_by_pic = defaultdict(lambda: {'pentest': [], 'verify': []})
 
@@ -1648,7 +1645,6 @@ def send_reminder_emails(request):
                     tasks_by_pic[pic]['verify'].append(task)
 
     for pic in valid_users:
-        #nếu pic nào k có task nào cần update thì k gửi nữa.
         task_data = tasks_by_pic.get(pic, {"pentest": [], "verify": []})
         has_tasks = bool(task_data['pentest'] or task_data['verify'])
         description =""
@@ -1669,7 +1665,7 @@ def send_reminder_emails(request):
             )
 
             
-            messages.success(request, f"pic {pic} output {description}")
+            # messages.success(request, f"pic {pic} output {description}")
         else:
             description = "All your tasks is up-to-date, just chill"
             html_content = render_to_string("emails/reminder_email_template.html", {
@@ -1678,20 +1674,29 @@ def send_reminder_emails(request):
                 "task_data": tasks_by_pic[pic],
                 'server_location': settings.SERVER_LOCATION,
             })
-            messages.success(request, f" KHONG CAN UPDATE pic {pic} output {description}")
+            # messages.success(request, f" KHONG CAN UPDATE pic {pic} output {description}")
             send_outlook_email(
                 subject=f"AppSecTool - Reminder Email Preview".upper(),
                 message=f"You have the following tasks that need attention.",
                 recipient_list=[f"{pic}@fpt.com"],
                 html_message=html_content
             )
+    return description, task_data, tasks_by_pic
+
+@login_required
+@require_groups(['Pentester', 'Leader', 'Manager'])
+def send_reminder_emails(request):
+    
+
+    current_user = request.user.username.lower()
+
+    description, tasks_by_pic = send_reminder()
+    messages.success(request, f"pic {current_user} -  output {description}")
 
     # Truyền tasks_by_pic cho template (pic dạng lowercase)
     return render(request, "appsec_task/tmp_reminder.html", {
-        # 'tasks_by_pic': tasks_by_pic.items(),
-        'pic':'admin',
+        'pic': current_user,
         'description': description,
-        'task_data': tasks_by_pic['admin'],
+        'task_data': tasks_by_pic[current_user],
         'server_location': settings.SERVER_LOCATION,
     })
-
