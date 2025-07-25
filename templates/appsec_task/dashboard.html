@@ -150,51 +150,67 @@
     </div>
   </div>
 </div>
+
 <div class="mt-5">
   <h5>📊 Affected APIs by Risk level in month</h5>
   <canvas id="vulnChart_api"></canvas>
 </div>
 
 
-<h3>🔝 Top 10 Frequent Vulnerabilities</h3>
-<table class="table table-sm table-bordered">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Vulnerability</th>
-      <th>Count</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in top_10_common_vulns %}
-      <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ item.name_vuln }}</td>
-        <td>{{ item.vuln_count }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
 
-<h3>🚨 Top 10 Vulnerabilities by Affected API Count</h3>
-<table class="table table-sm table-bordered">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Vulnerability</th>
-      <th>API Count</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in top_10_vuln_by_api %}
-      <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ item.name_vuln }}</td>
-        <td>{{ item.api_count }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!-- hiển thị thống kê TOP 10 -->
+<div class="container-fluid">
+  
+  <!-- 1. Bar Chart -->
+  <div class="row">
+    
+    <div class="col-md-6">
+      <h3>🔝 Top 10 Frequent Vulnerabilities</h3>
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Vulnerability</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in top_10_common_vulns %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.name_vuln }}</td>
+                <td>{{ item.vuln_count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+      <h3>🚨 Top 10 Vulnerabilities by Affected API Count</h3>
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Vulnerability</th>
+            <th>API Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in top_10_vuln_by_api %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.name_vuln }}</td>
+              <td>{{ item.api_count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
 
 
 <!-- exception -->
