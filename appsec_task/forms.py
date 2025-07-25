@@ -7,7 +7,7 @@ class AppSecTaskForm(forms.ModelForm):
         fields = [
             'name', 'description', 'status', 
             'PIC_ISM', 
-            'environment_prod', 'owner', 'mail_loop', 'chat_group', 'link_ticket', 
+            'environment_prod', 'owner', 'mail_loop', 'chat_group', 'link_ticket', 'name_sharepoint',
             'link_sharepoint', 'is_internet', 'is_newapp', 'checklist_type', 'sharecost',
             'is_pentest_task', 'is_verify_task', 'component', 'pentest_vendor'
         ]

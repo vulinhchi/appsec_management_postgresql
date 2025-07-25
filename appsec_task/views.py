@@ -123,7 +123,9 @@ def edit_appsec_task(request, task_id):
         form = AppSecTaskForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            return redirect("appsec_task:list_appsec_tasks")
+            messages.success(request, f"Task '{task.name}' was updated.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+            # return redirect("appsec_task:list_appsec_tasks")
     else:
         form = AppSecTaskForm(instance=task)
     return render(request, "appsec_task/edit_appsec_task.html", {"form": form, "task": task})
@@ -789,7 +791,9 @@ def edit_sharecost(request, appsec_task_id, sharecost_id):
 
             share_cost.save()
             
-            return redirect("appsec_task:list_sharecost")
+            # return redirect("appsec_task:list_sharecost")
+            messages.success(request, f"Sharecost '{appsec_task.name}' was updated.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
     else:
         form = ShareCostDetailsForm(instance=sharecost)
     return render(request, "appsec_task/add_share_cost.html", {"form": form, "task": sharecost, "appsec_task":appsec_task})

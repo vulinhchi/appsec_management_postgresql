@@ -238,9 +238,9 @@
 
                         </div>
                         <div class="card-body">
-                          
+                          <input type="hidden" value="{{ form.name_sharepoint.value }}">
                           <div class="input-group">
-                            <input type="text" id="id_name_sharepoint" name="name_sharepoint" class="form-control" placeholder="Tên hiển thị (VD: Checklist Internal)" value="{{ form.name_sharepoint.value|default:'' }}">
+                            <input type="text" id="id_name_sharepoint" name="name_sharepoint" class="form-control" placeholder="Tên hiển thị (VD: Checklist Internal)" value="{{ form.name_sharepoint.value}}">
                             <input type="url" id="id_link_sharepoint" name="link_sharepoint" class="form-control" placeholder="https://..." value="{{ form.link_sharepoint.value|default:'' }}">
                             <div class="input-group-append">
                               <button type="button" class="btn btn-outline-secondary" onclick="openHyperlinkPrompt()">🔗</button>
@@ -380,7 +380,7 @@
 
     document.getElementById('id_name_sharepoint').value = name;
     document.getElementById('id_link_sharepoint').value = url;
-  }
+  }  
 </script>
 <style>
 .component-checkbox {

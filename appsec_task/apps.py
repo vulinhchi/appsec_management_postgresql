@@ -22,7 +22,7 @@ class YourAppConfig(AppConfig):
             scheduler.add_job(
                 send_reminder,
                 # CronTrigger(hour='*', minute='*'),
-                CronTrigger(day_of_week='thu', hour=14, minute=0) #thứ 5 lúc 14h hàng tuần
+                CronTrigger(day_of_week='thu', hour=14, minute=0), #thứ 5 lúc 14h hàng tuần
 				id="daily_reminder",
                 replace_existing=True
             )

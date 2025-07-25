@@ -110,7 +110,9 @@ def edit_verify_task(request, verify_task_id):
                 except User.DoesNotExist:
                     continue
 
-            return redirect("verify_task:list_verify_tasks")
+            # return redirect("verify_task:list_verify_tasks")
+            messages.success(request, f"Task Verify '{appsec_task.name}' was updated.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
     else:
         form = VerifyTaskForm(instance=task, initial={"name": appsec_task.name, "description": appsec_task.description})  # Gán trước vào form
 
