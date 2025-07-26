@@ -25,15 +25,19 @@
         
         <label><input type="checkbox" class="column-toggle" data-column="3" checked> Pentest Vendor</label>
         <label><input type="checkbox" class="column-toggle" data-column="4" checked> Project Code</label>
-        <label><input type="checkbox" class="column-toggle" data-column="5" checked> Owner</label>
+        <label><input type="checkbox" class="column-toggle" data-column="5" unchecked> Owner</label>
         <label><input type="checkbox" class="column-toggle" data-column="8" checked> Month Pay</label>
         <label><input type="checkbox" class="column-toggle" data-column="9" checked> Pay Status</label>
-        <label><input type="checkbox" class="column-toggle" data-column="10" checked> Note</label>
+        <label><input type="checkbox" class="column-toggle" data-column="10" unchecked> Note</label>
 </div>
 <h5>🔢 Cost by Month</h5>
 <table class="table table-bordered">
     <thead>
-        <tr><th>Month</th><th>Cost MM</th><th>Cost Dolla</th></tr>
+        <tr>
+            <th style="width: 30%;">Month</th>
+            <th style="width: 30%;">Cost MM</th>
+            <th style="width: 30%;">Cost Dolla</th>
+        </tr>
     </thead>
     <tbody>
         {% for month, total in monthly_totals.items %}
@@ -49,14 +53,18 @@
 <h5>📊 Cost by Quarter</h5>
 <table class="table table-bordered">
     <thead>
-        <tr><th>Quarter</th><th>Cost MM</th><th>Cost Dolla</th></tr>
+        <tr>
+            <th style="width: 30%;">Quarter</th>
+            <th style="width: 30%;">Cost MM</th>
+            <th style="width: 30%;">Cost Dolla</th>
+        </tr>
     </thead>
     <tbody>
         {% for quarter, total in quarterly_totals.items %}
             <tr>
                 <td>{{ quarter }}</td>
                 <td>{{ total.cost_mm }}</td>
-                <td>{{ total.cost_dolla }}</td>
+                <td> {{ total.cost_dolla }}</td>
             </tr>
         {% endfor %}
     </tbody>
@@ -115,7 +123,10 @@
 <h5>📊 Filter calculator</h5>
 <table class="table table-bordered" id="searchTotals">
     <thead>
-        <tr><th>Number of Task</th><th>Sum Cost MM</th><th>Sum Cost Dolla</th></tr>
+        <tr>
+            <th style="width: 30%;">Number of Task</th>
+            <th style="width: 30%;">Sum Cost MM</th>
+            <th style="width: 30%;">Sum Cost Dolla</th></tr>
     </thead>
     <tbody>
         
