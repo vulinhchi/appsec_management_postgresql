@@ -78,8 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
-
 // chức năng search
 $(document).ready(function() {
     function parseDate(dateString) {

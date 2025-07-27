@@ -22,7 +22,9 @@
     <label><input type="checkbox" class="column-toggle" data-column="4" checked> Start Date</label>
     <label><input type="checkbox" class="column-toggle" data-column="5" checked> End Date</label>
     <label><input type="checkbox" class="column-toggle" data-column="6" checked> Owner</label>
-    </div>
+</div>
+
+ Count: <span id="searchCount">0</span>
 <div class="content">
     <div class="container-fluid">
         
@@ -67,7 +69,7 @@
                     <thead>
                         <tr>
                             <th onclick="sortTable(0)">ID</th>
-                            <th onclick="sortTable(1)">Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
+                            <th>Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
                             <th onclick="sortTable(2)">Status <br> 
                                 <select class="form-control filter-input" data-column="2">
                                     <option value="">All</option>
@@ -135,6 +137,60 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filters = document.querySelectorAll(".filter-input");
+
+    filters.forEach(function(input) {
+        input.addEventListener("keyup", filterTable);
+        input.addEventListener("change", filterTable);
+    });
+
+    function filterTable() {
+        const table = document.getElementById("taskTable");
+        const rows = table.querySelectorAll("tbody tr");
+
+        rows.forEach(function(row) {
+            let visible = true;
+            filters.forEach(function(input) {
+                const column = input.dataset.column;
+                const filterValue = input.value.toLowerCase();
+                const cell = row.cells[column];
+
+                if (cell && filterValue) {
+                    const text = cell.textContent.toLowerCase();
+                    if (!text.includes(filterValue)) {
+                        visible = false;
+                    }
+                }
+            });
+
+            row.style.display = visible ? "" : "none";
+        });
+
+        updateSearchTotals();
+    }
+
+    function updateSearchTotals() {
+        let count = 0;
+
+        const rows = document.querySelectorAll("#taskTable tbody tr");
+
+        rows.forEach(row => {
+            // if (row.offsetParent !== null) {
+            if (row.style.display !== "none"){
+
+                count += 1;
+            }
+        });
+
+        document.getElementById("searchCount").textContent = count;
+    }
+
+    // Khởi động lần đầu
+    filterTable();
+});
+</script>
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
 <script src="{% static 'js/custome.js' %}"></script> 
 
