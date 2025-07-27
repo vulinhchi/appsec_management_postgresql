@@ -21,7 +21,6 @@
     <label><input type="checkbox" class="column-toggle" data-column="3" checked> PIC ISM</label>
     <label><input type="checkbox" class="column-toggle" data-column="4" checked> Start Date</label>
     <label><input type="checkbox" class="column-toggle" data-column="5" checked> End Date</label>
-    <label><input type="checkbox" class="column-toggle" data-column="6" checked> Owner</label>
     </div>
 <div class="content">
     <div class="container-fluid">
@@ -79,7 +78,6 @@
                             <th>PIC ISM <br> <input type="text" class="form-control filter-input" data-column="3"></th>
                             <th onclick="sortTable(4)">Start Date </th>
                             <th onclick="sortTable(5)">End Date </th>
-                            <th>Owner <br> <input type="text" class="form-control filter-input" data-column="6"></th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -106,7 +104,6 @@
                             <td>{{ task.start_date }}</td>
                             <td>{{ task.end_date }}</td>
                                 
-                            <td>{{ task.appsec_task.owner }}</td>
                             <td>
                                 {% if task.appsec_task %}
                                     <a href="{% url 'appsec_task:view_appsec_task' task.appsec_task.id %}" class="text-primary">

@@ -24,7 +24,7 @@
         <label><input type="checkbox" class="column-toggle" data-column="8" unchecked> Mail Loop</label>
         <label><input type="checkbox" class="column-toggle" data-column="9" unchecked> Chat group </label>
         <label><input type="checkbox" class="column-toggle" data-column="10" unchecked> Ticket link</label>
-        <label><input type="checkbox" class="column-toggle" data-column="11" checked> Sharepoint link</label>
+        <label><input type="checkbox" class="column-toggle" data-column="11" unchecked> Sharepoint link</label>
 
         <label><input type="checkbox" class="column-toggle" data-column="12" unchecked> Internet/Internal?</label>
         <label><input type="checkbox" class="column-toggle" data-column="13" unchecked> New App/Old App?</label>
@@ -130,7 +130,7 @@
                         <tr>
                             <th onclick="sortTable(0)">ID</th>
                             <th>Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
-                            <th>Status
+                            <th onclick="sortTable(2)">Status
                                 <br> 
                                 <select class="form-control filter-input" data-column="2">
                                     <option value="">All</option>
@@ -161,7 +161,7 @@
                             <th>Ticket link <br> <input type="text" class="form-control filter-input" data-column="10"> </th>
                             
                             <th>Sharepoint link <br> <input type="text" class="form-control filter-input" data-column="11"></th>
-                            <th>Internet/Internal?>
+                            <th onclick="sortTable(12)">Internet/Internal?>
                                 <br> 
                                 <select class="form-control filter-input" data-column="12">
                                     <option value="">All</option>
@@ -170,7 +170,7 @@
                                     {% endfor %}
                                 </select>
                             </th>
-                            <th>New App/Old App?>
+                            <th onclick="sortTable(13)">New App/Old App?>
                                 <br> 
                                 <select class="form-control filter-input" data-column="13">
                                     <option value="">All</option>
@@ -180,7 +180,7 @@
                                 </select>
 
                             </th>
-                            <th>Checklist Type>
+                            <th onclick="sortTable(14)">Checklist Type>
                                 <br> 
                                 <select class="form-control filter-input" data-column="14">
                                     <option value="">All</option>
@@ -189,7 +189,7 @@
                                     {% endfor %}
                                 </select>
                             </th>
-                            <th>Share Cost?
+                            <th onclick="sortTable(15)">Share Cost?
                                 <br>
                                 <select class="form-control filter-input" data-column="15">
                                     <option value="">All</option>
@@ -199,7 +199,7 @@
                                 </select>
                                 
                             </th>
-                            <th>Component <br> 
+                            <th onclick="sortTable(16)">Component <br> 
                                 <select class="form-control filter-input" data-column="16">
                                     <option value="">All</option>
                                     {% for value, label in component_choices %}

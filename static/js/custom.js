@@ -113,12 +113,7 @@ $(document).ready(function() {
         var startDate = parseDate(startDateInput);
         var endDate = parseDate(endDateInput);
 
-        // search in all vuln
-        var startDateInputVuln = $("#start-date-vuln").val();
-        var endDateInputVuln = $("#end-date-vuln").val();
-        var startDateVuln = parseDate(startDateInputVuln);
-        var endDateVuln = parseDate(endDateInputVuln);
-        
+
         // ===== Filter AppSecTask + PentestTask + VerifyTask =====
         $("#taskTable tbody tr").each(function () {
             var row = $(this);
@@ -141,24 +136,6 @@ $(document).ready(function() {
                 isValid = false;
             }
 
-            // 🔍 Lấy Notify Date từ cột thứ 8 (index = 7)
-            var notifyIndex = row.find("td").filter(function(i) {
-                return $("#taskTable thead th").eq(i).text().trim().startsWith("Notify date");
-            }).text().trim();
-
-            console.log("NOTIFY: " , notifyIndex)
-            // Lấy Notify Date đúng từ cột đó trong row hiện tại
-            var notifyDateText = row.find("td").eq(notifyIndex).text().trim();
-            var notifyDate = parseDate(notifyDateText);
-        
-            // === Lọc theo khoảng Notify Date ===
-            if (startDateVuln && notifyDate && notifyDate < startDateVuln) {
-                isValid = false;
-            }
-            if (endDateVuln && notifyDate && notifyDate > endDateVuln) {
-                isValid = false;
-            }
-            
             $(".filter-input").each(function () {
                 var columnIndex = $(this).data("column");
                 var filterValue = $(this).val().toLowerCase().trim();
@@ -175,14 +152,13 @@ $(document).ready(function() {
     }
 
     // ✅ Chạy filter khi nhập input hoặc chọn ngày
-    $(".filter-input, .filter-date, .filter-date-vuln").on("input change", filterTable);
+    $(".filter-input, .filter-date").on("input change", filterTable);
 
     // ✅ Nút Clear Filters
     $("#clearFilters").on("click", function() {
-        $(".filter-input, .filter-date, .filter-date-vuln").val("").trigger("change");
+        $(".filter-input, .filter-date").val("").trigger("change");
         filterTable();
     });
-
 
     // ✅ Khi trang load, filter chạy 1 lần để đảm bảo không lỗi
     filterTable();
