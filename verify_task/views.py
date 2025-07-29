@@ -59,11 +59,32 @@ def create_verify_task(request, appsec_task_id):
             # Gửi noti cho những người mới được thêm vào
             added_users = new_assignees - old_assignees
 
+            removed_users = old_assignees - new_assignees
             for username in added_users:
                 try:
                     user = User.objects.get(username=username)
-                    send_assigned_mail_and_notification(verify_task, user, "verify")
                     
+                    send_assigned_mail_and_notification(
+                        verify_task, 
+                        user, 
+                        "verify",
+                        "New Verify Task Assigned",
+                        "AppSecTool - New Verify Task Assigned",
+                        f"You are assigned to verify task '{verify_task.name}'")
+
+                except User.DoesNotExist:
+                    continue
+            for username in removed_users:
+                try:
+                    user = User.objects.get(username=username)
+                    send_assigned_mail_and_notification(
+                        verify_task,
+                        user,
+                        "verify", 
+                        "New Verify Task Rmoved", 
+                        "AppSecTool - New Verify Task Removed", 
+                        f"You're no longer assigned to this task '{verify_task.name}', so there's no need to continue following it.")
+
                 except User.DoesNotExist:
                     continue
 
@@ -102,11 +123,33 @@ def edit_verify_task(request, verify_task_id):
             # Gửi noti cho những người mới được thêm vào
             added_users = new_assignees - old_assignees
 
+            # 🔹 Người bị gỡ khỏi assign
+            removed_users = old_assignees - new_assignees
             for username in added_users:
                 try:
                     user = User.objects.get(username=username)
-                    send_assigned_mail_and_notification(verify_task, user, "verify")
                     
+                    send_assigned_mail_and_notification(
+                        verify_task, 
+                        user, 
+                        "verify",
+                        "New Verify Task Assigned",
+                        "AppSecTool - New Verify Task Assigned",
+                        f"You are assigned to verify task '{verify_task.name}'")
+
+                except User.DoesNotExist:
+                    continue
+            for username in removed_users:
+                try:
+                    user = User.objects.get(username=username)
+                    send_assigned_mail_and_notification(
+                        verify_task,
+                        user,
+                        "verify", 
+                        "New Verify Task Rmoved", 
+                        "AppSecTool - New Verify Task Removed", 
+                        f"You're no longer assigned to this task '{verify_task.name}', so there's no need to continue following it.")
+
                 except User.DoesNotExist:
                     continue
 

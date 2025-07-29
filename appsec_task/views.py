@@ -1592,27 +1592,50 @@ def send_outlook_email(subject, message, recipient_list, html_message=None):
         return False
 
 
-def send_assigned_mail_and_notification(task, username, task_type):
+def send_assigned_mail_and_notification(task, username, task_type, title, subject, description):
+    # Notification.objects.create(
+    #     user=username,
+    #     title=f"New {task_type} Task Assigned",
+    #     description=f"You are assigned to {task_type} task: {task.name}",
+    #     url=f"/{task_type}/view/{task.id}",
+    # )
+
+    # html_content = render_to_string("emails/assigned_task.html", {
+    #     "username": username,
+    #     "task_name": task.name,
+    #     "description":f"You are assigned to {task_type} task",
+    #     "task_url": f"{settings.SERVER_LOCATION}/pentest/view/{task.id}",
+    # })
+
+    # send_outlook_email(
+    #     subject=f"AppSecTool - New {task_type} Task Assigned".upper(),
+    #     message=f"You are assigned to task: {task.name}",
+    #     recipient_list=[f"{username}@fpt.com"],
+    #     html_message=html_content
+    # )
+
     Notification.objects.create(
         user=username,
-        title=f"New {task_type} Task Assigned",
-        description=f"You are assigned to {task_type} task: {task.name}",
+        title=title,
+        description=description,
         url=f"/{task_type}/view/{task.id}",
     )
 
     html_content = render_to_string("emails/assigned_task.html", {
         "username": username,
         "task_name": task.name,
-        "description":f"You are assigned to {task_type} task:",
-        "task_url": f"{settings.SERVER_LOCATION}/pentest/view/{task.id}",
+        "description":description,
+        "task_url": f"{settings.SERVER_LOCATION}/{task_type}/view/{task.id}",
     })
 
     send_outlook_email(
-        subject=f"AppSecTool - New {task_type} Task Assigned".upper(),
-        message=f"You are assigned to task: {task.name}",
+        subject=subject.upper(),
+        message=description,
         recipient_list=[f"{username}@fpt.com"],
         html_message=html_content
     )
+
+
 
 
 def send_reminder():
