@@ -33,7 +33,5 @@ urlpatterns = [
     path('appsec/<int:appsec_task_id>/exceptions/<int:pk>/', views.exception_detail, name='exception_detail'),
     path('appsec/<int:appsec_task_id>/export_exception_template/', views.export_exception_template, name='export_exception_template'),
     path('', views.dashboard, name='dashboard'),
-
-    path('reminder/', views.send_reminder_emails, name='send_reminder_emails'),
    
 ]

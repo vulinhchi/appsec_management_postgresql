@@ -1593,27 +1593,6 @@ def send_outlook_email(subject, message, recipient_list, html_message=None):
 
 
 def send_assigned_mail_and_notification(task, username, task_type, title, subject, description):
-    # Notification.objects.create(
-    #     user=username,
-    #     title=f"New {task_type} Task Assigned",
-    #     description=f"You are assigned to {task_type} task: {task.name}",
-    #     url=f"/{task_type}/view/{task.id}",
-    # )
-
-    # html_content = render_to_string("emails/assigned_task.html", {
-    #     "username": username,
-    #     "task_name": task.name,
-    #     "description":f"You are assigned to {task_type} task",
-    #     "task_url": f"{settings.SERVER_LOCATION}/pentest/view/{task.id}",
-    # })
-
-    # send_outlook_email(
-    #     subject=f"AppSecTool - New {task_type} Task Assigned".upper(),
-    #     message=f"You are assigned to task: {task.name}",
-    #     recipient_list=[f"{username}@fpt.com"],
-    #     html_message=html_content
-    # )
-
     Notification.objects.create(
         user=username,
         title=title,
@@ -1710,20 +1689,3 @@ def send_reminder():
             )
     return description, task_data, tasks_by_pic
 
-@login_required
-@require_groups(['Pentester', 'Leader', 'Manager'])
-def send_reminder_emails(request):
-    
-
-    current_user = request.user.username.lower()
-
-    description, tasks_by_pic = send_reminder()
-    messages.success(request, f"pic {current_user} -  output {description}")
-
-    # Truyền tasks_by_pic cho template (pic dạng lowercase)
-    return render(request, "appsec_task/tmp_reminder.html", {
-        'pic': current_user,
-        'description': description,
-        'task_data': tasks_by_pic[current_user],
-        'server_location': settings.SERVER_LOCATION,
-    })
