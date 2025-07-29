@@ -1,7 +1,7 @@
 services:
   web:
     build: . #lúc dùng file docker-compose.yml trên server để run app thì bỏ dòng này ra
-    image: myapp_web:v4_3Jun  # Đặt tên image để export
+    image: myapp_web:v5_29Jul  # Đặt tên image để export
     container_name: django_web_v1
     command: >
       sh -c "python manage.py collectstatic --noinput &&
@@ -29,7 +29,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx_https_v4
+    container_name: nginx_https_v5
     ports:
       - "443:443"
       - "80:80"
@@ -46,7 +46,7 @@ services:
 
   db:
     image: postgres:latest
-    container_name: django_db_v4
+    container_name: django_db_v5
     restart: always
     environment:
       - POSTGRES_DB=taskdb
