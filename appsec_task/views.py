@@ -534,9 +534,9 @@ def export_appsec_tasks(request):
             "Public Internet/Internal?": task.appsec_task.is_internet if task.appsec_task else "",
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
-            "Share Cost?": task.appsec_task.sharecost,
+            "Share Cost?": task.appsec_task.sharecost if task.appsec_task else "",
             "Component": ", ".join(task.appsec_task.component) if task.appsec_task and task.appsec_task.component else "",
-            "Pentest Vendor": task.appsec_task.pentest_vendor,
+            "Pentest Vendor": task.appsec_task.pentest_vendor if task.appsec_task else "",
         })
     verify_df = pd.DataFrame(verify_data)
     # Chuyển sang DataFrame nhưng không export cột 'link_raw'
@@ -572,8 +572,8 @@ def export_appsec_tasks(request):
             "NewApp/OldApp?": task.appsec_task.is_newapp if task.appsec_task else "",
             "Checklist Type": task.appsec_task.checklist_type if task.appsec_task else "",
             "Component": ", ".join(task.appsec_task.component) if task.appsec_task and task.appsec_task.component else "",
-            "Pentest Vendor": task.appsec_task.pentest_vendor,
-            "Share Cost?": task.appsec_task.sharecost,
+            "Pentest Vendor": task.appsec_task.pentest_vendor if task.appsec_task else "",
+            "Share Cost?": task.appsec_task.sharecost if task.appsec_task else "",
             
         })
     pentest_df = pd.DataFrame(pentest_data)
