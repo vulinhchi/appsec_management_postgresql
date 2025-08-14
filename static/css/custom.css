@@ -236,6 +236,20 @@ td img {
 }
 
 
+.vuln-detail-link {
+  font-size: 1.13em;
+  font-weight: 600;
+  color: #3641b7;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vuln-detail-link:hover {
+  text-decoration: underline;
+  color: red; /* Tùy chọn: màu đậm hơn khi hover */
+}
+
+
 /*màu Background của level lỗ hổng*/
 .critical { background-color: #8B0000; color: white; } /* Đỏ đậm */
 .high { background-color: #FF0000; color: white; } /* Đỏ */
