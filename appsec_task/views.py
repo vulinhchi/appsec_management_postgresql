@@ -1269,6 +1269,7 @@ def task_timeline(current_year):
     verify_all = VerifyTask.objects.filter(start_date__year=current_year)
 
     def serialize_task(task, task_type):
+       
         data = {
             "name": task.name,
             "pic": task.PIC_ISM or "",
@@ -1276,7 +1277,7 @@ def task_timeline(current_year):
             "end": task.end_date.strftime("%Y-%m-%d") if task.end_date else "",
             "type": task_type,
             "status": task.status if hasattr(task, "status") else "", 
-    
+            "url": f"{settings.SERVER_LOCATION}/{task_type}/view/{task.id}",
         }
 
         if task_type == "retest":

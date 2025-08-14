@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base2.html' %}
 {% load static %}
 
 {% block content %}
@@ -19,7 +19,7 @@
 </select>
 <h4 class="mt-4">Monthly Task Timeline</h4>
 
-<div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+<div class="d-flex justify-content-between align-items-center mb-2 mt-4" style="overflow-x: auto; width: 100%;">
   <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(-1)">‹ Prev</button>
   <h5 id="calendar-month-title" class="mb-0"></h5>
   <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(1)">Next ›</button>
@@ -323,6 +323,7 @@ function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter
       });
 
       tasksForDay.forEach(task => {
+
         const tag = document.createElement("div");
         tag.className = "mt-1 px-1 py-1 d-block rounded";
         tag.style.fontSize = "0.75rem";
@@ -337,10 +338,22 @@ function renderCalendar(gridId, tasks, month, year, statusFilter = "", picFilter
           task.status === "In Progress" ? "#ffa500" :
           "#d1ecf1";
         tag.style.color = "#333";
-        tag.innerText = `${task.status} - ${task.type} - ${task.name} - (${task.pic})`;
-        tag.style.whiteSpace = "nowrap";
-        tag.style.overflow = "hidden";
-        tag.style.textOverflow = "ellipsis";
+
+        const link = document.createElement("a");
+        link.href = task.url;
+        link.innerText = `${task.status} - ${task.type} - ${task.name} - (${task.pic})`;
+        link.style.color = "#333";
+        link.style.textDecoration = "none";
+
+        // Nếu muốn mở tab mới:
+        // link.target = "_blank";
+
+        tag.appendChild(link);
+        // tag.style.whiteSpace = "nowrap";
+        // tag.style.overflow = "hidden";
+        // tag.style.textOverflow = "ellipsis";
+        tag.style.wordBreak = "break-word";  // ✅ Ngắt dòng giữa các từ dài
+
         cell.appendChild(tag);
       });
     }
