@@ -3,12 +3,13 @@
 
 {% block content %}
 <!-- Dropdown cho Status -->
-<select id="statusFilter" class="form-control">
+<p>
+  </p>
+  <select id="statusFilter" class="form-control">
   <option value="">All Status</option>
-  <option value="Done">Done</option>
-  <option value="Not Start">Not Start</option>
-  <option value="In Progress">In Progress</option>
-  <option value="Retest">Retest</option>
+  {% for value in status_choices %}
+    <option value="{{ value }}">{{ value }}</option>
+  {% endfor %}
 </select>
 
 <select id="picFilter" class="form-control">

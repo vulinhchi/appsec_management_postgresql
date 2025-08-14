@@ -1296,11 +1296,12 @@ def task_timeline(current_year):
     # user_choices = [(user.username, user.username) for user in User.objects.all()]
     pentester_group = Group.objects.get(name="Pentester")
     pentesters = User.objects.filter(groups=pentester_group)
-
+    status_choices = AppSecTask._meta.get_field('status').choices 
     return {
         "pentest_tasks_json": json.dumps(pentest_retest_tasks),
         "verify_tasks_json": json.dumps(verify_tasks),
         "user_choices": pentesters, 
+        "status_choices": status_choices,
     }
 
 def top_10_vuln_apis(year):
@@ -1429,6 +1430,7 @@ def dashboard(request):
         "pentest_tasks_json": timeline_stats["pentest_tasks_json"],
         "verify_tasks_json": timeline_stats["verify_tasks_json"],
         "user_choices": timeline_stats["user_choices"],
+        "status_choices": timeline_stats["status_choices"],
 
         "top_10_common_vulns": top_vulns["top_common"],
         "top_10_vuln_by_api": top_vulns["top_api"],
