@@ -249,6 +249,16 @@ td img {
   color: red; /* Tùy chọn: màu đậm hơn khi hover */
 }
 
+.affected-container pre {
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+.table-container {
+  overflow-x: auto;
+}
 
 /*màu Background của level lỗ hổng*/
 .critical { background-color: #8B0000; color: white; } /* Đỏ đậm */

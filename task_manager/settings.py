@@ -128,7 +128,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-SERVER_LOCATION = 'https://10.243.105.102'
+# SERVER_LOCATION = 'https://10.243.105.102'
+SERVER_LOCATION = 'https://localhost'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

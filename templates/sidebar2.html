@@ -1,0 +1,111 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <!-- Dashboard -->
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'appsec_task:dashboard' %}">
+        <i class="mdi mdi-view-dashboard menu-icon"></i>
+        <span class="menu-title">Dashboard</span>
+      </a>
+    </li>
+
+    <!-- AppSec Tasks -->
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'appsec_task:list_appsec_tasks' %}">
+        <i class="mdi mdi-clipboard-text menu-icon"></i>
+        <span class="menu-title">Appsec Tasks</span>
+      </a>
+    </li>
+
+    <!-- Pentest Tasks (with submenu) -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#pentestTasks" aria-expanded="false" aria-controls="pentestTasks">
+        <i class="mdi mdi-bug menu-icon"></i>
+        <span class="menu-title">Pentest Tasks</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="pentestTasks">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{% url 'pentest_task:my_task_view' %}">My Pentest Tasks</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'pentest_task:list_pentest_tasks' %}">List Pentest Tasks</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'pentest_task:list_retest_tasks' %}">List Retest Tasks</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Verify Tasks -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#verifyTasks" aria-expanded="false" aria-controls="verifyTasks">
+        <i class="mdi mdi-check-decagram menu-icon"></i>
+        <span class="menu-title">Verify Tasks</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="verifyTasks">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'verify_task:my_task_view' %}">My Verify Tasks</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'verify_task:list_verify_tasks' %}">List Verify Tasks</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Vulnerability Template -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#vulnTemplate" aria-expanded="false" aria-controls="vulnTemplate">
+        <i class="mdi mdi-database menu-icon"></i>
+        <span class="menu-title">Vulnerability Template</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="vulnTemplate">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'pentest_task:list_vuln_templates' %}">List Templates</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'pentest_task:vuln_template_create' %}">Add Template</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Other Information -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#otherInfo" aria-expanded="false" aria-controls="otherInfo">
+        <i class="mdi mdi-information-outline menu-icon"></i>
+        <span class="menu-title">Other Information</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="otherInfo">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'pentest_task:list_all_vulnerabilities' %}">All Vulnerabilities</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'appsec_task:list_sharecost' %}">All Sharecost</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'appsec_task:all_exceptions' %}">All Exceptions</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Config Template -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#configTemplate" aria-expanded="false" aria-controls="configTemplate">
+        <i class="mdi mdi-file-document-box-outline menu-icon"></i>
+        <span class="menu-title">Config Template</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="configTemplate">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'pentest_task:list_templates' %}">List Report Templates</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'pentest_task:upload_template' %}">Add New Template</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Account -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#account" aria-expanded="false" aria-controls="account">
+        <i class="mdi mdi-account-circle menu-icon"></i>
+        <span class="menu-title">Account</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="account">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'password_change' %}">Change Password</a></li>
+          <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</nav>
