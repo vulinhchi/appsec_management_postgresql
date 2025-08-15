@@ -4,50 +4,29 @@
 {% block content %}
 <h2>AppSec Task List</h2>
 
-<a href="{% url 'appsec_task:create_appsec_task' %}" class="btn btn-success">Create New Task</a>
-<a href="{% url 'appsec_task:export_appsec_tasks' %}" class="btn btn-primary">Export All Data</a>
-
-<!-- Checkbox để bật/tắt cột -->
-    <div class="mb-3">
-
-        <label><input type="checkbox" class="column-toggle" data-column="0" checked> ID</label>
-        <label><input type="checkbox" class="column-toggle" data-column="1" checked> Task Name</label>
-        <label><input type="checkbox" class="column-toggle" data-column="2" checked> Status</label>
-        <label><input type="checkbox" class="column-toggle" data-column="3" checked> PIC ISM</label>
-        <label><input type="checkbox" class="column-toggle" data-column="4" checked> Start Date</label>
-        <label><input type="checkbox" class="column-toggle" data-column="5" checked> End Date</label>
-
-        <label><input type="checkbox" class="column-toggle" data-column="6" unchecked> Production URL</label>
-        <label><input type="checkbox" class="column-toggle" data-column="7" unchecked> Owner</label>
+<div class="row mb-3">
+  <div class="col-12 d-flex flex-wrap justify-content-between align-items-center">
+    <div class="d-flex gap-2 mb-2 mb-md-0">
+        <a href="{% url 'appsec_task:create_appsec_task' %}"  class="btn btn-primary">+ Add New Vulnerability</a>
         
+        <a href="{% url 'appsec_task:export_appsec_tasks' %}"  class="btn btn-secondary">Export All Tasks</a>
         
-        <label><input type="checkbox" class="column-toggle" data-column="8" unchecked> Mail Loop</label>
-        <label><input type="checkbox" class="column-toggle" data-column="9" unchecked> Chat group </label>
-        <label><input type="checkbox" class="column-toggle" data-column="10" unchecked> Ticket link</label>
-        <label><input type="checkbox" class="column-toggle" data-column="11" unchecked> Sharepoint link</label>
-
-        <label><input type="checkbox" class="column-toggle" data-column="12" unchecked> Internet/Internal?</label>
-        <label><input type="checkbox" class="column-toggle" data-column="13" unchecked> New App/Old App?</label>
-        
-        <label><input type="checkbox" class="column-toggle" data-column="14" unchecked> Checklist Type</label>
-        <label><input type="checkbox" class="column-toggle" data-column="15" unchecked> Share Cost? </label>
-        <label><input type="checkbox" class="column-toggle" data-column="16" unchecked> Component</label>
-        <label><input type="checkbox" class="column-toggle" data-column="17" unchecked> Pentest Vendor</label>
-        
+        <form method="POST" enctype="multipart/form-data" action="{% url 'appsec_task:import_appsec_tasks'  %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="file" name="task_file" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-info">Import Appsec Tasks</button>
+                </div>
+            </div>
+        </form>  
     </div>
+    
+  </div>
+</div>
 
-
-<form method="POST" enctype="multipart/form-data" action="{% url 'appsec_task:import_appsec_tasks' %}">
-    {% csrf_token %}
-    <div class="row">
-        <div class="col-md-6">
-            <input type="file" name="task_file" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-success">Import Appsec Tasks</button>
-        </div>
-    </div>
-</form>  
 <div class="table-responsive">
     <div class="card mb-3">
             <div class="card-header bg-primary text-white">
@@ -120,7 +99,7 @@
                 </div>
                 Count: <span id="searchCount">0</span>
             </div>
-        </div>
+    </div>
 
     <div class="table-container">
         <table class="table table-bordered" id="taskTable" border="1">
@@ -128,11 +107,11 @@
       <!-- <table id="vulnTable" class="table mb-0" style="font-size:1rem;"> -->
         <thead>
           <tr>
-            <th class="text-center" style="width:90px;font-weight:500;"  onclick="sortTable(0)">ID</th>
-            <th class="text-center" style="width:270px;font-weight:500;">TASK NAME
+            <th class="text-center" style="width:50px;font-weight:500;"  onclick="sortTable(0)">ID</th>
+            <th class="text-center" style="width:200px;font-weight:500;">TASK NAME
                 <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
             </th>
-            <th class="text-center" style="width:100px;font-weight:500;">STATUS
+            <th class="text-center" style="width:70px;font-weight:500;">STATUS
             <br> 
             <select class="form-control filter-input" data-column="2">
                 <option value="">All</option>
@@ -145,6 +124,9 @@
                 <br>
                 <input type="text" class="form-control filter-input" data-column="3">
             </th>
+            <th class="text-center" style="width:50px;font-weight:500;">START DATE</th>
+            <th class="text-center" style="width:50px;font-weight:500;">END DATE</th>
+            
             <th class="text-center" style="width:110px;font-weight:500;">PENTEST/VERIFY</th>
             <th class="text-center" style="width:96px;font-weight:500;">ACTIONS</th>
           </tr>
@@ -178,7 +160,10 @@
                     <span class="badge bg-secondary">{{ task.status }}</span>
                 {% endif %}
             </td>
-            <td>{{ task.PIC_ISM }}</td>
+            <td><pre style="max-height: 100px; overflow: auto; white-space: pre-wrap;">{{ task.PIC_ISM }}</td>
+            <td data-type="start">{{ task.start_date }}</td>
+            <td data-type="end">{{ task.end_date }}</td>
+
             <td>
                 {% with pentest_task=task.pentest_tasks.first %}
                     {% if pentest_task %}
@@ -191,7 +176,7 @@
                         </a>
                     {% endif %}
                 {% endwith %}
-
+                <br>
                 {% with verify_task=task.verify_tasks.first %}
                     {% if verify_task %}
                 
@@ -221,7 +206,6 @@
                 <div class="task-detail-content p-2 text-muted small"></div>
               </td>
             </tr>
-
           
           {% empty %}
           <tr>
@@ -237,58 +221,7 @@
 
             
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const filters = document.querySelectorAll(".filter-input");
 
-    filters.forEach(function(input) {
-        input.addEventListener("keyup", filterTable);
-        input.addEventListener("change", filterTable);
-    });
-
-    function filterTable() {
-        const table = document.getElementById("taskTable");
-        const rows = table.querySelectorAll("tbody tr");
-
-        rows.forEach(function(row) {
-            let visible = true;
-            filters.forEach(function(input) {
-                const column = input.dataset.column;
-                const filterValue = input.value.toLowerCase();
-                const cell = row.cells[column];
-
-                if (cell && filterValue) {
-                    const text = cell.textContent.toLowerCase();
-                    if (!text.includes(filterValue)) {
-                        visible = false;
-                    }
-                }
-            });
-
-            row.style.display = visible ? "" : "none";
-        });
-
-        updateSearchTotals();
-    }
-
-    function updateSearchTotals() {
-        let count = 0;
-
-        const rows = document.querySelectorAll("#taskTable tbody tr");
-
-        rows.forEach(row => {
-            // if (row.offsetParent !== null) {
-            if (row.style.display !== "none"){
-
-                count += 1;
-            }
-        });
-
-        document.getElementById("searchCount").textContent = count;
-    }
-
-    // Khởi động lần đầu
-    filterTable();
-});
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".appsec-task-row").forEach(row => {
     row.addEventListener("click", () => {
