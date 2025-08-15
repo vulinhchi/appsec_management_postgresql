@@ -1,0 +1,92 @@
+<div class="card card-body border">
+  <div class="row">
+    <!-- LEFT: Thông tin chính + Nút -->
+    <div class="col-md-6">
+      <p><strong>Name:</strong> {{ task.name|default:"-" }}</p>
+      <p>
+        <strong>Status:</strong> 
+         {% if task.status == "Not Start" %}
+                <span class="badge bg-info">{{ task.status }}</span>
+            {% elif task.status == "In Progress" %}
+                <span class="badge bg-warning text-dark">{{ task.status }}</span>
+            {% elif task.status == "Interrupt" %}
+                <span class="badge bg-danger text-dark">{{ task.status }}</span>
+            {% elif task.status == "Done" %}
+                <span class="badge bg-success">{{ task.status }}</span>
+            {% elif task.status == "Cancel" %}
+                <span class="badge bg-danger text-dark">{{ task.status }}</span>
+            {% else %}
+                <span class="badge bg-secondary">{{ task.status }}</span>
+            {% endif %}
+      </p>
+      <p><strong>PIC ISM:</strong> {{ task.PIC_ISM|default:"-" }}</p>
+      <p><strong>Owner:</strong> {{ task.owner|default:"-" }}</p>
+      <p>
+        <strong>Start - End Date:</strong> 
+        {% if task.start_date %}{{ task.start_date|date:"Y-m-d" }}{% else %}-{% endif %}
+        -
+        {% if task.end_date %}{{ task.end_date|date:"Y-m-d" }}{% else %}-{% endif %}
+      </p>
+
+      <!-- Buttons Group -->
+      <div class="mt-4">
+        <a href="{% url 'appsec_task:exception_create' task.id %}" class="btn btn-sm btn-outline-primary me-2 mb-2">
+          <i class="mdi mdi-plus-circle-outline"></i> Create Exception
+        </a>
+        <a href="{% url 'appsec_task:exception_list' task.id %}" class="btn btn-sm btn-outline-secondary me-2 mb-2">
+          <i class="mdi mdi-format-list-bulleted"></i> List Exception
+        </a>
+        {% with sharecost_task=task.share_cost_details.first %}
+          {% if sharecost_task %}
+            <a href="{% url 'appsec_task:view_sharecost' task.id sharecost_task.id %}" class="btn btn-sm btn-outline-primary mb-2">
+              <i class="mdi mdi-eye"></i> View Share Cost
+            </a>
+          {% else %}
+            <a href="{% url 'appsec_task:add_sharecost' task.id %}" class="btn btn-sm btn-outline-success mb-2">
+              <i class="mdi mdi-currency-usd"></i> Add Share Cost
+            </a>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <!-- RIGHT: Thông tin chi tiết -->
+    <div class="col-md-6">
+      <p><strong>Environment:</strong> {{ task.environment_prod|default:"-" }}</p>
+      <p><strong>Checklist Type:</strong> {{ task.checklist_type|default:"-" }}</p>
+      <p><strong>Is Internet:</strong> {{ task.is_internet|default:"-" }}</p>
+      <p><strong>Is New App:</strong> {{ task.is_newapp|default:"-" }}</p>
+      <p><strong>Pentest Vendor:</strong> {{ task.pentest_vendor|default:"-" }}</p>
+      <p><strong>Share Cost:</strong> {{ task.sharecost|default:"-" }}</p>
+      <p><strong>Mail Loop:</strong> {{ task.mail_loop|default:"-" }}</p>
+      <p><strong>Chat Group:</strong> {{ task.chat_group|default:"-" }}</p>
+
+      <p>
+        <strong>Ticket Link:</strong>
+        {% if task.link_ticket %}
+          <a href="{{ task.link_ticket }}" target="_blank">{{ task.link_ticket }}</a>
+        {% else %}
+          -
+        {% endif %}
+      </p>
+
+      <p>
+        <strong>Sharepoint Link:</strong>
+        {% if task.link_sharepoint %}
+          <a href="{{ task.link_sharepoint }}" target="_blank">{{ task.name_sharepoint|default:task.link_sharepoint }}</a>
+        {% else %}
+          -
+        {% endif %}
+      </p>
+
+      <p>
+        <strong>Component:</strong>
+        {% if task.component %}
+          {{ task.component|join:", " }}
+        {% else %}
+          -
+        {% endif %}
+      </p>
+    </div>
+  </div>
+</div>

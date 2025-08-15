@@ -48,10 +48,8 @@
         </div>
     </div>
 </form>  
-<div class="content">
-    <div class="container-fluid">
-        
-        <div class="card mb-3">
+<div class="table-responsive">
+    <div class="card mb-3">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Advanced Filters</h5>
             </div>
@@ -123,190 +121,121 @@
                 Count: <span id="searchCount">0</span>
             </div>
         </div>
-            <div class="table-container">
 
+    <div class="table-container">
+        <table class="table table-bordered" id="taskTable" border="1">
+
+      <!-- <table id="vulnTable" class="table mb-0" style="font-size:1rem;"> -->
+        <thead>
+          <tr>
+            <th class="text-center" style="width:90px;font-weight:500;"  onclick="sortTable(0)">ID</th>
+            <th class="text-center" style="width:270px;font-weight:500;">TASK NAME
+                <input type="text" class="form-control filter-input" data-column="1" placeholder="Search...">
+            </th>
+            <th class="text-center" style="width:100px;font-weight:500;">STATUS
+            <br> 
+            <select class="form-control filter-input" data-column="2">
+                <option value="">All</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            </th>
+            <th class="text-center" style="width:100px;font-weight:500;">PIC
+                <br>
+                <input type="text" class="form-control filter-input" data-column="3">
+            </th>
+            <th class="text-center" style="width:110px;font-weight:500;">PENTEST/VERIFY</th>
+            <th class="text-center" style="width:96px;font-weight:500;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {% for task in tasks %}
+        <tr class="appsec-task-row" data-vuln-id="{{ task.id }}" style="display: none;" style="border-top:1px solid #eee;">
+
+            <td class="align-middle" style="color:#888;">{{ task.id }}</td>
+            <td class="align-middle">
+                <h6 class="card-title text-primary mb-3">
+                <a href="{% url 'appsec_task:view_appsec_task' task.id %}">
+                {{ task.name }}</h6>
+              </a>
+            </td>
+            
+            <td class="text-center align-middle">
+                                    
+                {% if task.status == "Not Start" %}
+                    <span class="badge bg-info">{{ task.status }}</span>
+                {% elif task.status == "In Progress" %}
+                    <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                {% elif task.status == "Interrupt" %}
+                    <span class="badge bg-danger text-dark">{{ task.status }}</span>
+                {% elif task.status == "Done" %}
+                    <span class="badge bg-success">{{ task.status }}</span>
+                {% elif task.status == "Cancel" %}
+                    <span class="badge bg-danger text-dark">{{ task.status }}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ task.status }}</span>
+                {% endif %}
+            </td>
+            <td>{{ task.PIC_ISM }}</td>
+            <td>
+                {% with pentest_task=task.pentest_tasks.first %}
+                    {% if pentest_task %}
+                        <a href="{% url 'pentest_task:view_pentest_task' pentest_task.id %}" class="btn btn-primary">
+                            View Pentest
+                        </a>
+                    {% else %}
+                        <a href="{% url 'pentest_task:create_pentest_task' task.id %}" class="btn btn-success">
+                            Create Pentest
+                        </a>
+                    {% endif %}
+                {% endwith %}
+
+                {% with verify_task=task.verify_tasks.first %}
+                    {% if verify_task %}
                 
-                <table class="table table-bordered" id="taskTable" border="1">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable(0)">ID</th>
-                            <th>Task Name <br> <input type="text" class="form-control filter-input" data-column="1" placeholder="Search..."></th>
-                            <th>Status
-                                <br> 
-                                <select class="form-control filter-input" data-column="2">
-                                    <option value="">All</option>
-                                    {% for value, label in status_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </th>
-                            <th>PIC ISM
-                                <br>
-                                <input type="text" class="form-control filter-input" data-column="3">
-                            </th>
-                            <th onclick="sortTable(4)">Start Date </th>
-                            <th onclick="sortTable(5)">End Date </th>
+                        <a href="{% url 'verify_task:view_verify_task' verify_task.id %}" class="btn btn-primary">View Verify</a>
+                    {% else %}
+                        <a href="{% url 'verify_task:create_verify_task' task.id %}" class="btn btn-success">Create Verify</a>
+                    {% endif %}
+                {% endwith %}
+            </td>
+            
+             <td class="text-center align-middle">
+                <a href="{%  url 'appsec_task:edit_appsec_task' task.id %}" class="btn btn-outline-primary btn-sm" title="Edit" style="padding:2px 8px;">
+                    <i class="mdi mdi-pencil"></i>
+                </a>
+                <form action="{% url 'appsec_task:delete_appsec_task' task.id %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-icon btn-sm"
+                            title="Delete"
+                            style="padding:2px 8px;"onclick="return confirm('Are you sure you want to delete this task?');"><i class="mdi mdi-delete"></i></button>
+                </form>
 
-                            <th>
-                                <span>Production URL </span>
-                                <br> 
-                                <input type="text" class="form-control filter-input" data-column="6">
-                            </th>
-                            <th>
-                                <span onclick="sortTable(7)">Owner </span> <br>
-                                <input type="text" class="form-control filter-input" data-column="7">
-                            </th>
-                            
-                            <th>Mail loop <br> <input type="text" class="form-control filter-input" data-column="8"></th>
-                            <th>Chat group <br> <input type="text" class="form-control filter-input" data-column="9"></th>
-                            <th>Ticket link <br> <input type="text" class="form-control filter-input" data-column="10"> </th>
-                            
-                            <th>Sharepoint link <br> <input type="text" class="form-control filter-input" data-column="11"></th>
-                            <th onclick="sortTable(12)">Internet/Internal?>
-                                <br> 
-                                <select class="form-control filter-input" data-column="12">
-                                    <option value="">All</option>
-                                    {% for value, label in is_internet_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </th>
-                            <th onclick="sortTable(13)">New App/Old App?>
-                                <br> 
-                                <select class="form-control filter-input" data-column="13">
-                                    <option value="">All</option>
-                                    {% for value, label in is_newapp_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
+            </td>
 
-                            </th>
-                            <th onclick="sortTable(14)">Checklist Type>
-                                <br> 
-                                <select class="form-control filter-input" data-column="14">
-                                    <option value="">All</option>
-                                    {% for value, label in checklist_type_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </th>
-                            <th onclick="sortTable(15)">Share Cost?
-                                <br>
-                                <select class="form-control filter-input" data-column="15">
-                                    <option value="">All</option>
-                                    {% for value, label in share_cost_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                                
-                            </th>
-                            <th onclick="sortTable(16)">Component <br> 
-                                <select class="form-control filter-input" data-column="16">
-                                    <option value="">All</option>
-                                    {% for value, label in component_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
+          </tr>
+          <tr class="task-detail-row d-none" id="task-detail-{{ task.id }}">
+              <td colspan="100%">
+                <div class="task-detail-content p-2 text-muted small"></div>
+              </td>
+            </tr>
 
-                            </th>
-                            <th>
-                                <span>Pentest Vendor</span>
-                                <br> 
-                                <input type="text" class="form-control filter-input" data-column="17">
-                            </th>
-                            
-                            <th>Pentest</th>
-                            <th>Verify</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-    
-                        {% for task in tasks %}
-                        <tr>
-                            <td>{{ task.id }}</td>
-                            <td>{{ task.name }}</td>
-                            <td>
-                                
-                                {% if task.status == "Not Start" %}
-                                    <span class="badge bg-info">{{ task.status }}</span>
-                                {% elif task.status == "In Progress" %}
-                                    <span class="badge bg-warning text-dark">{{ task.status }}</span>
-                                {% elif task.status == "Interrupt" %}
-                                    <span class="badge bg-danger text-dark">{{ task.status }}</span>
-                                {% elif task.status == "Done" %}
-                                    <span class="badge bg-success">{{ task.status }}</span>
-                                {% elif task.status == "Cancel" %}
-                                    <span class="badge bg-danger text-dark">{{ task.status }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ task.status }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ task.PIC_ISM }}</td>
-                            <td>{{ task.start_date }}</td>
-                            <td>{{ task.end_date }}</td>
-
-                            <td>{{ task.environment_prod }}</td>
-                            <td>{{ task.owner }}</td>
-                            <td>{{ task.mail_loop }}</td>
-                            <td>{{ task.chat_group }}</td>
-                            <td>{{ task.link_ticket }}</td>
-                            <td>
-                            <a href="{{ task.link_sharepoint }}" target="_blank">
-                                {{ task.name_sharepoint}}
-                            </a>
-                            </td>
-                            <td>{{ task.is_internet }}</td>
-                            <td>{{ task.is_newapp }}</td>
-                            <td>{{ task.checklist_type }}</td>
-                            <td>{{ task.sharecost }}</td>
-                            <td>{{ task.component }}</td>
-                            <td>{{ task.pentest_vendor }}</td>
-                            <td>
-                                
-                                {% with pentest_task=task.pentest_tasks.first %}
-                                    {% if pentest_task %}
-                                        <a href="{% url 'pentest_task:view_pentest_task' pentest_task.id %}" class="btn btn-primary">
-                                            View Pentest
-                                        </a>
-                                    {% else %}
-                                        <a href="{% url 'pentest_task:create_pentest_task' task.id %}" class="btn btn-success">
-                                            Create Pentest
-                                        </a>
-                                    {% endif %}
-                                {% endwith %}
-                                
-                            </td>
-                            <td>
-                                {% with verify_task=task.verify_tasks.first %}
-                                    {% if verify_task %}
-                                
-                                        <a href="{% url 'verify_task:view_verify_task' verify_task.id %}" class="btn btn-primary">View Verify</a>
-                                    {% else %}
-                                        <a href="{% url 'verify_task:create_verify_task' task.id %}" class="btn btn-success">Create Verify</a>
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                            
-                            <td>
-                                <a href="{% url 'appsec_task:view_appsec_task' task.id %}" class="btn btn-info">View</a>
-                                <a href="{% url 'appsec_task:edit_appsec_task' task.id %}" class="btn btn-warning">Edit</a>
-                                <form action="{% url 'appsec_task:delete_appsec_task' task.id %}" method="POST" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this task?');">Delete</button>
-                                                </form>
-                                
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="6">No tasks found.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-       </div>
+          
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center">No task found.
+          </td>
+          </tr>
+           
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-</div>
+  </div>
+
+            
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const filters = document.querySelectorAll(".filter-input");
@@ -360,7 +289,38 @@ document.addEventListener("DOMContentLoaded", function () {
     // Khởi động lần đầu
     filterTable();
 });
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".appsec-task-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const id = row.dataset.vulnId;
+      const details = document.getElementById(`task-detail-${id}`);
+      const container = details.querySelector(".task-detail-content");
+
+      if (!details.classList.contains("loaded")) {
+        fetch(`/appsec/view/${id}/`)
+          .then(response => {
+            if (!response.ok) throw new Error("Failed to fetch");
+            return response.text();
+          })
+          .then(data => {
+            container.innerHTML = data;
+            details.classList.add("loaded");
+            details.classList.remove("d-none");  // 👈 hiện row
+          })
+          .catch(err => {
+            console.error("❌ Error loading task details:", err);
+            container.innerHTML = `<div class="text-danger">Error loading task detail.</div>`;
+            details.classList.remove("d-none");  // 👈 hiện row dù lỗi
+          });
+      } else {
+        details.classList.toggle("d-none");  // 👈 toggle hiển thị
+      }
+    });
+  });
+});
+
+
 </script>
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script> 
-<script src="{% static 'js/custome.js' %}"></script>
+<script src="{% static 'js/custom.js' %}"></script>
 {% endblock %}

@@ -144,7 +144,8 @@ def delete_appsec_task(request, task_id):
 @require_groups(['Pentester', 'Leader', 'Manager'])
 def view_appsec_task(request, task_id):
     task = get_object_or_404(AppSecTask, id=task_id)
-    return render(request, "appsec_task/view_appsec_task.html", {"form": task})
+    # return render(request, "appsec_task/view_appsec_task.html", {"form": task})
+    return render(request, "appsec_task/appsec_task_details.html", {"task": task})
 
 
 @login_required
